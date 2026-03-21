@@ -13,12 +13,22 @@ class CouponController extends Controller {
     }
     
     public function store(Request $request) {
-        $this->repo->create($request->all());
+        $data = $request->all();
+        // If type is Internal, force show_on_home to be 0
+        if(($data['coupon_type'] ?? '') == 'Internal') $data['show_on_home'] = 0;
+        else $data['show_on_home'] = $request->has('show_on_home') ? 1 : 0;
+        
+        $this->repo->create($data);
         return redirect()->back()->with("success", "Coupon added successfully");
     }
     
     public function update(Request $request, $id) {
-        $this->repo->update($id, $request->except("_method", "_token"));
+        $data = $request->except("_method", "_token");
+        // If type is Internal, force show_on_home to be 0
+        if(($data['coupon_type'] ?? '') == 'Internal') $data['show_on_home'] = 0;
+        else $data['show_on_home'] = $request->has('show_on_home') ? 1 : 0;
+        
+        $this->repo->update($id, $data);
         return redirect()->back()->with("success", "Coupon updated successfully");
     }
     

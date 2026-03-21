@@ -21,13 +21,14 @@
                 <td style="max-width: 150px;" class="small text-danger">{{ $o->note }}</td>
                 <td class="font-weight-bold text-success">${{ $o->grand_total }}</td>
                 <td>
-                    @if($o->status == "Preparing")
-                        <span class="badge bg-warning text-dark"><i class="fas fa-fire"></i> Preparing</span>
-                    @elseif($o->status == "Ready")
-                        <span class="badge bg-info"><i class="fas fa-bell"></i> Ready</span>
-                    @else
-                        <span class="badge bg-success"><i class="fas fa-check-double"></i> Completed</span>
-                    @endif
+                    <form action="{{ route('orders.updateStatus', $o->id) }}" method="POST">
+                        @csrf
+                        <select name="status" class="form-select form-select-sm fw-bold {{ $o->status == 'Preparing' ? 'bg-warning text-dark' : ($o->status == 'Ready' ? 'bg-info text-white' : 'bg-success text-white') }}" onchange="this.form.submit()">
+                            <option value="Preparing" {{ $o->status == 'Preparing' ? 'selected' : '' }}>Preparing</option>
+                            <option value="Ready" {{ $o->status == 'Ready' ? 'selected' : '' }}>Ready</option>
+                            <option value="Completed" {{ $o->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                        </select>
+                    </form>
                 </td>
                 <td class="small">{{ $o->created_at->diffForHumans() }}<br><span class="text-muted">{{ $o->created_at->format("H:i A") }}</span></td>
                 <td>

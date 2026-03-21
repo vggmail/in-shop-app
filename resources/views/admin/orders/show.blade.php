@@ -17,7 +17,14 @@
                 @endif
             </p>
             <p class="mb-0"><strong>Status:</strong> 
-                <span class="badge bg-info text-dark">{{ $order->status }}</span>
+                <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="d-inline-flex align-items-center mt-2">
+                    @csrf
+                    <select name="status" class="form-select form-select-sm me-2 bg-info text-dark fw-bold" onchange="this.form.submit()">
+                        <option value="Preparing" {{ $order->status == 'Preparing' ? 'selected' : '' }}>Preparing</option>
+                        <option value="Ready" {{ $order->status == 'Ready' ? 'selected' : '' }}>Ready</option>
+                        <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                    </select>
+                </form>
             </p>
         </div>
         <div class="col-md-4 border-end ps-4">
@@ -25,7 +32,13 @@
             <p class="mb-1"><strong>Time:</strong> <i class="far fa-clock"></i> {{ $order->created_at->format('Y-m-d H:i A') }}</p>
             <p class="mb-1"><strong>Method:</strong> {{ $order->payment_method }}</p>
             <p class="mb-0"><strong>Status:</strong> 
-                <span class="badge {{ $order->payment_status == 'Paid' ? 'bg-success' : 'bg-danger' }}">{{ $order->payment_status }}</span>
+                <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="d-inline-flex align-items-center mt-2">
+                    @csrf
+                    <select name="payment_status" class="form-select form-select-sm {{ $order->payment_status == 'Paid' ? 'bg-success' : 'bg-danger' }} text-white fw-bold" onchange="this.form.submit()">
+                        <option value="Paid" {{ $order->payment_status == 'Paid' ? 'selected' : '' }}>Paid</option>
+                        <option value="Pending" {{ $order->payment_status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                    </select>
+                </form>
             </p>
         </div>
         <div class="col-md-4 ps-4">

@@ -11,6 +11,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ExpenseController;
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\UserAdminController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -30,10 +31,13 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
+    Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     Route::get('orders/{id}/invoice', [OrderController::class, 'printInvoice'])->name('orders.invoice');
     
     Route::get('payments', [OrderController::class, 'payments'])->name('payments.index');
     Route::get('reports', [OrderController::class, 'reports'])->name('reports.index');
+    Route::get('orders/check-pending', [OrderController::class, 'checkPending'])->name('orders.check-pending');
+    Route::get('logs', [AdminController::class, 'logs'])->name('logs.index');
     Route::resource('users', UserAdminController::class)->except(['create', 'show', 'edit']);
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

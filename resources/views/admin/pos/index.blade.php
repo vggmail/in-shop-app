@@ -43,7 +43,7 @@
 
                             <i class="fas fa-hamburger fa-2x text-warning mb-2"></i>
                             <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">${{ number_format($i->price, 2) }}</span>
+                            <span class="text-secondary small font-weight-bold">₹{{ number_format($i->price, 2) }}</span>
                             <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
                                 Stock: {{ $i->stock_quantity }}
                             </div>
@@ -69,7 +69,7 @@
 
                             <i class="fas fa-utensils fa-2x text-success mb-2"></i>
                             <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">${{ number_format($i->price, 2) }}</span>
+                            <span class="text-secondary small font-weight-bold">₹{{ number_format($i->price, 2) }}</span>
                             <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
                                 Stock: {{ $i->stock_quantity }}
                             </div>
@@ -122,15 +122,15 @@
                     
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary fw-bold">Subtotal</span>
-                        <span class="fw-bold">$<span id="subTotal">0.00</span></span>
+                        <span class="fw-bold">₹<span id="subTotal">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 text-danger">
                         <span class="fw-bold">Discount</span>
-                        <span class="fw-bold">-$<span id="discount">0.00</span></span>
+                        <span class="fw-bold">-₹<span id="discount">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-top pt-2 fs-4">
                         <span class="fw-bold text-dark">Total</span>
-                        <span class="fw-bold text-success">$<span id="grandTotal">0.00</span></span>
+                        <span class="fw-bold text-success">₹<span id="grandTotal">0.00</span></span>
                     </div>
                     
                     <div class="mb-3 bg-white p-2 border rounded">
@@ -161,7 +161,7 @@
                             <option value="Card">💳 CARD</option>
                             <option value="UPI">📱 UPI</option>
                         </select>
-                        <button class="btn btn-success btn-lg w-50 fw-bold shadow-sm" onclick="processOrder()"><i class="fas fa-print"></i> PLACE ORDER</button>
+                        <button class="btn btn-success btn-lg w-50 fw-bold shadow-sm" onclick="processOrder(event)"><i class="fas fa-print"></i> PLACE ORDER</button>
                     </div>
                 </div>
             </div>
@@ -182,7 +182,7 @@
                 <input type="hidden" id="m_base_price">
                 <input type="hidden" id="m_item_name">
                 
-                <h6 class="text-muted mb-3">Base Price: $<span id="m_display_price"></span></h6>
+                <h6 class="text-muted mb-3">Base Price: ₹<span id="m_display_price"></span></h6>
                 
                 <div id="variantsBox" class="mb-3 d-none">
                     <h6 class="fw-bold fs-6">Choose Size/Variant</h6>
@@ -199,7 +199,7 @@
                 </div>
             </div>
             <div class="modal-footer justify-content-between border-top-0 bg-light">
-                <h5 class="fw-bold text-danger mb-0">Total: $<span id="m_total_price">0.00</span></h5>
+                <h5 class="fw-bold text-danger mb-0">Total: ₹<span id="m_total_price">0.00</span></h5>
                 <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="addConfiguredItem()"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
             </div>
         </div>
@@ -236,7 +236,7 @@
         if(variants.length > 0) {
             let options = `<option value="" data-price="${price}">Standard Size (Default)</option>`;
             variants.forEach(v => {
-                options += `<option value="${v.id}" data-price="${v.price}">${v.name} (+$${v.price})</option>`;
+                options += `<option value="${v.id}" data-price="${v.price}">${v.name} (+₹${v.price})</option>`;
             });
             $("#m_variant").html(options);
             $("#variantsBox").removeClass("d-none");
@@ -250,7 +250,7 @@
             extras.forEach(e => {
                 extHtml += `<div class="form-check border rounded p-2 ps-4 mb-0 bg-white" style="flex: 1 1 45%;">
                                 <input class="form-check-input m_extra_cb" type="checkbox" value="${e.id}" data-price="${e.price}" data-name="${e.name}" id="ext_${e.id}" onchange="calcModalPrice()">
-                                <label class="form-check-label w-100" style="cursor:pointer;" for="ext_${e.id}">${e.name} <span class="text-success float-end">+$${e.price}</span></label>
+                                <label class="form-check-label w-100" style="cursor:pointer;" for="ext_${e.id}">${e.name} <span class="text-success float-end">+₹${e.price}</span></label>
                             </div>`;
             });
             $("#m_extras_list").html(extHtml);
@@ -349,7 +349,7 @@
                         <button class="btn btn-sm btn-light border-0 px-2 py-1 text-success fw-bold" onclick="updateCartQty(${idx}, 1)">+</button>
                     </div>
                 </td>
-                <td class="pt-3 fw-bold text-end align-middle bg-light text-dark">$${item.total.toFixed(2)}</td>
+                <td class="pt-3 fw-bold text-end align-middle bg-light text-dark">₹${item.total.toFixed(2)}</td>
             </tr>`;
         });
         $("#cartBody").html(html);
@@ -369,7 +369,7 @@
                     return;
                 }
                 discountVal = sub * (parseFloat(c.discount_percentage) / 100);
-                $("#couponMsg").html(`<span class="text-success"><i class="fas fa-check-circle"></i> Applied ${c.discount_percentage}% OFF (-$${discountVal.toFixed(2)})</span>`);
+                $("#couponMsg").html(`<span class="text-success"><i class="fas fa-check-circle"></i> Applied ${c.discount_percentage}% OFF (-₹${discountVal.toFixed(2)})   </span>`);
                 calcTotals(sub);
             } else {
                 $("#couponMsg").html(`<span class="text-danger"><i class="fas fa-times-circle"></i> Invalid Code</span>`);
@@ -387,6 +387,7 @@
     let allCustomers = @json($customers);
     $("#customer_search").on("input", function(){
         let query = $(this).val().trim();
+        $(this).removeClass("is-invalid");
         if(query.length < 2) { $("#customer_add_display").addClass("d-none"); return; }
         
         let found = allCustomers.find(c => c.phone == query || c.name.toLowerCase().includes(query.toLowerCase()));
@@ -395,7 +396,7 @@
             $("#customer_add_display").addClass("d-none");
         } else {
             $("#customer_add_display").removeClass("d-none");
-            $("#new_cust_phone").val(query);
+            $("#new_cust_phone").val(query).removeClass("is-invalid");
         }
     });
 
@@ -414,53 +415,78 @@
     }
 
     function confirmNewCust() {
-        let name = $("#customer_search").val();
-        let phone = $("#new_cust_phone").val();
+        let name = $("#customer_search").val().trim();
+        let phone = $("#new_cust_phone").val().trim();
+        
+        if(!name || name.length < 2) { $("#customer_search").addClass("is-invalid").focus(); return; }
+        if(!/^\d{10}$/.test(phone)) { $("#new_cust_phone").addClass("is-invalid").focus(); return; }
+        
         selectCustomer("new", name + " (" + phone + ") ");
         window.new_cust_name = name;
         window.new_cust_phone = phone;
     }
 
-    function processOrder() {
+    function processOrder(e) {
         if(cart.length === 0) return alert("Cart is empty!");
         
         let pItems = cart.map(c => {
             return {
-                item_id: c.id,
-                variant_id: c.variant_id || null,
-                price: c.price,
-                quantity: c.qty,
-                total: c.total,
-                extras: c.extras // array of {id, price}
+                item_id: String(c.id),
+                variant_id: c.variant_id ? String(c.variant_id) : null,
+                price: Number(c.price),
+                quantity: Number(c.qty),
+                total: Number(c.total),
+                extras: Array.isArray(c.extras) ? c.extras.map(ex => ({id: String(ex.id), price: Number(ex.price)})) : []
             };
         });
         
-        let btn = $(event.target);
+        // Grab button correctly
+        let btn = e ? $(e.target).closest('button') : $("button:contains('PLACE ORDER')");
         btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
         
         let data = {
             _token: "{{ csrf_token() }}",
-            order_type: $("input[name='order_type']:checked").val(),
-            table_number: $("#table_number").val(),
-            customer_id: $("#customer_id").val() === "new" ? null : $("#customer_id").val(),
+            order_type: $("input[name='order_type']:checked").val() || "Dine-in",
+            table_number: $("#table_number").val() || "",
+            customer_id: $("#customer_id").val() === "new" ? null : ($("#customer_id").val() || null),
             customer_name: (window.new_cust_name || null),
             customer_phone: (window.new_cust_phone || null),
-            note: $("#order_note").val(),
-            payment_method: $("#payment_method").val(),
+            note: $("#order_note").val() || "",
+            payment_method: $("#payment_method").val() || "Cash",
             items: pItems,
-            total_amount: parseFloat($("#subTotal").text()),
-            discount_amount: discountVal,
-            grand_total: parseFloat($("#grandTotal").text())
+            total_amount: parseFloat($("#subTotal").text()) || 0,
+            discount_amount: (typeof discountVal !== "undefined") ? discountVal : 0,
+            grand_total: parseFloat($("#grandTotal").text()) || 0
         };
+
+        console.log("Submitting Order Data:", data);
         
-        $.post("{{ route('pos.store') }}", data, function(res) {
-            if(res.status) {
-                if(confirm("Order #" + res.order_id + " generated!\nPrint Receipt now?")) {
-                    window.open("/orders/" + res.order_id + "/invoice", "_blank", "width=400,height=600");
+        $.ajax({
+            url: "{{ route('pos.store') }}",
+            method: "POST",
+            data: data,
+            success: function(res) {
+                console.log("Response:", res);
+                if(res.status) {
+                    let printUrl = "{{ url('/cp/orders') }}/" + res.order_id + "/invoice";
+                    let printWin = window.open(printUrl, "_blank", "width=420,height=650");
+                    setTimeout(function(){
+                        location.reload();
+                    }, 1000);
+                } else {
+                    alert(res.msg);
+                    btn.prop("disabled", false).html('<i class="fas fa-print"></i> PLACE ORDER');
                 }
-                location.reload();
-            } else {
-                alert(res.msg);
+            },
+            error: function(xhr) {
+                console.error("Order Error:", xhr);
+                let errorMsg = "Server Error. Please try again.";
+                if(xhr.responseJSON && xhr.responseJSON.msg) {
+                    errorMsg = xhr.responseJSON.msg;
+                } else if(xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                alert(errorMsg);
                 btn.prop("disabled", false).html('<i class="fas fa-print"></i> PLACE ORDER');
             }
         });

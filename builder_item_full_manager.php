@@ -1,4 +1,7 @@
-@extends("layouts.admin")
+<?php
+$dirV = __DIR__ . '/resources/views/admin/items';
+
+$content = '@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-4 mt-2">
     <div>
@@ -16,17 +19,12 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 item-hover">
             <div class="position-relative bg-light text-center py-4 text-muted">
                 <i class="fas fa-utensils fa-3x"></i>
-                <span class="badge {{ $i->stock_quantity > 0 ? 'bg-success' : 'bg-danger' }} position-absolute" style="top:10px; right:10px;">{{ $i->stock_quantity }} in stock</span>
+                <span class="badge {{ $i->stock_quantity > 0 ? \'bg-success\' : \'bg-danger\' }} position-absolute" style="top:10px; right:10px;">{{ $i->stock_quantity }} in stock</span>
             </div>
             <div class="card-body p-4">
                 <h5 class="fw-bold mb-1 d-flex justify-content-between align-items-center">
                     {{ $i->name }}
-                    <div class="text-end">
-                        <span class="text-primary small fw-bold">₹{{ number_format($i->price, 2) }}</span>
-                        @if($i->mrp && $i->mrp > $i->price)
-                            <div class="text-muted text-decoration-line-through fw-normal" style="font-size: 10px;">₹{{ number_format($i->mrp, 2) }}</div>
-                        @endif
-                    </div>
+                    <span class="text-primary small fw-bold">₹{{ number_format($i->price, 2) }}</span>
                 </h5>
                 <p class="text-muted small mb-2">{{ $i->category->name }}</p>
                 
@@ -46,12 +44,12 @@
 
                 <div class="d-flex gap-2 mt-auto">
                     <button class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2" 
-                        onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
+                        onclick="editItem({{ $i->id }}, \'{{ addslashes($i->name) }}\', {{ $i->category_id }}, {{ $i->price }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
                         <i class="fas fa-edit small me-1"></i> Edit
                     </button>
-                    <form action="{{ route('items.destroy', $i->id) }}" method="POST" class="w-100">
+                    <form action="{{ route(\'items.destroy\', $i->id) }}" method="POST" class="w-100">
                         @csrf @method("DELETE")
-                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-pill py-2" onclick="return confirm('Delete item?')"><i class="fas fa-trash small me-1"></i> Del</button>
+                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-pill py-2" onclick="return confirm(\'Delete item?\')"><i class="fas fa-trash small me-1"></i> Del</button>
                     </form>
                 </div>
             </div>
@@ -76,19 +74,15 @@
                     @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Base Price (₹)</label>
                 <input type="number" step="0.01" name="price" id="f_price" class="form-control bg-light border-0" required>
             </div>
-            <div class="col-md-3">
-                <label class="small fw-bold text-muted text-uppercase mb-1">MRP/Full Price (₹)</label>
-                <input type="number" step="0.01" name="mrp" id="f_mrp" class="form-control bg-light border-0">
-            </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Stock Qty</label>
                 <input type="number" name="stock_quantity" id="f_stock" class="form-control bg-light border-0" value="100" required>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Low Alert Limit</label>
                 <input type="number" name="low_stock_limit" id="f_limit" class="form-control bg-light border-0" value="10" required>
             </div>
@@ -99,7 +93,7 @@
             <div class="col-md-6">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="small fw-bold text-muted text-uppercase">Sizes / Variants</label>
-                    <button type="button" class="btn btn-sm btn-primary py-0 px-2" onclick="addRow('v-container', 'variants')">+</button>
+                    <button type="button" class="btn btn-sm btn-primary py-0 px-2" onclick="addRow(\'v-container\', \'variants\')">+</button>
                 </div>
                 <div id="v-container"></div>
             </div>
@@ -107,7 +101,7 @@
             <div class="col-md-6">
                  <div class="d-flex justify-content-between align-items-center mb-2">
                     <label class="small fw-bold text-muted text-uppercase">Extra Toppings</label>
-                    <button type="button" class="btn btn-sm btn-success py-0 px-2" onclick="addRow('e-container', 'extras')">+</button>
+                    <button type="button" class="btn btn-sm btn-success py-0 px-2" onclick="addRow(\'e-container\', \'extras\')">+</button>
                 </div>
                 <div id="e-container"></div>
             </div>
@@ -124,8 +118,8 @@
 <script>
 let vIdx = 0; eIdx = 0;
 
-function addRow(containerId, type, name = '', price = '') {
-    let idx = type === 'variants' ? vIdx++ : eIdx++;
+function addRow(containerId, type, name = \'\', price = \'\') {
+    let idx = type === \'variants\' ? vIdx++ : eIdx++;
     let html = `
         <div class="input-group mb-2 shadow-sm rounded overflow-hidden">
             <input type="text" name="${type}[${idx}][name]" value="${name}" class="form-control border-0 bg-white" placeholder="Name" style="font-size:12px;">
@@ -137,32 +131,35 @@ function addRow(containerId, type, name = '', price = '') {
 
 function openAddItem() {
     $("#itemForm")[0].reset();
-    $("#itemForm").attr("action", "{{ route('items.store') }}");
-    $("#method_field").html('');
+    $("#itemForm").attr("action", "{{ route(\'items.store\') }}");
+    $("#method_field").html(\'\');
     $("#itemModalTitle").text("Create New Menu Item");
     $("#v-container, #e-container").empty();
     new bootstrap.Modal(document.getElementById("itemModal")).show();
 }
 
-function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, extras) {
+function editItem(id, name, catId, price, avail, stock, limit, variants, extras) {
     $("#itemForm").attr("action", "/cp/items/" + id);
-    $("#method_field").html('@method("PUT")');
+    $("#method_field").html(\'@method("PUT")\');
     $("#itemModalTitle").text("Edit Item Details");
     $("#f_name").val(name);
     $("#f_category_id").val(catId);
     $("#f_price").val(price);
-    $("#f_mrp").val(mrp);
     $("#f_stock").val(stock);
     $("#f_limit").val(limit);
     
     $("#v-container, #e-container").empty();
-    variants.forEach(v => addRow('v-container', 'variants', v.name, v.price));
-    extras.forEach(e => addRow('e-container', 'extras', e.name, e.price));
+    variants.forEach(v => addRow(\'v-container\', \'variants\', v.name, v.price));
+    extras.forEach(e => addRow(\'e-container\', \'extras\', e.name, e.price));
     
     new bootstrap.Modal(document.getElementById("itemModal")).show();
 }
 
 // Intercept New Item Btn
-$('[data-bs-target="#addItemModal"]').attr('data-bs-target', '').attr('onclick', 'openAddItem()');
+$(\'[data-bs-target="#addItemModal"]\').attr(\'data-bs-target\', \'\').attr(\'onclick\', \'openAddItem()\');
 </script>
 @endsection
+';
+
+file_put_contents("$dirV/index.blade.php", $content);
+echo "Integrated Item Manager with Variants and Extras support created.\n";

@@ -56,4 +56,26 @@ class OrderController extends Controller {
     public function reports() {
         return view("admin.reports.index");
     }
+
+    public function checkPending() {
+        $count = \App\Models\Order::where('status', '!=', 'Completed')->count();
+        $latest = \App\Models\Order::orderBy('id', 'desc')->first();
+        return response()->json([
+            'count' => $count,
+            'latest_id' => $latest ? $latest->id : 0,
+            'latest_order' => $latest ? $latest->order_number : null
+        ]);
+    }
+
+    public function updateStatus(Request $request, $id) {
+        $order = \App\Models\Order::findOrFail($id);
+        if ($request->has('status')) {
+            $order->status = $request->status;
+        }
+        if ($request->has('payment_status')) {
+            $order->payment_status = $request->payment_status;
+        }
+        $order->save();
+        return back()->with('success', 'Order status updated successfully!');
+    }
 }

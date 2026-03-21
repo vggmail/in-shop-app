@@ -8,16 +8,20 @@ use App\Repositories\OrderRepository;
 class HomeController extends Controller {
     public function index() {
         $categories = Category::all();
-        $items = Item::with(["category", "variants", "extras"])->where("is_available", 1)->get();
-        return view("welcome", compact("categories", "items"));
+        $items = Item::with(["category", "variants", "extras"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
+        $coupons = \App\Models\Coupon::where('show_on_home', 1)->where('coupon_type', '!=', 'Internal')->get();
+        return view("welcome", compact("categories", "items", "coupons"));
     }
 
     public function placeOrder(Request $request, OrderRepository $repo) {
         try {
             // Default values for Customer self-order
             $data = $request->all();
-            $data["order_type"] = "Takeaway"; // or Dine-in if scan from table
-            $data["payment_method"] = "Cash"; // or Redirect to stripe/paypal
+            if(isset($data['items']) && is_string($data['items'])) {
+                $data['items'] = json_decode($data['items'], true);
+            }
+            $data["order_type"] = "Takeaway"; 
+            $data["payment_method"] = "Cash"; 
             
             $order = $repo->createOrder($data);
             return response()->json(["status" => true, "order_id" => $order->id, "msg" => "Order placed successfully!"]);

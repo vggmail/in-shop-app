@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        view()->composer('layouts.admin', function ($view) {
+            $pendingCount = \App\Models\Order::where('status', '!=', 'Completed')->count();
+            $latest = \App\Models\Order::orderBy('id', 'desc')->first();
+            $view->with('pending_orders_count', $pendingCount)
+                 ->with('latest_order_id', $latest ? $latest->id : 0);
+        });
     }
 }

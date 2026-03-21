@@ -39,7 +39,7 @@ class OrderRepository {
                 "status" => "Preparing",
             ]);
 
-            if(!empty($data["items"])) {
+            if(!empty($data["items"]) && is_array($data["items"])) {
                 foreach ($data["items"] as $item) {
                     $itemModel = \App\Models\Item::find($item["item_id"]);
                     if(!$itemModel || $itemModel->stock_quantity < $item["quantity"]) {
