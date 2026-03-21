@@ -15,10 +15,13 @@ use App\Http\Controllers\UserAdminController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
+Route::get('/order/{order_number}/success', [HomeController::class, 'orderSuccess'])->name('home.orderSuccess');
 
 Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     
+    Route::post('items/bulk-upload', [ItemController::class, 'bulkUpload'])->name('items.bulkUpload');
+    Route::get('items/sample-csv', [ItemController::class, 'sampleCsv'])->name('items.sampleCsv');
     Route::resource('items', ItemController::class)->except(['create', 'show', 'edit']);
     Route::resource('customers', CustomerController::class)->except(['create', 'show', 'edit']);
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);

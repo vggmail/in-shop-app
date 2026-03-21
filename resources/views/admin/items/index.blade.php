@@ -6,6 +6,7 @@
         <p class="text-muted small">Manage sizes, variations, and extra toppings.</p>
     </div>
     <div class="d-flex gap-2 align-items-center">
+        <button class="btn btn-outline-success px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk Upload</button>
         <button class="btn btn-primary px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
     </div>
 </div>
@@ -59,6 +60,30 @@
     </div>
     @endforeach
 </div>
+
+<!-- BULK UPLOAD MODAL -->
+<div class="modal fade" id="bulkUploadModal"><div class="modal-dialog"><div class="modal-content border-0 shadow-lg">
+    <form action="{{ route('items.bulkUpload') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        <div class="modal-header border-0 pb-0 pt-4 px-4">
+            <h5 class="modal-title fw-bold">Bulk Upload Items</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+            <div class="mb-3">
+                <label class="small fw-bold text-muted text-uppercase mb-1">Select CSV File</label>
+                <input type="file" name="file" class="form-control bg-light border-0" accept=".csv" required>
+            </div>
+            <div class="text-end mb-2">
+                <a href="{{ route('items.sampleCsv') }}" class="small text-primary fw-bold text-decoration-none"><i class="fas fa-download me-1"></i> Download Sample CSV</a>
+            </div>
+            <p class="small text-muted mb-0"><b>CSV Format:</b> category_name, name, price, stock_quantity, is_available</p>
+        </div>
+        <div class="modal-footer border-0 pb-4 pt-0 px-4">
+            <button type="submit" class="btn btn-success btn-lg w-100 py-3 rounded-3 fw-bold shadow-sm"><i class="fas fa-upload me-2"></i> UPLOAD ITEMS</button>
+        </div>
+    </form>
+</div></div></div>
 
 <!-- ITEM MODAL (ADD/EDIT) -->
 <div class="modal fade" id="itemModal"><div class="modal-dialog modal-lg"><div class="modal-content border-0 shadow-lg"><form id="itemForm" method="POST">

@@ -18,9 +18,10 @@ class OrderRepository {
             
             $customerId = $data["customer_id"] ?? null;
             if (!$customerId && !empty($data["customer_phone"])) {
-                $customer = Customer::firstOrCreate(
+                $customerName = !empty($data["customer_name"]) ? $data["customer_name"] : "Guest Customer";
+                $customer = Customer::updateOrCreate(
                     ["phone" => $data["customer_phone"]],
-                    ["name" => $data["customer_name"] ?? "Guest Customer"]
+                    ["name" => $customerName]
                 );
                 $customerId = $customer->id;
             }
@@ -35,7 +36,7 @@ class OrderRepository {
                 "discount_amount" => $data["discount_amount"] ?? 0,
                 "grand_total" => $data["grand_total"],
                 "payment_method" => $data["payment_method"],
-                "payment_status" => $data["grand_total"] > 0 && $data["payment_method"] != "Pending" ? "Paid" : "Pending",
+                "payment_status" => $data["payment_status"] ?? ($data["grand_total"] > 0 && $data["payment_method"] != "Pending" ? "Paid" : "Pending"),
                 "status" => "Preparing",
             ]);
 

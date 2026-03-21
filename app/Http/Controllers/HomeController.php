@@ -20,13 +20,23 @@ class HomeController extends Controller {
             if(isset($data['items']) && is_string($data['items'])) {
                 $data['items'] = json_decode($data['items'], true);
             }
-            $data["order_type"] = "Takeaway"; 
-            $data["payment_method"] = "Cash"; 
+            if(!isset($data["order_type"])) {
+                $data["order_type"] = "Takeaway"; 
+            }
+            if(!isset($data["payment_method"])) {
+                $data["payment_method"] = "Cash"; 
+            }
+            $data["payment_status"] = "Pending";
             
             $order = $repo->createOrder($data);
-            return response()->json(["status" => true, "order_id" => $order->id, "msg" => "Order placed successfully!"]);
+            return response()->json(["status" => true, "order_id" => $order->id, "order_number" => $order->order_number, "msg" => "Order placed successfully!"]);
         } catch (\Exception $e) {
             return response()->json(["status" => false, "msg" => $e->getMessage()]);
         }
+    }
+
+    public function orderSuccess($order_number) {
+        $order = \App\Models\Order::with('items')->where('order_number', $order_number)->firstOrFail();
+        return view('order-success', compact('order'));
     }
 }

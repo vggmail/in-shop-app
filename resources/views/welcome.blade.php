@@ -121,7 +121,7 @@
 
     <div class="cart-float" id="cart-float" data-bs-toggle="modal" data-bs-target="#checkoutModal">
         <span class="fw-bold"><i class="fas fa-shopping-cart me-2"></i> <span id="cart-count">0</span> Items</span>
-        <span class="fw-bold">Pay: ₹<span id="cart-total">0.00</span></span>
+        <span class="fw-bold">PROCEED TO CHECKOUT <i class="fas fa-arrow-right ms-2 fs-6"></i></span>
     </div>
 
     <!-- Food Modal -->
@@ -178,6 +178,16 @@
             <input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Enter Table Number (e.g. T-04)">
         </div>
 
+        <div class="mb-4">
+            <label class="small fw-bold text-muted mb-2 text-uppercase">Payment Method</label>
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="payment_method" id="pay-cash" value="Cash" checked>
+                <label class="btn btn-outline-success py-2" for="pay-cash" onclick="document.getElementById('pay-cash').checked=true;"><i class="fas fa-money-bill-wave me-1"></i> CASH</label>
+                <input type="radio" class="btn-check" name="payment_method" id="pay-upi" value="UPI">
+                <label class="btn btn-outline-success py-2" for="pay-upi" onclick="document.getElementById('pay-upi').checked=true;"><i class="fas fa-qrcode me-1"></i> UPI (ONLINE)</label>
+            </div>
+        </div>
+
         <div class="p-3 bg-light rounded-4 mb-4">
             <label class="small fw-bold text-muted mb-2 text-uppercase d-block">Apply Coupon</label>
             <div class="input-group">
@@ -202,7 +212,7 @@
             </div>
         </div>
 
-        <button class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold" id="placeOrderBtn" onclick="submitOrder()">PLACE ORDER NOW</button>
+        <button class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold" id="placeOrderBtn" onclick="submitOrder()">CHECKOUT</button>
     </div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -310,7 +320,11 @@
         function removeFromCart(index) {
             cart.splice(index, 1);
             saveCart();
-            renderCart();
+            if(cart.length === 0) {
+                location.reload();
+            } else {
+                renderCart();
+            }
         }
 
         let appliedCoupon = null;
@@ -403,7 +417,8 @@
                 _token: "{{ csrf_token() }}",
                 customer_name: name,
                 customer_phone: phone,
-                order_type: $("input[name='order_type']:checked").val(),
+                order_type: document.querySelector('input[name="order_type"]:checked').value,
+                payment_method: document.querySelector('input[name="payment_method"]:checked').value,
                 table_number: $("#table_number").val(),
                 items: JSON.stringify(items),
                 total_amount: parseFloat($("#checkout-subtotal").text()),
@@ -411,9 +426,8 @@
                 grand_total: parseFloat($("#checkout-total").text())
             }, function(res) {
                 if(res.status) {
-                    alert(res.msg);
                     localStorage.removeItem('cart');
-                    location.reload();
+                    window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
                 } else {
                     alert("Error: " + res.msg);
                     $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER NOW");

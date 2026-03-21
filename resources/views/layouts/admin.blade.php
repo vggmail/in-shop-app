@@ -93,23 +93,26 @@
     <script>
         let lastOrderId = {{ $latest_order_id ?? 0 }};
         function checkNewOrders() {
-            $.get('{{ route("orders.check-pending") }}', function(data) {
-                if (data.count > 0) $('#sidebar-pending-count').text(data.count);
-                else $('#sidebar-pending-count').text('');
+            $.ajax({
+                url: '{{ route("orders.check-pending") }}',
+                cache: false,
+                success: function(data) {
+                    if (data.count > 0) $('#sidebar-pending-count').text(data.count);
+                    else $('#sidebar-pending-count').text('');
 
-                if (data.latest_id > lastOrderId) {
-                    $('#bell-dot').show();
-                    $('#notif-content').html(`
-                        <div class="d-flex align-items-center p-2 mb-2 bg-light rounded text-start">
-                            <div class="bg-success text-white rounded-circle p-2 me-2"><i class="fas fa-shopping-basket"></i></div>
-                            <div>
-                                <div class="fw-bold text-dark small">New Order Received!</div>
-                                <div class="small text-muted" style="font-size: 0.75rem;">${data.latest_order}</div>
+                    if (data.latest_id > lastOrderId) {
+                        $('#bell-dot').show();
+                        $('#notif-content').html(`
+                            <div class="d-flex align-items-center p-2 mb-2 bg-light rounded text-start">
+                                <div class="bg-success text-white rounded-circle p-2 me-2"><i class="fas fa-shopping-basket"></i></div>
+                                <div>
+                                    <div class="fw-bold text-dark small">New Order Received!</div>
+                                    <div class="small text-muted" style="font-size: 0.75rem;">${data.latest_order}</div>
+                                </div>
                             </div>
-                        </div>
-                        <a href="{{ route('orders.index') }}" class="btn btn-sm btn-primary w-100 mt-2">View Orders</a>
-                    `);
-                    Swal.fire({
+                            <a href="{{ route('orders.index') }}" class="btn btn-sm btn-primary w-100 mt-2">View Orders</a>
+                        `);
+                        Swal.fire({
                         title: 'New Order!',
                         text: 'Order ' + data.latest_order + ' has been placed.',
                         icon: 'info',
@@ -122,8 +125,9 @@
                     new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(() => {});
                 }
                 lastOrderId = data.latest_id;
-            });
-        }
+            }
+        });
+    }
         setInterval(checkNewOrders, 5000); // Check every 5s for better responsiveness
         $('#notif-trigger').on('click', () => $('#bell-dot').hide());
     </script>
