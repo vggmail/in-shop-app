@@ -69,9 +69,8 @@
     <div class="sidebar-overlay" id="sidebar-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1040; display: none;"></div>
     <div class="row g-0 flex-nowrap min-vh-100">
         <div class="col-auto sidebar" id="admin-sidebar">
-                <div class="px-4 py-4">
-                    <h4 class="text-white fw-bold mb-0"><i class="fas fa-rocket text-danger me-2"></i>In-Shop</h4>
-                    <p class="small text-muted mb-0">Admin Panel v2.0</p>
+                <div class="px-3 py-3">
+                    <h3 class="text-white fw-bold mb-0 d-flex align-items-center"><i class="fas fa-utensils text-danger me-2"></i> Fast Food</h3>
                 </div>
                 
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>
@@ -89,7 +88,6 @@
                 <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Reports</span></a>
                 
                 @if(auth()->user()->role_id == 1)
-                <div class="px-4 mt-4 mb-2 small text-uppercase fw-bold text-muted" style="font-size: 0.7rem; letter-spacing: 1px;">Admin Only</div>
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-user-shield"></i> <span>Staff Management</span></a>
                 <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Activity Logs</span></a>
                 @endif
