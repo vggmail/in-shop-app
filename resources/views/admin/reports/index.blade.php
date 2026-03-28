@@ -1,10 +1,50 @@
 @extends("layouts.admin")
+
+@section("styles")
+<style>
+    @media print {
+        /* Hide everything outside the report content */
+        nav, aside, header, footer,
+        .sidebar, .navbar, .topbar,
+        [class*="sidebar"], [class*="navbar"],
+        [class*="nav-"], .dropdown-menu,
+        .btn, button, input,
+        .no-print { display: none !important; }
+
+        body { background: white !important; margin: 0 !important; padding: 0 !important; }
+
+        /* Remove card shadows and borders for cleaner print */
+        .card { box-shadow: none !important; border: 1px solid #ddd !important; }
+
+        /* Print header */
+        .print-header { display: block !important; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #333; padding-bottom: 10px; }
+        .print-header h3 { margin: 0; font-size: 20px; font-weight: bold; }
+        .print-header p { margin: 2px 0; font-size: 12px; color: #555; }
+
+        /* Full width content */
+        .col-md-3 { width: 25% !important; float: left; }
+        .row { display: flex !important; flex-wrap: wrap; }
+        main, .main-content, [class*="content"] { margin: 0 !important; padding: 0 !important; width: 100% !important; }
+    }
+
+    /* Hide print header on screen */
+    .print-header { display: none; }
+</style>
+@endsection
+
 @section("content")
-<div class="d-flex justify-content-between mb-4 mt-2">
+
+{{-- Hidden print header shown only when printing --}}
+<div class="print-header">
+    <h3>FAST FOOD HUB — Analytical Report</h3>
+    <p>Generated on {{ date('d M Y, h:i A') }}</p>
+</div>
+
+<div class="d-flex justify-content-between mb-4 mt-2 no-print">
     <h2><i class="fas fa-chart-pie text-primary"></i> Analytical Reports</h2>
     <div class="d-flex gap-2">
         <input type="date" id="report_date" class="form-control" value="{{ date("Y-m-d") }}">
-        <button class="btn btn-dark" onclick="window.print()"><i class="fas fa-print"></i></button>
+        <button class="btn btn-dark" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
     </div>
 </div>
 
@@ -12,19 +52,19 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Gross Sales</small>
-            <h3 class="fw-bold mb-0 text-success">${{ number_format(\App\Models\Order::sum("grand_total"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-success">&#8377;{{ number_format(\App\Models\Order::sum("grand_total"), 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Total Expenses</small>
-            <h3 class="fw-bold mb-0 text-danger">${{ number_format(\App\Models\Expense::sum("amount"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-danger">&#8377;{{ number_format(\App\Models\Expense::sum("amount"), 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Net Profit</small>
-            <h3 class="fw-bold mb-0 text-primary">${{ number_format(\App\Models\Order::sum("grand_total") - \App\Models\Expense::sum("amount"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-primary">&#8377;{{ number_format(\App\Models\Order::sum("grand_total") - \App\Models\Expense::sum("amount"), 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
@@ -55,7 +95,7 @@
                     <td>{{ $o->order_number }}</td>
                     <td><span class="badge border text-dark">{{ $o->order_type }}</span></td>
                     <td>{{ $o->payment_method }}</td>
-                    <td class="text-end fw-bold">${{ number_format($o->grand_total, 2) }}</td>
+                    <td class="text-end fw-bold">&#8377;{{ number_format($o->grand_total, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>
@@ -81,7 +121,7 @@
                     <td>{{ date("d M, Y", strtotime($e->date)) }}</td>
                     <td><span class="badge bg-light text-danger">{{ $e->category }}</span></td>
                     <td>{{ $e->description }}</td>
-                    <td class="text-end fw-bold">-${{ number_format($e->amount, 2) }}</td>
+                    <td class="text-end fw-bold">-&#8377;{{ number_format($e->amount, 2) }}</td>
                 </tr>
                 @endforeach
             </tbody>

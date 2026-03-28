@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 
+use Illuminate\Pagination\Paginator;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -19,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Paginator::useBootstrapFive();
+
         view()->composer('layouts.admin', function ($view) {
             $pendingCount = \App\Models\Order::where('status', '!=', 'Completed')->count();
             $latest = \App\Models\Order::orderBy('id', 'desc')->first();

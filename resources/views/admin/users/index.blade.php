@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-4 mt-2">
     <div>
@@ -107,3 +107,5 @@ function editUser(id, name, email, roleId, phone) {
 }
 </script>
 @endsection
+
+

@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-4 mt-2">
     <div>
@@ -61,3 +61,5 @@
     .smaller { font-size: 0.75rem; }
 </style>
 @endsection
+
+

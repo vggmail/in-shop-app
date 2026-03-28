@@ -13,6 +13,7 @@ use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\PayUController;
+use App\Http\Controllers\CustomerAuthController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -21,6 +22,14 @@ Route::get('/order/{order_number}/check-status', [HomeController::class, 'checkS
 Route::post('/payu/pay/{order_number}', [PayUController::class, 'pay'])->name('payu.pay');
 Route::match(['get', 'post'], '/payu/success', [PayUController::class, 'success'])->name('payu.success');
 Route::match(['get', 'post'], '/payu/failure', [PayUController::class, 'failure'])->name('payu.failure');
+
+// Customer Auth & History
+Route::post('/customer/check-phone', [CustomerAuthController::class, 'checkPhone'])->name('customer.checkPhone');
+Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('customer.login');
+Route::post('/customer/auto-login', [CustomerAuthController::class, 'autoLogin'])->name('customer.autoLogin');
+Route::get('/customer/reorder/{order_number}', [CustomerAuthController::class, 'reorder'])->name('customer.reorder');
+Route::get('/customer/orders', [CustomerAuthController::class, 'myOrders'])->name('customer.orders');
+Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -44,6 +53,7 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     
     Route::get('payments', [OrderController::class, 'payments'])->name('payments.index');
+    Route::get('payments/export', [OrderController::class, 'exportPayments'])->name('payments.export');
     Route::get('reports', [OrderController::class, 'reports'])->name('reports.index');
     Route::get('logs', [AdminController::class, 'logs'])->name('logs.index');
     Route::resource('users', UserAdminController::class)->except(['create', 'show', 'edit']);

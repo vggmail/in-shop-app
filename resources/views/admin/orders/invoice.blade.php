@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -99,7 +99,7 @@
             @endif
             <tr class="fw-bold fs-6">
                 <td style="font-size: 16px; padding-top: 5px;">TOTAL</td>
-                <td class="text-right" style="font-size: 16px; padding-top: 5px;">${{ number_format($order->grand_total, 2) }}</td>
+                <td class="text-right" style="font-size: 16px; padding-top: 5px;">₹{{ number_format($order->grand_total, 2) }}</td>
             </tr>
             <tr>
                 <td style="padding-top: 5px; font-size: 11px;">Payment:</td>
@@ -120,3 +120,4 @@
     </div>
 </body>
 </html>
+

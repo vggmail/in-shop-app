@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="card p-4 shadow border-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -44,7 +44,7 @@
         <div class="col-md-4 ps-4">
             <h5 class="fw-bold mb-3 text-secondary">Kitchen Note</h5>
             <div class="p-2 border rounded bg-white text-danger fw-bold fst-italic shadow-sm" style="min-height: 60px;">
-                {{ $order->note ? "🔊 " . $order->note : "No special instructions" }}
+                {{ $order->note ? "ðŸ”Š " . $order->note : "No special instructions" }}
             </div>
         </div>
     </div>
@@ -64,22 +64,23 @@
                         <div class="mt-1 small text-muted">
                             <i class="fas fa-plus text-success" style="font-size: 10px;"></i> 
                             @foreach($item->extras as $e)
-                                {{ $e->extra->name }} (+${{ number_format($e->price, 2) }}){{ !$loop->last ? ', ' : '' }}
+                                {{ $e->extra->name }} (+₹{{ number_format($e->price, 2) }}){{ !$loop->last ? ', ' : '' }}
                             @endforeach
                         </div>
                     @endif
                 </td>
-                <td class="text-center align-middle">${{ number_format($item->price, 2) }}</td>
+                <td class="text-center align-middle">₹{{ number_format($item->price, 2) }}</td>
                 <td class="text-center align-middle"><span class="badge bg-light text-dark fs-6">{{ $item->quantity }}</span></td>
-                <td class="text-end align-middle fw-bold">${{ number_format($item->total, 2) }}</td>
+                <td class="text-end align-middle fw-bold">₹{{ number_format($item->total, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
         <tfoot class="border-top-0">
-            <tr><td colspan="3" class="text-end border-0 pb-0 pt-3 text-muted fw-bold">Subtotal:</td><td class="text-end border-0 pb-0 pt-3 fw-bold">${{ number_format($order->total_amount, 2) }}</td></tr>
-            <tr><td colspan="3" class="text-end border-0 pb-1 pt-1 text-danger">Discount:</td><td class="text-end border-0 pb-1 pt-1 text-danger">-${{ number_format($order->discount_amount, 2) }}</td></tr>
-            <tr><td colspan="3" class="text-end border-top-0 fs-4 fw-bold pb-3">Grand Total:</td><td class="text-end border-top-0 fs-4 text-success fw-bold pb-3">${{ number_format($order->grand_total, 2) }}</td></tr>
+            <tr><td colspan="3" class="text-end border-0 pb-0 pt-3 text-muted fw-bold">Subtotal:</td><td class="text-end border-0 pb-0 pt-3 fw-bold">₹{{ number_format($order->total_amount, 2) }}</td></tr>
+            <tr><td colspan="3" class="text-end border-0 pb-1 pt-1 text-danger">Discount:</td><td class="text-end border-0 pb-1 pt-1 text-danger">-₹{{ number_format($order->discount_amount, 2) }}</td></tr>
+            <tr><td colspan="3" class="text-end border-top-0 fs-4 fw-bold pb-3">Grand Total:</td><td class="text-end border-top-0 fs-4 text-success fw-bold pb-3">₹{{ number_format($order->grand_total, 2) }}</td></tr>
         </tfoot>
     </table>
 </div>
 @endsection
+

@@ -56,8 +56,36 @@ class OrderController extends Controller {
     }
 
     public function payments() {
+        $payments = Payment::with("order")->orderBy("id", "DESC")->paginate(20);
+        $allPayments = Payment::with("order")->orderBy("id", "DESC")->get(); // for summary cards
+        return view("admin.payments.index", compact("payments", "allPayments"));
+    }
+
+    public function exportPayments() {
         $payments = Payment::with("order")->orderBy("id", "DESC")->get();
-        return view("admin.payments.index", compact("payments"));
+
+        $filename = "payments_" . date("Y-m-d") . ".csv";
+        $headers = [
+            "Content-Type"        => "text/csv",
+            "Content-Disposition" => "attachment; filename=\"$filename\"",
+        ];
+
+        $callback = function () use ($payments) {
+            $out = fopen("php://output", "w");
+            fputcsv($out, ["Order #", "Date", "Method", "Amount", "Status"]);
+            foreach ($payments as $p) {
+                fputcsv($out, [
+                    "#ORD-" . ($p->order->id ?? "N/A"),
+                    date("d M Y H:i", strtotime($p->created_at)),
+                    $p->method,
+                    number_format($p->amount, 2),
+                    $p->status,
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
     
     public function reports() {

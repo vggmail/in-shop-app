@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-4 mt-2">
     <div>
@@ -23,9 +23,9 @@
                 <h5 class="fw-bold mb-1 d-flex justify-content-between align-items-center">
                     {{ $i->name }}
                     <div class="text-end">
-                        <span class="text-primary small fw-bold">₹{{ number_format($i->price, 2) }}</span>
+                        <span class="text-primary small fw-bold">â‚¹{{ number_format($i->price, 2) }}</span>
                         @if($i->mrp && $i->mrp > $i->price)
-                            <div class="text-muted text-decoration-line-through fw-normal" style="font-size: 10px;">₹{{ number_format($i->mrp, 2) }}</div>
+                            <div class="text-muted text-decoration-line-through fw-normal" style="font-size: 10px;">â‚¹{{ number_format($i->mrp, 2) }}</div>
                         @endif
                     </div>
                 </h5>
@@ -34,14 +34,14 @@
                 <div class="mb-3">
                     <small class="text-uppercase fw-bold text-muted" style="font-size:10px;">Variants:</small>
                     @forelse($i->variants as $v)
-                        <span class="badge bg-soft-primary text-primary border-0 me-1">{{ $v->name }} (+₹{{ $v->price }})</span>
+                        <span class="badge bg-soft-primary text-primary border-0 me-1">{{ $v->name }} (+â‚¹{{ $v->price }})</span>
                     @empty <span class="text-muted small">No variants</span> @endforelse
                 </div>
 
                 <div class="mb-4">
                     <small class="text-uppercase fw-bold text-muted" style="font-size:10px;">Extras:</small>
                     @forelse($i->extras as $e)
-                        <span class="badge bg-soft-success text-success border-0 me-1">{{ $e->name }} (+₹{{ $e->price }})</span>
+                        <span class="badge bg-soft-success text-success border-0 me-1">{{ $e->name }} (+â‚¹{{ $e->price }})</span>
                     @empty <span class="text-muted small">No extras</span> @endforelse
                 </div>
 
@@ -102,11 +102,11 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="small fw-bold text-muted text-uppercase mb-1">Base Price (₹)</label>
+                <label class="small fw-bold text-muted text-uppercase mb-1">Base Price (â‚¹)</label>
                 <input type="number" step="0.01" name="price" id="f_price" class="form-control bg-light border-0" required>
             </div>
             <div class="col-md-3">
-                <label class="small fw-bold text-muted text-uppercase mb-1">MRP/Full Price (₹)</label>
+                <label class="small fw-bold text-muted text-uppercase mb-1">MRP/Full Price (â‚¹)</label>
                 <input type="number" step="0.01" name="mrp" id="f_mrp" class="form-control bg-light border-0">
             </div>
             <div class="col-md-3">
@@ -154,7 +154,7 @@ function addRow(containerId, type, name = '', price = '') {
     let html = `
         <div class="input-group mb-2 shadow-sm rounded overflow-hidden">
             <input type="text" name="${type}[${idx}][name]" value="${name}" class="form-control border-0 bg-white" placeholder="Name" style="font-size:12px;">
-            <input type="number" step="0.01" name="${type}[${idx}][price]" value="${price}" class="form-control border-0 bg-white" placeholder="₹ Price" style="font-size:12px;">
+            <input type="number" step="0.01" name="${type}[${idx}][price]" value="${price}" class="form-control border-0 bg-white" placeholder="â‚¹ Price" style="font-size:12px;">
             <button class="btn btn-outline-danger border-0 bg-white" type="button" onclick="$(this).parent().remove()"><i class="fas fa-times small"></i></button>
         </div>`;
     $(`#${containerId}`).append(html);
@@ -191,3 +191,5 @@ function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, ex
 $('[data-bs-target="#addItemModal"]').attr('data-bs-target', '').attr('onclick', 'openAddItem()');
 </script>
 @endsection
+
+

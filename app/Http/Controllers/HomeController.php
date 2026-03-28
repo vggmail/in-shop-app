@@ -10,7 +10,23 @@ class HomeController extends Controller {
         $categories = Category::all();
         $items = Item::with(["category", "variants", "extras"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
         $coupons = \App\Models\Coupon::where('show_on_home', 1)->where('coupon_type', '!=', 'Internal')->get();
-        return view("welcome", compact("categories", "items", "coupons"));
+        
+        $customer = \App\Models\Customer::find(session('customer_id'));
+        $recentItems = collect();
+        if($customer) {
+            $orderIds = \App\Models\Order::where('customer_id', $customer->id)->pluck('id');
+            $recentItemIds = \App\Models\OrderItem::whereIn('order_id', $orderIds)
+                ->distinct()
+                ->pluck('item_id');
+            
+            $recentItems = Item::with(['category', 'variants', 'extras'])
+                ->whereIn('id', $recentItemIds)
+                ->where('is_available', 1)
+                ->limit(10)
+                ->get();
+        }
+
+        return view("welcome", compact("categories", "items", "coupons", "customer", "recentItems"));
     }
 
     public function placeOrder(Request $request, OrderRepository $repo) {
@@ -22,6 +38,7 @@ class HomeController extends Controller {
             $data["order_type"] = $data["order_type"] ?? "Takeaway"; 
             $data["payment_method"] = $data["payment_method"] ?? "Cash"; 
             $data["payment_status"] = "Pending";
+            $data["customer_id"] = session("customer_id");
             
             $order = $repo->createOrder($data);
             

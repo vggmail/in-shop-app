@@ -4,70 +4,101 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Fast Food Hub - Fresh Burgers, Pizza & More | Order Online</title>
-    <meta name="description" content="Craving something delicious? Fast Food Hub offers the freshest burgers, cheesy pizzas, and tasty sides. Order online for quick delivery or takeaway.">
-    <meta name="keywords" content="fast food, online ordering, burger, pizza, takeaway, delivery, restaurant">
-    <meta name="author" content="Fast Food Hub">
-    
-    <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:title" content="Fast Food Hub - Delicious Food Delivered Fast">
-    <meta property="og:description" content="Get the best burgers and pizzas in town. Fast, fresh, and friendly service. Order now!">
-    <meta property="og:image" content="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800">
-
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ url()->current() }}">
-    <meta property="twitter:title" content="Fast Food Hub - Delicious Food Delivered Fast">
-    <meta property="twitter:description" content="Get the best burgers and pizzas in town. Fast, fresh, and friendly service. Order now!">
-    <meta property="twitter:image" content="https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    
     <style>
-        :root { --primary: #ff4757; --dark: #2f3542; --light: #f1f2f6; }
-        body { font-family: "Outfit", sans-serif; background-color: #f8f9fa; color: var(--dark); overflow-x: hidden; padding-bottom: 100px; }
-        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800"); background-size: cover; height: 30vh; border-radius: 0 0 30px 30px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
-        .category-pill { background: white; border: 1px solid #eee; padding: 8px 20px; border-radius: 30px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 600; color: #777; }
-        .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .food-card { border: none; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; height: 100%; transition: 0.3s; cursor: pointer; }
-        .food-card:active { transform: scale(0.95); }
-        .food-img { height: 140px; background: #eee; display: flex; align-items: center; justify-content: center; color: #ccc; }
-        .cart-float { position: fixed; bottom: 20px; right: 20px; left: 20px; background: var(--dark); color: white; padding: 15px 25px; border-radius: 20px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; cursor: pointer; display: none; }
-        .modal-content { border-radius: 25px; border: none; }
+        :root { --primary: #ff4757; --dark: #2f3542; --light: #f1f2f6; --accent: #ff6b81; }
+        body { font-family: "Outfit", sans-serif; background-color: #f8f9fa; color: var(--dark); overflow-x: hidden; padding-bottom: 90px; }
+        .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800"); background-size: cover; height: 180px; border-radius: 0 0 40px 40px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; position: relative; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 75px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #eee; border-radius: 30px 30px 0 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1050; padding: 0 10px; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; text-decoration: none; font-size: 11px; font-weight: 600; width: 60px; height: 60px; transition: 0.3s; }
+        .nav-item.active { color: var(--primary); }
+        .nav-item.active i { font-size: 20px; }
+        .nav-item i { font-size: 18px; margin-bottom: 4px; }
+        .category-pill { background: white; border: 1px solid #eee; padding: 10px 22px; border-radius: 30px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 600; color: #777; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
+        .food-card { border: none; border-radius: 25px; box-shadow: 0 8px 18px rgba(0,0,0,0.04); overflow: hidden; height: 100%; transition: 0.3s; cursor: pointer; background: white; }
+        .food-card:active { transform: scale(0.96); }
+        .food-img { height: 150px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #ddd; position: relative; }
+        .cart-float { position: fixed; bottom: 85px; left: 20px; right: 20px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; }
+        .cart-float:active { transform: scale(0.98); }
+        .modal-content { border-radius: 35px; border: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
-        .coupon-pill { background: #fff5f5; border: 1px dashed var(--primary); padding: 5px 15px; border-radius: 10px; min-width: 150px; }
+        .coupon-pill { background: #fff5f5; border: 1px dashed var(--primary); padding: 5px 15px; border-radius: 12px; min-width: 155px; box-shadow: 2px 2px 10px rgba(0,0,0,0.02); }
+        .recent-card { width: 120px; background: white; border-radius: 20px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; text-align: center; padding: 12px; cursor: pointer; transition: 0.3s; }
+        .recent-card:active { transform: scale(0.95); }
+        .recent-card i { background: #fff1f2; color: var(--primary); width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; }
     </style>
-    <!-- Structured Data (JSON-LD) -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Restaurant",
-      "name": "Fast Food Hub",
-      "image": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800",
-      "url": "{{ url('/') }}",
-      "telephone": "",
-      "address": {
-        "@type": "PostalAddress",
-        "streetAddress": "Main Street",
-        "addressLocality": "Your City",
-        "postalCode": "000000",
-        "addressCountry": "IN"
-      },
-      "menu": "{{ url('/') }}",
-      "servesCuisine": "Fast Food, Burger, Pizza",
-      "priceRange": "₹₹"
-    }
-    </script>
 </head>
 <body>
 
     <div class="hero">
-        <div><h1 class="fw-bold">FAST FOOD HUB</h1><p class="small opacity-75">Order your favorite meals instantly</p></div>
+        @php
+            $hour = now()->hour;
+            if($hour < 12) $greet = "Good Morning";
+            elseif($hour < 17) $greet = "What's for lunch";
+            elseif($hour < 21) $greet = "Good Evening";
+            else $greet = "Late Night Cravings";
+            
+            $name = isset($customer) ? explode(' ', $customer->name)[0] : '';
+        @endphp
+        <div>
+            @if(isset($customer))
+                <p class="small fw-bold text-uppercase mb-1" style="letter-spacing: 1px; color: var(--accent);">{{ $greet }}, {{ $name }}! What would you like to eat today? 👋</p>
+            @else
+                <p class="small fw-bold text-uppercase mb-1" style="letter-spacing: 1px; color: var(--accent);">{{ $greet }}! What would you like to eat today? 👋</p>
+            @endif
+            <h2 class="fw-800 fs-1 mb-0" style="letter-spacing: -1px;">FAST FOOD HUB</h2>
+            <p class="small opacity-75 fw-bold">Fresh • Fast • Delicious</p>
+        </div>
+    </div>
+
+    <!-- Bottom App Navigation -->
+    <div class="bottom-nav">
+        <a href="{{ url('/') }}" class="nav-item active">
+            <i class="fas fa-home-alt"></i>
+            <span>Menu</span>
+        </a>
+        <a href="{{ route('customer.orders') }}" class="nav-item">
+            <i class="fas fa-shopping-bag"></i>
+            <span>My Orders</span>
+        </a>
+        @if(isset($customer))
+            <a href="#" class="nav-item text-primary" data-bs-toggle="dropdown">
+                <i class="fas fa-user-circle"></i>
+                <span>Account</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mb-3">
+                <li class="px-3 py-2 fw-bold small text-muted text-uppercase" style="font-size: 10px;">Welcome, {{ $customer->name }}</li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item py-2 text-danger fw-bold" href="{{ route('customer.logout') }}" onclick="localStorage.removeItem('customer_device_token')"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+            </ul>
+        @else
+            <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#loginModal">
+                <i class="fas fa-user-lock"></i>
+                <span>Account</span>
+            </a>
+        @endif
     </div>
 
     <div class="container mt-4">
+        @if(isset($recentItems) && $recentItems->count() > 0)
+        <div class="mb-4">
+            <label class="small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 1px;">Ready for seconds?</label>
+            <div class="d-flex overflow-auto gap-3 pb-2 no-scrollbar">
+                @foreach($recentItems as $ri)
+                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }})">
+                    <i class="fas fa-history"></i>
+                    <div class="small fw-bold text-truncate">{{ $ri->name }}</div>
+                    <div class="small text-primary fw-bold">₹{{ $ri->price }}</div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         <div class="d-flex overflow-auto gap-2 pb-3 mb-3 no-scrollbar">
             <div class="category-pill active" onclick="filterCat('all')">All Menu</div>
             @foreach($categories as $c)<div class="category-pill" onclick="filterCat('{{ Str::slug($c->name) }}')">{{ $c->name }}</div>@endforeach
@@ -92,7 +123,6 @@
             @foreach($items as $i)
             <div class="col-6 col-md-4 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
                 <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
-                    
                     <div class="food-img position-relative">
                         <i class="fas fa-hamburger fa-2x"></i>
                         <div class="position-absolute top-0 end-0 p-2">
@@ -102,15 +132,7 @@
                     <div class="card-body p-3">
                         <h6 class="fw-bold mb-1">{{ $i->name }}</h6>
                         <div class="d-flex justify-content-between align-items-center">
-                            <div>
-                                <span class="text-primary fw-bold">₹{{ number_format($i->price, 2) }}</span>
-                                @if($i->mrp && $i->mrp > $i->price)
-                                    <span class="text-muted text-decoration-line-through small ms-1" style="font-size: 10px;">₹{{ number_format($i->mrp, 2) }}</span>
-                                @endif
-                            </div>
-                            @if($i->mrp && $i->mrp > $i->price)
-                                <span class="badge bg-soft-danger text-danger border-0 small" style="font-size: 8px;">{{ round((($i->mrp - $i->price) / $i->mrp) * 100) }}% OFF</span>
-                            @endif
+                            <div><span class="text-primary fw-bold">₹{{ number_format($i->price, 2) }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -119,17 +141,52 @@
         </div>
     </div>
 
-    <div class="cart-float" id="cart-float" data-bs-toggle="modal" data-bs-target="#checkoutModal">
-        <span class="fw-bold"><i class="fas fa-shopping-cart me-2"></i> <span id="cart-count">0</span> Items</span>
-        <span class="fw-bold">PROCEED TO CHECKOUT <i class="fas fa-arrow-right ms-2 fs-6"></i></span>
+    <!-- Minimized Floating Checkout Bar -->
+    <div class="cart-float px-3" id="cart-float" data-bs-toggle="modal" data-bs-target="#checkoutModal" style="display: none;">
+        <div class="d-flex align-items-center gap-2">
+            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="fas fa-shopping-basket" style="font-size: 13px;"></i></div>
+            <div class="fw-bold small lh-1"><span id="cart-count">0</span> Items <span class="mx-1 opacity-25">|</span> ₹<span id="cart-total-float">0.00</span></div>
+        </div>
+        <div class="fw-bold small text-uppercase d-flex align-items-center" style="letter-spacing: 1px;">CHECKOUT <i class="fas fa-arrow-right ms-2 opacity-75"></i></div>
     </div>
+
+    <!-- Login Modal -->
+    <div class="modal fade" id="loginModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content shadow-lg"><div class="modal-body p-4">
+        <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
+        <h5 class="fw-bold mb-4">Customer Login</h5>
+        <div id="login-error-tag" class="alert alert-danger py-2 small fw-bold d-none mb-3 border-0 rounded-3"></div>
+        <div id="login-phone-section">
+            <label class="small fw-bold text-muted mb-2">MOBILE NUMBER</label>
+            <input type="tel" id="login-phone" class="form-control form-control-lg border-0 bg-light rounded-3 mb-3" placeholder="10-digit number">
+            <button class="btn btn-primary btn-lg w-100 rounded-pill fw-bold" onclick="checkPhoneExists()">CONTINUE</button>
+        </div>
+        <div id="login-pin-section" class="d-none text-center">
+            <p class="text-muted small mb-1" id="pin-modal-subtitle"></p>
+            <h4 class="fw-bold mb-4" id="pin-modal-title"></h4>
+            <div class="mb-3 position-relative">
+                <label id="pin-label" class="small fw-bold text-muted d-block mb-2"></label>
+                <input type="password" id="login-pin" maxlength="4" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
+                <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 mt-2 text-muted border-0 shadow-none" onclick="togglePinVisibility('login-pin', 'pin-eye-icon')">
+                    <i class="fas fa-eye" id="pin-eye-icon"></i>
+                </button>
+            </div>
+            <div id="confirm-pin-box" class="mb-3 position-relative d-none">
+                <label class="small fw-bold text-muted d-block mb-2">CONFIRM PIN</label>
+                <input type="password" id="login-pin-confirm" maxlength="4" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
+                <button type="button" class="btn btn-sm position-absolute top-50 end-0 translate-middle-y me-2 mt-2 text-muted border-0 shadow-none" onclick="togglePinVisibility('login-pin-confirm', 'pin-eye-icon-confirm')">
+                    <i class="fas fa-eye" id="pin-eye-icon-confirm"></i>
+                </button>
+            </div>
+            <button class="btn btn-primary btn-lg w-100 rounded-pill fw-bold d-none" id="login-submit-btn" onclick="processPinLogin()">VERIFY & LOGIN</button>
+            <button class="btn btn-link btn-sm mt-3 text-muted text-decoration-none" onclick="goBackToLoginPhone()">Back</button>
+        </div>
+    </div></div></div></div>
 
     <!-- Food Modal -->
     <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4">
         <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
         <h4 class="fw-bold mb-1" id="m-food-name">Food Name</h4>
-        <p class="text-muted small mb-4" id="m-food-desc">Includes fresh ingredients & special sauces.</p>
-
+        <p class="text-muted small mb-4">Fresh ingredients & special sauces.</p>
         <div id="m-variants-box" class="mb-4 d-none">
             <label class="fw-bold small text-uppercase text-muted mb-2">Select Variant</label>
             <div id="m-variants-list" class="d-grid gap-2"></div>
@@ -138,7 +195,6 @@
             <label class="fw-bold small text-uppercase text-muted mb-2">Extra Toppings</label>
             <div id="m-extras-list" class="row g-2"></div>
         </div>
-
         <div class="d-grid mt-4">
             <button class="btn btn-danger btn-lg rounded-pill fw-bold py-3" onclick="addToCart()">ADD TO CART - ₹<span id="m-total">0.00</span></button>
         </div>
@@ -148,79 +204,35 @@
     <div class="modal fade" id="checkoutModal"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-body p-4">
         <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
         <h4 class="fw-bold mb-4"><i class="fas fa-shopping-basket text-danger me-2"></i> Finalize Order</h4>
-        
         <div id="checkout-list" class="mb-4 bg-light p-3 rounded-4" style="max-height: 250px; overflow-y: auto;"></div>
-
+        
+        @if(!isset($customer))
         <div class="row g-3 mb-4">
-            <div class="col-12">
-                <label class="small fw-bold text-muted mb-1">YOUR NAME</label>
-                <input type="text" id="cust_name" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Enter Full Name">
-                <div class="invalid-feedback">Please enter your correct name.</div>
-            </div>
-            <div class="col-12">
-                <label class="small fw-bold text-muted mb-1">MOBILE NUMBER (10 DIGITS)</label>
-                <input type="tel" id="cust_phone" maxlength="10" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="e.g. 9876543210">
-                <div class="invalid-feedback">Please enter a valid 10-digit mobile number.</div>
-            </div>
+            <div class="col-12"><label class="small fw-bold text-muted mb-1">YOUR NAME</label><input type="text" id="cust_name" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
+            <div class="col-12"><label class="small fw-bold text-muted mb-1">MOBILE NUMBER</label><input type="tel" id="cust_phone" maxlength="10" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
         </div>
-
-        <div class="mb-4">
-            <label class="small fw-bold text-muted mb-2 text-uppercase">Where will you eat?</label>
-            <div class="btn-group w-100" role="group">
-                <input type="radio" class="btn-check" name="order_type" id="type-dinein" value="Dine-in" checked>
-                <label class="btn btn-outline-danger py-2" for="type-dinein"><i class="fas fa-chair me-1"></i> DINE-IN</label>
-                <input type="radio" class="btn-check" name="order_type" id="type-takeaway" value="Takeaway">
-                <label class="btn btn-outline-danger py-2" for="type-takeaway"><i class="fas fa-shopping-bag me-1"></i> TAKEAWAY</label>
-            </div>
-        </div>
-
-        <div class="mb-4" id="table-number-box">
-            <input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Enter Table Number (e.g. T-04)">
-        </div>
-
-        <div class="mb-4">
-            <label class="small fw-bold text-muted mb-2 text-uppercase">Payment Method</label>
-            <div class="row g-2">
-                <div class="col-6">
-                    <input type="radio" class="btn-check" name="payment_method" id="pay-cash" value="Cash" checked>
-                    <label class="btn btn-outline-success w-100 py-3 border-2 fw-bold" for="pay-cash">
-                        <i class="fas fa-money-bill-wave d-block mb-1"></i> CASH
-                    </label>
+        @else
+            <div class="mb-4 bg-light p-3 rounded-4 d-flex align-items-center justify-content-between">
+                <div>
+                    <h6 class="fw-bold mb-0">{{ $customer->name }}</h6>
+                    <small class="text-muted">{{ $customer->phone }}</small>
                 </div>
-                <div class="col-6">
-                    <input type="radio" class="btn-check" name="payment_method" id="pay-online" value="PayU">
-                    <label class="btn btn-outline-danger w-100 py-3 border-2 fw-bold" for="pay-online">
-                        <i class="fas fa-credit-card d-block mb-1"></i> ONLINE
-                    </label>
-                </div>
+                <div class="badge bg-success rounded-pill fw-bold">VERIFIED <i class="fas fa-check-circle"></i></div>
             </div>
+            <input type="hidden" id="cust_name" value="{{ $customer->name }}">
+            <input type="hidden" id="cust_phone" value="{{ $customer->phone }}">
+        @endif
+        <div class="mb-4">
+            <label class="small fw-bold text-muted mb-2 text-uppercase">Order Type</label>
+            <div class="btn-group w-100"><input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" checked><label class="btn btn-outline-danger py-2" for="t-dine">DINE-IN</label><input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway"><label class="btn btn-outline-danger py-2" for="t-away">TAKEAWAY</label></div>
         </div>
-
-        <div class="p-3 bg-light rounded-4 mb-4">
-            <label class="small fw-bold text-muted mb-2 text-uppercase d-block">Apply Coupon</label>
-            <div class="input-group">
-                <input type="text" id="coupon_code" class="form-control border-0 bg-white shadow-none" placeholder="Enter coupon code">
-                <button class="btn btn-primary px-4 fw-bold" type="button" onclick="applyCoupon()">APPLY</button>
-            </div>
-            <div id="coupon-msg" class="small mt-1 px-2 d-none"></div>
+        <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Table No (Optional)"></div>
+        <div class="mb-4">
+            <label class="small fw-bold text-muted mb-2 text-uppercase">Payment</label>
+            <div class="row g-2"><div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-cash" value="Cash" checked><label class="btn btn-outline-success w-100 py-3 fw-bold" for="p-cash">CASH</label></div><div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU"><label class="btn btn-outline-danger w-100 py-3 fw-bold" for="p-upi">ONLINE</label></div></div>
         </div>
-
-        <div class="px-2">
-            <div class="d-flex justify-content-between mb-1">
-                <span class="text-muted">Subtotal</span>
-                <span class="fw-bold text-dark">₹<span id="checkout-subtotal">0.00</span></span>
-            </div>
-            <div class="d-flex justify-content-between mb-1 d-none" id="discount-row">
-                <span class="text-danger fw-bold">Discount (<span id="discount-percent">0</span>%)</span>
-                <span class="fw-bold text-danger">-₹<span id="discount-amount">0.00</span></span>
-            </div>
-            <div class="d-flex justify-content-between mb-4 mt-2 border-top pt-2">
-                <h5 class="fw-bold">Grand Total</h5>
-                <h5 class="fw-bold text-success">₹<span id="checkout-total">0.00</span></h5>
-            </div>
-        </div>
-
-        <button class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold" id="placeOrderBtn" onclick="submitOrder()">CHECKOUT</button>
+        <div class="px-2 d-flex justify-content-between mb-4 border-top pt-3"><h5 class="fw-bold">Total</h5><h5 class="fw-bold text-success">₹<span id="checkout-total">0.00</span></h5><span id="checkout-subtotal" class="d-none">0</span></div>
+        <button class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold" id="placeOrderBtn" onclick="submitOrder()">PLACE ORDER</button>
     </div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -228,246 +240,132 @@
     <script>
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         let currentItem = null;
-
-        $(document).ready(function() {
-            renderCart();
-        });
-
-        function saveCart() {
-            localStorage.setItem('cart', JSON.stringify(cart));
-        }
-
-        function filterCat(slug) {
-            $(".category-pill").removeClass("active");
-            $(event.target).addClass("active");
-            if(slug==='all') $(".food-item-box").show();
-            else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); }
-        }
-
+        $(document).ready(function() { renderCart(); });
+        function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
+        function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
         function openFoodModal(id, name, price, variants, extras) {
             currentItem = { id, name, price, variants, extras };
-            $("#m-food-name").text(name);
-            $("#m-variants-list, #m-extras-list").empty();
-            if(variants.length) {
-                $("#m-variants-box").removeClass("d-none");
-                // Always add a Standard/Default choice if not specifically forced
-                $("#m-variants-list").append(`<input type="radio" class="btn-check" name="food_var" id="var_default" value="" data-price="0" data-name="Standard" checked>
-                    <label class="btn btn-outline-dark rounded-pill py-2 text-start px-3" for="var_default">Standard <span class="float-end">Included</span></label>`);
-                
-                variants.forEach(v => {
-                    $("#m-variants-list").append(`<input type="radio" class="btn-check" name="food_var" id="var_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}">
-                        <label class="btn btn-outline-dark rounded-pill py-2 text-start px-3" for="var_${v.id}">${v.name} <span class="float-end">+₹${v.price}</span></label>`);
-                });
-            } else { $("#m-variants-box").addClass("d-none"); }
-
-            if(extras.length) {
-                $("#m-extras-box").removeClass("d-none");
-                extras.forEach(e => {
-                    $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="ext_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}">
-                        <label class="btn btn-outline-secondary rounded-pill w-100 text-start px-3 py-2" for="ext_${e.id}">${e.name} <br><span class="small">+₹${e.price}</span></label></div>`);
-                });
-            } else { $("#m-extras-box").addClass("d-none"); }
-
-            $(document).on("change", ".btn-check", updateMTotal);
-            updateMTotal();
-            new bootstrap.Modal(document.getElementById("foodModal")).show();
+            $("#m-food-name").text(name); $("#m-variants-list, #m-extras-list").empty();
+            if(variants.length) { $("#m-variants-box").removeClass("d-none"); $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="Standard" checked><label class="btn btn-outline-dark rounded-pill py-2" for="v_def">Standard</label>`); variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); } else { $("#m-variants-box").addClass("d-none"); }
+            if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
+            updateMTotal(); new bootstrap.Modal(document.getElementById("foodModal")).show();
         }
-
-        function updateMTotal() {
-            let total = currentItem.price;
-            let vPrice = parseFloat($("input[name='food_var']:checked").data("price") || 0);
-            let ePrice = 0;
-            $(".m-extra-cb:checked").each(function(){ ePrice += parseFloat($(this).data("price")); });
-            $("#m-total").text((total + vPrice + ePrice).toFixed(2));
-        }
-
+        function updateMTotal() { let t = currentItem.price; let v = parseFloat($("input[name='f_var']:checked").data("price") || 0); let e = 0; $(".m-extra-cb:checked").each(function(){ e += parseFloat($(this).data("price")); }); $("#m-total").text((t + v + e).toFixed(2)); }
+        $(document).on("change", ".btn-check", updateMTotal);
         function addToCart() {
-            let varInput = $("input[name='food_var']:checked");
-            let extras = [];
-            $(".m-extra-cb:checked").each(function(){
-                extras.push({ id: $(this).val(), price: parseFloat($(this).data("price")), name: $(this).data("name") });
-            });
-            
-            cart.push({
-                item_id: currentItem.id,
-                name: currentItem.name,
-                price: parseFloat($("#m-total").text()),
-                variant_id: varInput.val() || null,
-                variant_name: varInput.data("name") || "",
-                extras: extras,
-                qty: 1
-            });
-            bootstrap.Modal.getInstance(document.getElementById("foodModal")).hide();
-            saveCart();
-            renderCart();
+            let v = $("input[name='f_var']:checked"); let ex = []; $(".m-extra-cb:checked").each(function(){ ex.push({ id: $(this).val(), price: parseFloat($(this).data("price")), name: $(this).data("name") }); });
+            let p = currentItem.price + parseFloat(v.data("price") || 0) + ex.reduce((a, b) => a + b.price, 0);
+            cart.push({ item_id: currentItem.id, variant_id: v.val() || null, price: p, qty: 1, name: currentItem.name, variant_name: v.data("name") || 'Standard', extras: ex });
+            saveCart(); bootstrap.Modal.getInstance(document.getElementById("foodModal")).hide();
         }
-
         function renderCart() {
-            if(!cart.length) { $("#cart-float").hide(); return; }
-            $("#cart-float").css("display", "flex");
-            let count = cart.length;
-            let subtotal = cart.reduce((s, o) => s + (o.price * o.qty), 0);
-            $("#cart-count").text(count);
-            $("#cart-total, #checkout-subtotal").text(subtotal.toFixed(2));
-            
-            let html = "";
-            cart.forEach((c, i) => {
-                html += `<div class="d-flex justify-content-between mb-3 border-bottom pb-2">
-                    <div>
-                        <h6 class="mb-0 fw-bold">${c.name}</h6>
-                        <small class="text-muted">${c.variant_name ? c.variant_name+', ' : ''} ${c.extras.length ? c.extras.map(e=>e.name).join(', ') : 'No Extras'}</small>
-                        <div class="mt-1"><button class="btn btn-sm btn-link text-danger p-0" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt me-1"></i> Remove</button></div>
-                    </div>
-                    <div class="text-end fw-bold text-danger">₹${c.price.toFixed(2)}</div>
-                </div>`;
-            });
-            $("#checkout-list").html(html);
-            updateFinalTotal();
+            let c = $("#cart-float"); let count = cart.reduce((a, b) => a + b.qty, 0); let total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
+            $("#cart-count").text(count); $("#cart-total-float").text(total.toFixed(2));
+            count > 0 ? c.fadeIn().css("display", "flex") : c.fadeOut();
+            let list = $("#checkout-list").empty(); cart.forEach((item, i) => { list.append(`<div class="d-flex justify-content-between mb-2"><div><span class="fw-bold">${item.qty}x ${item.name}</span><br><small class="text-muted">${item.variant_name}</small></div><div class="text-end">₹${(item.price * item.qty).toFixed(2)}<br><button class="btn btn-sm text-danger p-0" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button></div></div>`); });
+            $("#checkout-total, #checkout-subtotal").text(total.toFixed(2));
         }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            saveCart();
-            if(cart.length === 0) {
-                location.reload();
-            } else {
-                renderCart();
-            }
-        }
-
-        let appliedCoupon = null;
-
-        function applyCoupon() {
-            let code = $("#coupon_code").val().trim();
-            if(!code) return;
-            let subtotal = parseFloat($("#checkout-subtotal").text());
-            
-            $.post("{{ route('coupons.check') }}", {
-                _token: "{{ csrf_token() }}",
-                code: code
-            }, function(res) {
-                let msg = $("#coupon-msg");
-                msg.removeClass("d-none text-success text-danger");
-                if(res.status) {
-                    if(subtotal < res.coupon.min_bill_amount) {
-                        msg.addClass("text-danger").text(`Min. order of ₹${res.coupon.min_bill_amount} required!`);
-                    } else {
-                        appliedCoupon = res.coupon;
-                        msg.addClass("text-success").text(`Success! ${res.coupon.discount_percentage}% discount applied.`);
-                        updateFinalTotal();
-                    }
-                } else {
-                    appliedCoupon = null;
-                    msg.addClass("text-danger").text("Invalid or expired coupon code.");
-                    updateFinalTotal();
-                }
-            });
-        }
-
-        function updateFinalTotal() {
-            let subtotal = parseFloat($("#checkout-subtotal").text());
-            let discount = 0;
-            if(appliedCoupon) {
-                discount = (subtotal * appliedCoupon.discount_percentage) / 100;
-                $("#discount-row").removeClass("d-none");
-                $("#discount-percent").text(appliedCoupon.discount_percentage);
-                $("#discount-amount").text(discount.toFixed(2));
-            } else {
-                $("#discount-row").addClass("d-none");
-            }
-            $("#checkout-total").text((subtotal - discount).toFixed(2));
-        }
-
-        function copyCoupon(code) {
-            $("#coupon_code").val(code);
-            $("#checkoutModal").modal("show");
-            setTimeout(applyCoupon, 500);
-        }
-
-        // Toggle Table Number visibility
-        $(document).on("change", "input[name='order_type']", function(){
-            if($(this).val() === "Dine-in") $("#table-number-box").removeClass("d-none");
-            else $("#table-number-box").addClass("d-none");
-        });
-
+        function removeFromCart(i) { cart.splice(i, 1); saveCart(); }
         function submitOrder() {
-            let name = $("#cust_name").val().trim();
-            let phone = $("#cust_phone").val().trim();
-            let isValid = true;
-
-            // Reset Errors
-            $("#cust_name, #cust_phone").removeClass("is-invalid");
-
-            if(!name || name.length < 3) {
-                $("#cust_name").addClass("is-invalid");
-                isValid = false;
-            }
-
-            if(!phone || !/^\d{10}$/.test(phone)) {
-                $("#cust_phone").addClass("is-invalid");
-                isValid = false;
-            }
-
-            if(!isValid) return;
-
-            let items = cart.map(c => ({
-                item_id: c.item_id,
-                variant_id: c.variant_id,
-                price: c.price,
-                quantity: c.qty,
-                total: c.price * c.qty,
-                extras: c.extras.map(e => ({ id: e.id, price: e.price }))
-            }));
-
+            @if(!isset($customer))
+                let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();
+                if(!phone || phone.length!==10) return alert("Valid mobile required");
+                localStorage.setItem('pending_name', name); 
+                localStorage.setItem('checkout_after_login', 'true'); // Flag to continue after login
+                $("#checkoutModal").modal("hide"); 
+                $("#login-phone").val(phone); 
+                checkPhoneExists(); 
+                $("#loginModal").modal("show"); 
+                return;
+            @endif
+            let items = cart.map(c => ({ item_id: c.item_id, variant_id: c.variant_id, price: c.price, quantity: c.qty, total: c.price * c.qty, extras: c.extras.map(e => ({ id: e.id, price: e.price })) }));
             $("#placeOrderBtn").prop("disabled", true).text("Processing...");
-
-            $.post("{{ route('home.store') }}", {
-                _token: "{{ csrf_token() }}",
-                customer_name: name,
-                customer_phone: phone,
-                order_type: document.querySelector('input[name="order_type"]:checked').value,
-                payment_method: document.querySelector('input[name="payment_method"]:checked').value,
-                table_number: $("#table_number").val(),
-                items: JSON.stringify(items),
-                total_amount: parseFloat($("#checkout-subtotal").text()),
-                discount_amount: parseFloat($("#discount-amount").text() || 0),
-                grand_total: parseFloat($("#checkout-total").text())
-            }, function(res) {
-                if(res.status) {
-                    localStorage.removeItem('cart');
-                    
-                    if (res.redirect_url) {
-                        // CASE 1: Direct UPI Deep Link (Open App)
-                        if (res.is_upi) {
-                            window.location.href = res.redirect_url;
-                            // Wait 2 seconds and then proceed to success page
-                            setTimeout(function(){
-                                window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
-                            }, 3000);
-                        } 
-                        // CASE 2: PayU Payment Gateway Form
-                        else if (res.redirect_url.includes('payu')) {
-                            let form = document.createElement('form');
-                            form.method = 'POST';
-                            form.action = res.redirect_url;
-                            let token = document.createElement('input');
-                            token.type = 'hidden';
-                            token.name = '_token';
-                            token.value = "{{ csrf_token() }}";
-                            form.appendChild(token);
-                            document.body.appendChild(form);
-                            form.submit();
-                        }
+            $.post("{{ route('home.store') }}", { _token: "{{ csrf_token() }}", customer_name: $("#cust_name").val(), customer_phone: $("#cust_phone").val(), order_type: $("input[name='order_type']:checked").val(), payment_method: $("input[name='payment_method']:checked").val(), table_number: $("#table_number").val(), items: JSON.stringify(items), total_amount: parseFloat($("#checkout-total").text()), grand_total: parseFloat($("#checkout-total").text()) }, function(res) {
+                if(res.status) { localStorage.removeItem('cart'); if(res.redirect_url) window.location.href = res.redirect_url; else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; } else alert(res.message || "Error placing order");
+            });
+        }
+        function checkPhoneExists() {
+            let p = $("#login-phone").val().trim(); if(p.length!==10) return alert("10-digit number required");
+            $.post("{{ route('customer.checkPhone') }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
+                if(res.status) { 
+                    $("#login-phone-section").addClass("d-none"); 
+                    $("#login-pin-section").removeClass("d-none"); 
+                    $("#pin-modal-title").text(res.exists ? "Enter PIN" : "Setup Secure PIN"); 
+                    $("#pin-modal-subtitle").text(p);
+                    if(!res.exists) {
+                        $("#confirm-pin-box").removeClass("d-none");
+                        $("#pin-label").text("CREATE 4-DIGIT PIN");
                     } else {
-                        // CASE 3: Cash or Other Offline Methods
-                        window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
+                        $("#confirm-pin-box").addClass("d-none");
+                        $("#pin-label").text("ENTER PIN");
                     }
-                } else {
-                    alert("Error: " + res.msg);
-                    $("#placeOrderBtn").prop("disabled", false).text("CHECKOUT");
                 }
             });
         }
+        function processPinLogin() {
+            let p = $("#login-phone").val().trim(); 
+            let pin = $("#login-pin").val().trim();
+            let pinConfirm = $("#login-pin-confirm").val().trim();
+            
+            // Check if confirm box is visible
+            if(!$("#confirm-pin-box").hasClass("d-none")) {
+                if(pin !== pinConfirm) return showLoginError("PINs do not match!");
+            }
+
+            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: localStorage.getItem('pending_name') || '' }, function(res) {
+                if(res.status) { if(res.device_token) localStorage.setItem('customer_device_token', res.device_token); location.reload(); } else showLoginError(res.message || "Invalid PIN");
+            }).fail(function(xhr) {
+                let msg = "Invalid PIN!";
+                if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                showLoginError(msg);
+                $("#login-pin, #login-pin-confirm").val(""); // Clear on fail
+            });
+        }
+        $(document).on("keyup", "#login-pin, #login-pin-confirm", function() {
+            if($(this).val().length === 4) {
+                if(!$("#confirm-pin-box").hasClass("d-none")) {
+                    if($("#login-pin").val().length === 4 && $("#login-pin-confirm").val().length === 4) processPinLogin();
+                } else {
+                    processPinLogin();
+                }
+            }
+        });
+        function goBackToLoginPhone() {
+            $("#login-pin-section").addClass("d-none");
+            $("#login-phone-section").removeClass("d-none");
+            $("#login-pin, #login-pin-confirm").val("");
+            $("#login-error-tag").addClass("d-none");
+        }
+        function showLoginError(msg) {
+            const err = $("#login-error-tag");
+            err.text(msg).removeClass("d-none");
+            setTimeout(() => { err.addClass("d-none"); }, 3000);
+        }
+        function togglePinVisibility(id, iconId) {
+            const input = document.getElementById(id);
+            const icon = document.getElementById(iconId);
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+            $(document).ready(function() {
+                @if(session('reorder_cart')) localStorage.setItem('cart', '{!! session('reorder_cart') !!}'); cart = JSON.parse(localStorage.getItem('cart')); renderCart(); @php session()->forget('reorder_cart'); @endphp @endif
+                
+                // Continue checkout after login if flag is set
+                if(localStorage.getItem('checkout_after_login') === 'true') {
+                    localStorage.removeItem('checkout_after_login');
+                    @if(isset($customer))
+                        setTimeout(() => { submitOrder(); }, 500);
+                    @endif
+                }
+
+                let t = localStorage.getItem('customer_device_token'); 
+            @if(!isset($customer)) if(t) $.post("{{ route('customer.autoLogin') }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res){ if(res.status) location.reload(); else localStorage.removeItem('customer_device_token'); }); @endif
+        });
     </script>
 </body>
 </html>

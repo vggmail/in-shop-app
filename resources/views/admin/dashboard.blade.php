@@ -39,7 +39,7 @@
                     <span class="text-success small fw-bold mt-1">+12%</span>
                 </div>
                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Today Sales</h6>
-                <h3 class="fw-800 mb-0">₹{{ number_format($todaySales, 2) }}</h3>
+                <h3 class="fw-800 mb-0">&#8377;{{ number_format($todaySales, 2) }}</h3>
             </div>
         </div>
         <div class="col-md-3">
@@ -66,7 +66,7 @@
                     <div class="icon-box bg-gradient-warning text-white shadow-lg"><i class="fas fa-coins fa-lg"></i></div>
                 </div>
                 <h6 class="text-muted small mb-1 text-uppercase fw-bold">Gross Revenue</h6>
-                <h3 class="fw-800 mb-0">₹{{ number_format($totalRevenue, 2) }}</h3>
+                <h3 class="fw-800 mb-0">&#8377;{{ number_format($totalRevenue, 2) }}</h3>
             </div>
         </div>
     </div>
@@ -142,14 +142,15 @@
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: '#1e293b',
-                    callbacks: { label: (c) => `₹${c.parsed.y.toLocaleString()}` }
+                    callbacks: { label: (c) => `&#8377;${c.parsed.y.toLocaleString()}` }
                 }
             },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: (v) => '₹' + v } },
+                y: { beginAtZero: true, ticks: { callback: (v) => '&#8377;' + v } },
                 x: { grid: { display: false } }
             }
         }
     });
 </script>
 @endsection
+

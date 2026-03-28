@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-3 mt-2">
     <h2><i class="fas fa-ticket-alt text-danger me-2"></i> Promotional Coupons</h2>
@@ -33,7 +33,7 @@
                 <div class="mt-auto border-top pt-3">
                     <div class="d-flex justify-content-between small mb-1">
                         <span class="text-muted">Min Order:</span>
-                        <span class="fw-bold text-dark">₹{{ number_format($c->min_bill_amount, 2) }}</span>
+                        <span class="fw-bold text-dark">â‚¹{{ number_format($c->min_bill_amount, 2) }}</span>
                     </div>
                     <div class="d-flex justify-content-between small">
                         <span class="text-muted">Expires:</span>
@@ -71,7 +71,7 @@
                 </select>
             </div>
             <div class="col-md-12">
-                <label class="small fw-bold text-muted text-uppercase mb-1">Minimum Bill Amount (₹)</label>
+                <label class="small fw-bold text-muted text-uppercase mb-1">Minimum Bill Amount (â‚¹)</label>
                 <input type="number" step="0.01" name="min_bill_amount" class="form-control form-control-lg bg-light border-0 shadow-none" placeholder="0.00">
             </div>
             <div class="col-md-12">
@@ -114,7 +114,7 @@
                 </select>
             </div>
             <div class="col-md-12">
-                <label class="small fw-bold text-muted text-uppercase mb-1">Minimum Bill Amount (₹)</label>
+                <label class="small fw-bold text-muted text-uppercase mb-1">Minimum Bill Amount (â‚¹)</label>
                 <input type="number" step="0.01" name="min_bill_amount" id="e_min_bill" class="form-control form-control-lg bg-light border-0 shadow-none">
             </div>
             <div class="col-md-12">
@@ -174,3 +174,4 @@ $(document).on("change", 'select[name="coupon_type"]', function() {
 });
 </script>
 @endsection
+

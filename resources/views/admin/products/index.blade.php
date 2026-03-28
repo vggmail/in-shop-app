@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-3">
     <h2>Products</h2>
@@ -13,7 +13,7 @@
                 <td>-</td>
                 <td>{{ $p->name }}<br><small class="text-muted">{{ $p->category->name }}</small></td>
                 <td>{{ $p->sku }}</td>
-                <td>${{ $p->price }}</td>
+                <td>₹{{ $p->price }}</td>
                 <td>
                     @if($p->stock_quantity <= $p->low_stock_alert)
                         <span class="badge bg-danger">{{ $p->stock_quantity }}</span>
@@ -52,3 +52,4 @@
     <div class="modal-footer"><button type="submit" class="btn btn-primary">Save</button></div>
 </form></div></div></div>
 @endsection
+

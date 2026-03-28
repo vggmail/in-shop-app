@@ -1,4 +1,4 @@
-@extends("layouts.admin")
+﻿@extends("layouts.admin")
 
 @section("styles")
 <style>
@@ -43,7 +43,7 @@
 
                             <i class="fas fa-hamburger fa-2x text-warning mb-2"></i>
                             <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">₹{{ number_format($i->price, 2) }}</span>
+                            <span class="text-secondary small font-weight-bold">â‚¹{{ number_format($i->price, 2) }}</span>
                             <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
                                 Stock: {{ $i->stock_quantity }}
                             </div>
@@ -69,7 +69,7 @@
 
                             <i class="fas fa-utensils fa-2x text-success mb-2"></i>
                             <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">₹{{ number_format($i->price, 2) }}</span>
+                            <span class="text-secondary small font-weight-bold">â‚¹{{ number_format($i->price, 2) }}</span>
                             <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
                                 Stock: {{ $i->stock_quantity }}
                             </div>
@@ -122,15 +122,15 @@
                     
                     <div class="d-flex justify-content-between mb-1">
                         <span class="text-secondary fw-bold">Subtotal</span>
-                        <span class="fw-bold">₹<span id="subTotal">0.00</span></span>
+                        <span class="fw-bold">â‚¹<span id="subTotal">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between mb-2 text-danger">
                         <span class="fw-bold">Discount</span>
-                        <span class="fw-bold">-₹<span id="discount">0.00</span></span>
+                        <span class="fw-bold">-â‚¹<span id="discount">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 border-top pt-2 fs-4">
                         <span class="fw-bold text-dark">Total</span>
-                        <span class="fw-bold text-success">₹<span id="grandTotal">0.00</span></span>
+                        <span class="fw-bold text-success">â‚¹<span id="grandTotal">0.00</span></span>
                     </div>
                     
                     <div class="mb-3 bg-white p-2 border rounded">
@@ -157,9 +157,9 @@
                     
                     <div class="d-flex gap-2">
                         <select id="payment_method" class="form-select form-select-lg shadow-sm border-0 font-weight-bold text-center">
-                            <option value="Cash">💵 CASH</option>
-                            <option value="Card">💳 CARD</option>
-                            <option value="UPI">📱 UPI</option>
+                            <option value="Cash">ðŸ’µ CASH</option>
+                            <option value="Card">ðŸ’³ CARD</option>
+                            <option value="UPI">ðŸ“± UPI</option>
                         </select>
                         <button class="btn btn-success btn-lg w-50 fw-bold shadow-sm" onclick="processOrder(event)"><i class="fas fa-print"></i> PLACE ORDER</button>
                     </div>
@@ -182,7 +182,7 @@
                 <input type="hidden" id="m_base_price">
                 <input type="hidden" id="m_item_name">
                 
-                <h6 class="text-muted mb-3">Base Price: ₹<span id="m_display_price"></span></h6>
+                <h6 class="text-muted mb-3">Base Price: â‚¹<span id="m_display_price"></span></h6>
                 
                 <div id="variantsBox" class="mb-3 d-none">
                     <h6 class="fw-bold fs-6">Choose Size/Variant</h6>
@@ -199,7 +199,7 @@
                 </div>
             </div>
             <div class="modal-footer justify-content-between border-top-0 bg-light">
-                <h5 class="fw-bold text-danger mb-0">Total: ₹<span id="m_total_price">0.00</span></h5>
+                <h5 class="fw-bold text-danger mb-0">Total: â‚¹<span id="m_total_price">0.00</span></h5>
                 <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="addConfiguredItem()"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
             </div>
         </div>
@@ -238,7 +238,7 @@
         if(variants.length > 0) {
             let options = `<option value="" data-price="${price}">Standard Size (Default)</option>`;
             variants.forEach(v => {
-                options += `<option value="${v.id}" data-price="${v.price}">${v.name} (+₹${v.price})</option>`;
+                options += `<option value="${v.id}" data-price="${v.price}">${v.name} (+â‚¹${v.price})</option>`;
             });
             $("#m_variant").html(options);
             $("#variantsBox").removeClass("d-none");
@@ -252,7 +252,7 @@
             extras.forEach(e => {
                 extHtml += `<div class="form-check border rounded p-2 ps-4 mb-0 bg-white" style="flex: 1 1 45%;">
                                 <input class="form-check-input m_extra_cb" type="checkbox" value="${e.id}" data-price="${e.price}" data-name="${e.name}" id="ext_${e.id}" onchange="calcModalPrice()">
-                                <label class="form-check-label w-100" style="cursor:pointer;" for="ext_${e.id}">${e.name} <span class="text-success float-end">+₹${e.price}</span></label>
+                                <label class="form-check-label w-100" style="cursor:pointer;" for="ext_${e.id}">${e.name} <span class="text-success float-end">+â‚¹${e.price}</span></label>
                             </div>`;
             });
             $("#m_extras_list").html(extHtml);
@@ -351,7 +351,7 @@
                         <button class="btn btn-sm btn-light border-0 px-2 py-1 text-success fw-bold" onclick="updateCartQty(${idx}, 1)">+</button>
                     </div>
                 </td>
-                <td class="pt-3 fw-bold text-end align-middle bg-light text-dark">₹${item.total.toFixed(2)}</td>
+                <td class="pt-3 fw-bold text-end align-middle bg-light text-dark">â‚¹${item.total.toFixed(2)}</td>
             </tr>`;
         });
         $("#cartBody").html(html);
@@ -371,7 +371,7 @@
                     return;
                 }
                 discountVal = sub * (parseFloat(c.discount_percentage) / 100);
-                $("#couponMsg").html(`<span class="text-success"><i class="fas fa-check-circle"></i> Applied ${c.discount_percentage}% OFF (-₹${discountVal.toFixed(2)})   </span>`);
+                $("#couponMsg").html(`<span class="text-success"><i class="fas fa-check-circle"></i> Applied ${c.discount_percentage}% OFF (-â‚¹${discountVal.toFixed(2)})   </span>`);
                 calcTotals(sub);
             } else {
                 $("#couponMsg").html(`<span class="text-danger"><i class="fas fa-times-circle"></i> Invalid Code</span>`);
@@ -499,3 +499,4 @@
     }
 </script>
 @endsection
+
