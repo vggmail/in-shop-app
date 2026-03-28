@@ -180,11 +180,19 @@
 
         <div class="mb-4">
             <label class="small fw-bold text-muted mb-2 text-uppercase">Payment Method</label>
-            <div class="btn-group w-100" role="group">
-                <input type="radio" class="btn-check" name="payment_method" id="pay-cash" value="Cash" checked>
-                <label class="btn btn-outline-success py-2" for="pay-cash" onclick="document.getElementById('pay-cash').checked=true;"><i class="fas fa-money-bill-wave me-1"></i> CASH</label>
-                <input type="radio" class="btn-check" name="payment_method" id="pay-upi" value="UPI">
-                <label class="btn btn-outline-success py-2" for="pay-upi" onclick="document.getElementById('pay-upi').checked=true;"><i class="fas fa-qrcode me-1"></i> UPI (ONLINE)</label>
+            <div class="row g-2">
+                <div class="col-6">
+                    <input type="radio" class="btn-check" name="payment_method" id="pay-cash" value="Cash" checked>
+                    <label class="btn btn-outline-success w-100 py-3 border-2 fw-bold" for="pay-cash">
+                        <i class="fas fa-money-bill-wave d-block mb-1"></i> CASH
+                    </label>
+                </div>
+                <div class="col-6">
+                    <input type="radio" class="btn-check" name="payment_method" id="pay-online" value="PayU">
+                    <label class="btn btn-outline-danger w-100 py-3 border-2 fw-bold" for="pay-online">
+                        <i class="fas fa-credit-card d-block mb-1"></i> ONLINE
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -427,10 +435,36 @@
             }, function(res) {
                 if(res.status) {
                     localStorage.removeItem('cart');
-                    window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
+                    
+                    if (res.redirect_url) {
+                        // CASE 1: Direct UPI Deep Link (Open App)
+                        if (res.is_upi) {
+                            window.location.href = res.redirect_url;
+                            // Wait 2 seconds and then proceed to success page
+                            setTimeout(function(){
+                                window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
+                            }, 3000);
+                        } 
+                        // CASE 2: PayU Payment Gateway Form
+                        else if (res.redirect_url.includes('payu')) {
+                            let form = document.createElement('form');
+                            form.method = 'POST';
+                            form.action = res.redirect_url;
+                            let token = document.createElement('input');
+                            token.type = 'hidden';
+                            token.name = '_token';
+                            token.value = "{{ csrf_token() }}";
+                            form.appendChild(token);
+                            document.body.appendChild(form);
+                            form.submit();
+                        }
+                    } else {
+                        // CASE 3: Cash or Other Offline Methods
+                        window.location.href = "{{ url('/order') }}/" + res.order_number + "/success";
+                    }
                 } else {
                     alert("Error: " + res.msg);
-                    $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER NOW");
+                    $("#placeOrderBtn").prop("disabled", false).text("CHECKOUT");
                 }
             });
         }

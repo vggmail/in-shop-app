@@ -35,16 +35,67 @@
                 Error: {{ $message ?? 'Unknown session error or stock issue.' }}
             </div>
 
-            <div class="dashed-line"></div>
+            <div class="mt-4 shadow-sm" id="capture">
+                @if(isset($order))
+                    <div class="p-3 border rounded-3 bg-white mb-3">
+                        <div class="text-muted small mb-1">REFERENCE ORDER ID</div>
+                        <div class="fw-bold fs-4 text-dark">#{{ $order->order_number }}</div>
+                    </div>
 
-            <div class="mt-4">
-                <a href="{{ url('/') }}" class="btn btn-dark rounded-pill px-5 py-3 fw-bold shadow-sm w-100">
-                    <i class="fas fa-redo me-2"></i> TRY AGAIN
-                </a>
-                <p class="mt-3 small text-muted">Need help? Call us at <strong>{{ $tenant->phone ?? 'Support' }}</strong></p>
+                    <form action="{{ route('payu.pay', $order->order_number) }}" method="POST" id="retryForm">
+                        @csrf
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold shadow-sm w-100 mb-2">
+                            <i class="fas fa-credit-card me-2"></i> RETRY PAYMENT
+                        </button>
+                    </form>
+                    
+                    <div class="d-flex gap-2 mb-3">
+                        <button onclick="saveErrorImage()" class="btn btn-outline-dark rounded-pill py-2 flex-grow-1 fw-bold">
+                            <i class="fas fa-image me-2"></i> SAVE IMAGE
+                        </button>
+                    </div>
+
+                    <a href="{{ url('/') }}" class="btn btn-link text-muted fw-semibold text-decoration-none d-block">
+                        <i class="fas fa-arrow-left me-1"></i> Return to Home
+                    </a>
+                @else
+                    <div class="alert alert-warning small mb-3">
+                        Order details could not be recovered. Please return to home and try again.
+                    </div>
+                    <a href="{{ url('/') }}" class="btn btn-dark rounded-pill px-5 py-3 fw-bold shadow-sm w-100">
+                        <i class="fas fa-reply me-2"></i> RETURN TO HOME
+                    </a>
+                @endif
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        function saveErrorImage() {
+            const el = document.body;
+            const retry = document.getElementById("retryForm");
+            const home = document.querySelector(".btn-link");
+            const saveBtn = document.querySelector(".btn-outline-dark");
+
+            // Temporary UI Cleanup
+            if(retry) retry.style.display = 'none';
+            if(home) home.style.display = 'none';
+            if(saveBtn) saveBtn.style.display = 'none';
+
+            html2canvas(document.querySelector(".error-box"), { scale: 2, backgroundColor: "#f8f9fa" }).then(canvas => {
+                let link = document.createElement('a');
+                link.download = 'Order-Failure-{{ $order->order_number ?? "Error" }}.png';
+                link.href = canvas.toDataURL("image/png");
+                link.click();
+
+                // Restore UI
+                if(retry) retry.style.display = 'block';
+                if(home) home.style.display = 'block';
+                if(saveBtn) saveBtn.style.display = 'block';
+            });
+        }
+    </script>
 
 </body>
 </html>

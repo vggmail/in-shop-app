@@ -1,12 +1,24 @@
 <?php
 namespace App\Repositories;
-use App\Models\Coupon;
 
-class CouponRepository {
-    public function getAll() { return Coupon::orderBy("id", "DESC")->get(); }
-    public function find($id) { return Coupon::findOrFail($id); }
-    public function create($data) { return Coupon::create($data); }
-    public function update($id, $data) { $c = $this->find($id); $c->update($data); return $c; }
-    public function delete($id) { return $this->find($id)->delete(); }
-    public function findByCode($code) { return Coupon::where("code", $code)->first(); }
+use App\Models\Coupon;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+
+class CouponRepository extends BaseRepository
+{
+    public function __construct(Coupon $model)
+    {
+        parent::__construct($model);
+    }
+
+    public function getAll(): Collection
+    {
+        return $this->all();
+    }
+
+    public function findByCode(string $code): ?Coupon
+    {
+        return $this->model->where('code', $code)->where('status', 1)->first();
+    }
 }

@@ -7,8 +7,15 @@ use Illuminate\Support\Facades\Hash;
 use App\Traits\LogsActivity;
 
 class UserAdminController extends Controller {
+    protected $repo;
+
+    public function __construct(\App\Repositories\UserRepository $repo)
+    {
+        $this->repo = $repo;
+    }
+
     public function index() {
-        $users = User::with("role")->get();
+        $users = $this->repo->getAllWithRoles();
         $roles = Role::all();
         return view("admin.users.index", compact("users", "roles"));
     }

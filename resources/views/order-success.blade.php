@@ -61,37 +61,70 @@
             <div class="dashed-line"></div>
             
             @if($order->payment_method == 'UPI' && $order->payment_status == 'Pending')
-            <div class="bg-light p-4 rounded-4 text-center mb-4 border border-primary border-opacity-25 payment-preview-box">
-                <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-qrcode text-primary me-2"></i>Complete your UPI Payment</h6>
+            <div class="bg-light p-4 rounded-4 text-center mb-4 border border-primary border-opacity-25 payment-preview-box shadow-sm">
+                <h6 class="fw-bold mb-3 text-dark"><i class="fas fa-mobile-alt text-primary me-2"></i>Pay via UPI App</h6>
                 
                 @php
                     $upiId = $tenant->upi_id ?? 'admin@upi';
                     $upiName = urlencode($tenant->name ?? 'Fast Food Hub');
-                    $upiUrl = "upi://pay?pa=" . $upiId . "&pn=" . $upiName . "&am=" . $order->grand_total . "&tr=" . $order->order_number . "&cu=INR";
+                    $baseUpi = "pa=" . $upiId . "&pn=" . $upiName . "&am=" . $order->grand_total . "&tr=" . $order->order_number . "&cu=INR";
+                    $upiUrl = "upi://pay?" . $baseUpi;
                 @endphp
 
-                <!-- Only visible on mobile devices -->
-                <div class="d-md-none">
-                    <a href="{{ $upiUrl }}" class="btn btn-primary btn-lg w-100 rounded-pill mb-3 fw-bold py-3 shadow-sm">
-                        <i class="fas fa-paper-plane me-2"></i> OPEN UPI APP TO PAY
-                    </a>
-                    <div class="text-muted small mb-3">Pay via any installed UPI app.</div>
+                <!-- App Selection Grid (High-Quality Logos) -->
+                <div class="row g-2 mb-4">
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-outline-dark w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="https://www.gstatic.com/images/branding/product/1x/gpay_32dp.png" height="24" class="mb-1">
+                            <span style="font-size: 10px;">GPay</span>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-outline-dark w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="https://vggmail.com/logos/phonepe.png" onerror="this.src='https://upload.wikimedia.org/wikipedia/commons/thumb/7/71/PhonePe_Logo.svg/2560px-PhonePe_Logo.svg.png'; this.style.height='12px';" height="24" class="mb-1">
+                            <span style="font-size: 10px;">PhonePe</span>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-outline-dark w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/24/Paytm_Logo_%28standalone%29.svg/2560px-Paytm_Logo_%28standalone%29.svg.png" height="15" class="mb-2 mt-1">
+                            <span style="font-size: 10px;">Paytm</span>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-outline-dark w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Amazon_Pay_logo.svg/2560px-Amazon_Pay_logo.svg.png" height="15" class="mb-2 mt-1">
+                            <span style="font-size: 10px;">Amazon Pay</span>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-outline-dark w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/UPI-Logo.png/1200px-UPI-Logo.png" height="20" class="mb-1">
+                            <span style="font-size: 10px;">BHIM</span>
+                        </a>
+                    </div>
+                    <div class="col-4">
+                        <a href="{{ $upiUrl }}" class="btn btn-primary w-100 rounded-3 py-3 px-1 fw-bold border-0 shadow-sm h-100 d-flex flex-column align-items-center justify-content-center text-white">
+                            <i class="fas fa-ellipsis-h fa-lg mb-2"></i>
+                            <span style="font-size: 10px;">OTHER</span>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Visible on desktop (Web) -->
-                <div class="d-none d-md-block mb-3">
-                    <p class="small text-muted mb-3">Please scan the QR code using any UPI app (Google Pay, PhonePe, Paytm, etc.) to complete your payment of <strong>₹{{ number_format($order->grand_total, 2) }}</strong>.</p>
+                <div class="text-muted small mb-4 bg-white p-2 rounded">
+                    <strong>₹{{ number_format($order->grand_total, 2) }}</strong> payable to <code>{{ $upiId }}</code>
                 </div>
-                
-                <div class="d-inline-block bg-white p-2 rounded shadow-sm mb-3" style="width: 180px; height: 180px;" id="qrcode"></div>
-                
-                <div class="dashed-line mb-3"></div>
 
-                <div class="bg-white p-3 rounded-3 border">
-                   <div class="small fw-bold text-muted text-uppercase mb-1">Store UPI ID</div>
-                   <div class="d-flex justify-content-between align-items-center">
-                       <code class="fs-6 text-dark" id="upi_id_text">{{ $upiId }}</code>
-                       <button class="btn btn-sm btn-outline-primary rounded-pill px-3" onclick="copyUPI()">COPY</button>
+                <div class="d-inline-block bg-white p-2 rounded shadow-sm mb-4" id="qrcode" style="border: 2px solid #f1f2f6;"></div>
+                <div class="small fw-bold text-muted d-block mb-3">SCAN ANY QR APP</div>
+                
+                <div class="dashed-line mb-4"></div>
+
+                <div class="bg-white p-3 rounded-4 border shadow-sm">
+                   <div class="small fw-bold text-muted text-uppercase mb-2">Store UPI ID</div>
+                   <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded-3 border">
+                       <code class="fs-6 text-dark fw-bold" id="upi_id_text">{{ $upiId }}</code>
+                       <button class="btn btn-sm btn-primary rounded-pill px-4 fw-bold" onclick="copyUPI()">COPY</button>
                    </div>
                 </div>
             </div>
@@ -169,6 +202,18 @@
                         window.location.href = upiString;
                     }, 1000);
                 }
+
+                // Polling for payment status
+                setInterval(function() {
+                    fetch("{{ route('home.checkStatus', $order->order_number) }}")
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status && data.payment_status === 'Paid') {
+                                location.reload();
+                            }
+                        })
+                        .catch(err => console.error("Status check failed:", err));
+                }, 5000);
             @endif
         });
 

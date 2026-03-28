@@ -5,6 +5,7 @@ use App\Repositories\OrderRepository;
 use App\Repositories\ItemRepository;
 use App\Repositories\CustomerRepository;
 use App\Models\Payment;
+use App\Http\Requests\StoreOrderRequest;
 
 class OrderController extends Controller {
     protected $repo;
@@ -24,12 +25,18 @@ class OrderController extends Controller {
         return view("admin.pos.index", compact("items", "customers")); 
     }
     
-    public function store(Request $request) {
+    public function store(StoreOrderRequest $request) {
         try {
-            $order = $this->repo->createOrder($request->all());
-            return response()->json(["status" => true, "order_id" => $order->id, "msg" => "Order completed successfully"]);
+            $order = $this->repo->createOrder($request->validated());
+            return response()->json([
+                'status' => true,
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
+                'data' => $order,
+                'message' => 'Order completed successfully'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(["status" => false, "msg" => $e->getMessage()]);
+            return $this->sendError($e->getMessage(), 422);
         }
     }
     

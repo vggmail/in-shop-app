@@ -15,28 +15,73 @@ class HomeController extends Controller {
 
     public function placeOrder(Request $request, OrderRepository $repo) {
         try {
-            // Default values for Customer self-order
             $data = $request->all();
             if(isset($data['items']) && is_string($data['items'])) {
                 $data['items'] = json_decode($data['items'], true);
             }
-            if(!isset($data["order_type"])) {
-                $data["order_type"] = "Takeaway"; 
-            }
-            if(!isset($data["payment_method"])) {
-                $data["payment_method"] = "Cash"; 
-            }
+            $data["order_type"] = $data["order_type"] ?? "Takeaway"; 
+            $data["payment_method"] = $data["payment_method"] ?? "Cash"; 
             $data["payment_status"] = "Pending";
             
             $order = $repo->createOrder($data);
-            return response()->json(["status" => true, "order_id" => $order->id, "order_number" => $order->order_number, "msg" => "Order placed successfully!"]);
+            
+            if ($order->payment_method == 'UPI' || $order->payment_method == 'PayU') {
+                $tenant = app()->bound('tenant') ? app('tenant') : null;
+                
+                // If direct UPI is selected and we have a VPA (upi_id)
+                if ($order->payment_method == 'UPI' && $tenant && $tenant->upi_id) {
+                    $upi_vpa = $tenant->upi_id;
+                    $shop_name = $tenant->name ?? 'Shop';
+                    $order_msg = "Order #" . $order->order_number;
+                    
+                    // Standard UPI Deep Link: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=MESSAGE
+                    $upi_url = "upi://pay?pa=" . $upi_vpa . "&pn=" . urlencode($shop_name) . "&am=" . $order->grand_total . "&cu=INR&tn=" . urlencode($order_msg);
+                    
+                    return response()->json([
+                        'status' => true,
+                        'is_upi' => true,
+                        'order_number' => $order->order_number,
+                        'redirect_url' => $upi_url,
+                        'data' => $order,
+                        'message' => 'Opening UPI Apps...'
+                    ]);
+                }
+
+                // Fallback to PayU for ONLINE or if UPI ID is missing
+                return response()->json([
+                    'status' => true,
+                    'is_upi' => false,
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'redirect_url' => route('payu.pay', $order->order_number),
+                    'data' => $order,
+                    'message' => 'Redirecting to payment gateway...'
+                ]);
+            }
+
+            return response()->json([
+                'status' => true,
+                'order_number' => $order->order_number,
+                'data' => $order,
+                'message' => 'Order placed successfully!'
+            ]);
         } catch (\Exception $e) {
-            return response()->json(["status" => false, "msg" => $e->getMessage()]);
+            return $this->sendError($e->getMessage(), 422);
         }
     }
 
     public function orderSuccess($order_number) {
         $order = \App\Models\Order::with('items')->where('order_number', $order_number)->firstOrFail();
         return view('order-success', compact('order'));
+    }
+
+    public function checkStatus($order_number) {
+        $order = \App\Models\Order::where('order_number', $order_number)->first();
+        if(!$order) return response()->json(['status' => false]);
+        return response()->json([
+            'status' => true,
+            'payment_status' => $order->payment_status,
+            'order_status' => $order->status
+        ]);
     }
 }

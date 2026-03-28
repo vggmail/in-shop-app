@@ -7,9 +7,16 @@ use App\Models\Payment;
 use App\Models\Customer;
 use DB;
 
-class OrderRepository {
-    public function getAll() { return Order::with("customer")->orderBy("id", "DESC")->paginate(15); }
-    public function find($id) { return Order::with(["customer", "items.item", "items.variant", "items.extras.extra", "payments"])->findOrFail($id); }
+class OrderRepository extends BaseRepository {
+    public function __construct(Order $model)
+    {
+        parent::__construct($model);
+    }
+
+    public function getAll() { return $this->paginate(15, ["*"], ["customer"]); }
+    public function find(int $id, array $relations = []): ?\Illuminate\Database\Eloquent\Model { 
+        return parent::find($id, ["customer", "items.item", "items.variant", "items.extras.extra", "payments"]); 
+    }
     
     public function createOrder($data) {
         DB::beginTransaction();

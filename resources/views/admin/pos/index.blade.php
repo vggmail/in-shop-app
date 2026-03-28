@@ -211,7 +211,9 @@
 @section("scripts")
 <script>
     let cart = [];
-    let discountVal = 0;
+    let pos_discount_val = 0;
+    let pos_cust_name = null;
+    let pos_cust_phone = null;
     
     // Switch table number visibility
     $("input[name='order_type']").change(function(){
@@ -377,10 +379,11 @@
         });
     }
     
-    function calcTotals(sub) {
-        $("#discount").text(discountVal.toFixed(2));
-        let gt = sub - discountVal;
-        $("#grandTotal").text(gt > 0 ? gt.toFixed(2) : "0.00");
+    function calcTotals() {
+        let sub = cart.reduce((a, b) => a + b.total, 0);
+        $("#subTotal").text(sub.toFixed(2));
+        $("#discount").text(pos_discount_val.toFixed(2));
+        $("#grandTotal").text((sub - pos_discount_val > 0 ? sub - pos_discount_val : 0).toFixed(2));
     }
     
     // Customer Add / Search
@@ -422,59 +425,62 @@
         if(!/^\d{10}$/.test(phone)) { $("#new_cust_phone").addClass("is-invalid").focus(); return; }
         
         selectCustomer("new", name + " (" + phone + ") ");
-        window.new_cust_name = name;
-        window.new_cust_phone = phone;
+        pos_cust_name = name;
+        pos_cust_phone = phone;
     }
 
     function processOrder(e) {
         if(cart.length === 0) return alert("Cart is empty!");
         
-        let pItems = cart.map(c => {
-            return {
-                item_id: String(c.id),
-                variant_id: c.variant_id ? String(c.variant_id) : null,
-                price: Number(c.price),
-                quantity: Number(c.qty),
-                total: Number(c.total),
-                extras: Array.isArray(c.extras) ? c.extras.map(ex => ({id: String(ex.id), price: Number(ex.price)})) : []
-            };
-        });
+        let customerId = $("#customer_id").val() || null;
+        let customerName = pos_cust_name || null;
+        let customerPhone = pos_cust_phone || null;
         
-        // Grab button correctly
+        // Prepare items
+        let pItems = cart.map(c => ({
+            item_id: String(c.id),
+            variant_id: c.variant_id ? String(c.variant_id) : null,
+            price: parseFloat(c.price) || 0,
+            quantity: parseInt(c.qty) || 1,
+            total: parseFloat(c.total) || 0,
+            extras: Array.isArray(c.extras) ? c.extras.map(ex => ({id: String(ex.id), price: parseFloat(ex.price) || 0})) : []
+        }));
+        
         let btn = e ? $(e.target).closest('button') : $("button:contains('PLACE ORDER')");
         btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
         
-        let data = {
-            _token: "{{ csrf_token() }}",
+        let orderData = {
             order_type: $("input[name='order_type']:checked").val() || "Dine-in",
             table_number: $("#table_number").val() || "",
-            customer_id: $("#customer_id").val() === "new" ? null : ($("#customer_id").val() || null),
-            customer_name: (window.new_cust_name || null),
-            customer_phone: (window.new_cust_phone || null),
+            customer_id: customerId === "new" ? null : (customerId || null),
+            customer_name: customerName,
+            customer_phone: customerPhone,
             note: $("#order_note").val() || "",
             payment_method: $("#payment_method").val() || "Cash",
             items: pItems,
             total_amount: parseFloat($("#subTotal").text()) || 0,
-            discount_amount: (typeof discountVal !== "undefined") ? discountVal : 0,
+            discount_amount: parseFloat($("#discount").text()) || 0,
             grand_total: parseFloat($("#grandTotal").text()) || 0
         };
 
-        console.log("Submitting Order Data:", data);
+        console.log("Submitting Raw JSON:", orderData);
         
         $.ajax({
-            url: "{{ route('pos.store') }}",
+            url: "{{ route('pos.store', [], false) }}",
             method: "POST",
-            data: data,
+            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
+            contentType: "application/json",
+            data: JSON.stringify(orderData),
             success: function(res) {
-                console.log("Response:", res);
+                console.log("Success Response:", res);
                 if(res.status) {
                     let printUrl = "{{ url('/cp/orders') }}/" + res.order_id + "/invoice";
-                    let printWin = window.open(printUrl, "_blank", "width=420,height=650");
+                    window.open(printUrl, "_blank", "width=420,height=650");
                     setTimeout(function(){
                         location.reload();
                     }, 1000);
                 } else {
-                    alert(res.msg);
+                    alert(res.message || res.msg || "Error processing order.");
                     btn.prop("disabled", false).html('<i class="fas fa-print"></i> PLACE ORDER');
                 }
             },
