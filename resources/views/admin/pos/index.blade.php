@@ -88,8 +88,8 @@
     
     <!-- Cart System -->
     <div class="col-lg-5">
-        <div class="card border-0 shadow-lg rounded-4 overflow-hidden d-flex flex-column" style="height: calc(100vh - 140px);">
-            <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden d-flex flex-column" style="height: calc(100vh - 100px);">
+            <div class="p-3 bg-white border-bottom d-flex justify-content-between align-items-center">
                 <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-receipt text-muted me-2"></i>Current Order</h5>
                 <button class="btn btn-sm btn-outline-danger border-0 rounded-pill" onclick="clearCart()"><i class="fas fa-trash-alt me-1"></i> Clear</button>
             </div>
@@ -97,15 +97,9 @@
             <div class="p-3 bg-light-subtle border-bottom">
                 <div class="btn-group w-100 rounded-3 overflow-hidden shadow-sm" role="group">
                     <input type="radio" class="btn-check" name="order_type" id="type-dinein" value="Dine-in" checked autocomplete="off">
-                    <label class="btn btn-outline-primary py-2" for="type-dinein"><i class="fas fa-chair me-2"></i>Dine In</label>
+                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-dinein" style="height: 42px;"><i class="fas fa-chair me-2"></i>Dine In</label>
                     <input type="radio" class="btn-check" name="order_type" id="type-takeaway" value="Takeaway" autocomplete="off">
-                    <label class="btn btn-outline-primary py-2" for="type-takeaway"><i class="fas fa-walking me-2"></i>Takeaway</label>
-                </div>
-                <div class="mt-3" id="table-number-box">
-                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-hashtag text-muted"></i></span>
-                        <input type="text" id="table_number" class="form-control border-start-0 ps-0" placeholder="Table Number (e.g. T-04)">
-                    </div>
+                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-takeaway" style="height: 42px;"><i class="fas fa-walking me-2"></i>Takeaway</label>
                 </div>
             </div>
 
@@ -118,29 +112,36 @@
                 </div>
             </div>
             
-            <div class="px-4 py-3 border-top bg-light-subtle">
-                <div class="row g-2">
+            <div class="px-3 py-3 border-top bg-light-subtle">
+                <div class="row g-2 align-items-end">
                     <div class="col-7 position-relative">
-                        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.65rem;">Customer Phone (Optional)</label>
-                        <div class="input-group input-group-sm">
-                            <span class="input-group-text bg-white border-0"><i class="fas fa-search small"></i></span>
-                            <input type="text" id="customer_phone" class="form-control border-0 shadow-none" placeholder="Search by phone..." autocomplete="off">
-                            <button class="btn btn-outline-secondary border-0 bg-white d-none" type="button" id="clear_cust"><i class="fas fa-times small"></i></button>
+                        <label class="text-center small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.65rem;">Customer (Optional)</label>
+                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 42px;">
+                            <span class="input-group-text bg-transparent border-0 ps-3 h-100 d-flex align-items-center"><i class="fas fa-search small text-muted"></i></span>
+                            <input type="text" id="customer_phone" class="form-control border-0 shadow-none px-2 h-100" placeholder="Search phone..." autocomplete="off" style="font-size: 0.85rem;">
+                            <button class="btn btn-outline-secondary border-0 bg-transparent d-none px-3 h-100" type="button" id="clear_cust"><i class="fas fa-times small"></i></button>
                         </div>
-                        <div id="customer_dropdown" class="position-absolute w-100 bg-white shadow-lg rounded-3 border d-none" style="z-index: 1060; max-height: 200px; overflow-y: auto; top: 100%;"></div>
+                        <div id="customer_dropdown" class="position-absolute w-100 bg-white shadow-lg rounded-3 border d-none" style="z-index: 1060; max-height: 200px; overflow-y: auto; bottom: 100%; left: 0;"></div>
                         <input type="hidden" id="selected_customer_id">
                     </div>
-                    <div class="col-5">
-                        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.65rem;">Coupon Code</label>
-                        <div class="input-group input-group-sm">
-                            <input type="text" id="coupon_code" class="form-control border-0 shadow-none text-uppercase" placeholder="Code">
-                            <button class="btn btn-dark border-0" type="button" onclick="applyCoupon()"><i class="fas fa-check small"></i></button>
+                    <div class="col-5" id="table-number-box">
+                        <label class="text-center small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.65rem;">Table No.</label>
+                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 42px;">
+                            <span class="input-group-text bg-transparent border-0 ps-3 h-100 d-flex align-items-center"><i class="fas fa-hashtag text-muted small"></i></span>
+                            <input type="text" id="table_number" class="form-control border-0 shadow-none ps-1 h-100" placeholder="T-00" style="font-size: 0.85rem;">
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="p-4 border-top bg-white">
+            <div class="px-3 py-3 border-top bg-white">
+                <div class="input-group shadow-sm border p-0 m-0" style="border-radius: 50px; overflow: hidden; background: #fff; display: flex; height: 44px;">
+                    <input type="text" id="coupon_code" class="form-control border-0 shadow-none px-3 h-80" placeholder="DISCOUNT COUPON CODE" style="font-weight: 600; font-size: 0.825rem; letter-spacing: 0.5px; color: #475569; border-radius: 0;">
+                    <button class="btn text-white border-0 px-3 fw-bold m-0 h-100" type="button" onclick="applyCoupon()" style="background: #1e293b; font-size: 0.8rem; z-index: 2; border-radius: 0; min-width: 90px;">VALIDATE</button>
+                </div>
+            </div>
+
+            <div class="p-3 order-top bg-white">
                 <div class="d-flex justify-content-between mb-2">
                     <span class="text-muted">Subtotal</span>
                     <span class="fw-bold h6 mb-0">&#8377;<span id="subTotal">0.00</span></span>
@@ -155,15 +156,15 @@
                 </div>
                 
                 <div class="row g-2">
-                    <div class="col-7">
-                        <select id="payment_method" class="form-select border-2 border-primary-subtle fw-bold">
+                    <div class="col-6">
+                        <select id="payment_method" class="form-select border border-primary-subtle fw-bold shadow-sm" style="height: 40px; border-radius: 50px; font-size: 0.95rem; padding-left: 20px;">
                             <option value="Cash">💵 CASH</option>
                             <option value="Card">💳 CARD</option>
                             <option value="UPI">📱 UPI</option>
                         </select>
                     </div>
-                    <div class="col-5">
-                         <button class="btn btn-primary w-100 fw-bold shadow-sm" style="height: 100%;" onclick="processOrder(event)">PLACE ORDER</button>
+                    <div class="col-6">
+                         <button class="btn w-100 fw-bold shadow-sm text-white" style="height: 40px; border-radius: 50px; background-color: #ff4757; font-size: 1rem;" onclick="processOrder(event)"><i class="fas fa-check-circle me-2"></i> Place Order</button>
                     </div>
                 </div>
             </div>
@@ -199,7 +200,7 @@
                     <span class="small opacity-75 d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Current Total</span>
                     <h4 class="fw-bold mb-0 text-success">&#8377;<span id="m_total_price">0.00</span></h4>
                 </div>
-                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-bold" onclick="addConfiguredItem()">ADD ITEM</button>
+                <button type="button" class="btn btn-primary px-3 py-2 rounded-pill fw-bold" onclick="addConfiguredItem()">ADD ITEM</button>
             </div>
         </div>
     </div>
@@ -412,7 +413,7 @@
         let sub = 0;
         cart.forEach((item, idx) => {
             sub += item.total;
-            html += `<div class="list-group-item cart-item bg-transparent px-0 py-3 border-0">
+            html += `<div class="list-group-item cart-item bg-transparent px-0 py-2 border-0">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="pe-3">
                         <div class="fw-bold text-dark">${item.name}</div>
