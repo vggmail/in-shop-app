@@ -1,10 +1,11 @@
 <?php
 namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use App\Traits\LogsActivity;
 
 class Item extends Model {
-    use LogsActivity;
+    use LogsActivity, SoftDeletes;
     protected $fillable = ["category_id", "name", "image", "price", "mrp", "is_available", "stock_quantity", "low_stock_limit"];
 
     public function isReallyAvailable() {

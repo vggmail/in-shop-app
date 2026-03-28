@@ -13,16 +13,16 @@
         body { font-family: "Outfit", sans-serif; background-color: #f8f9fa; color: var(--dark); overflow-x: hidden; padding-bottom: 90px; }
         .hero { background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url("https://images.unsplash.com/photo-1513104890138-7c749659a591?w=800"); background-size: cover; height: 180px; border-radius: 0 0 40px 40px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; position: relative; margin-bottom: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
         .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 75px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #eee; border-radius: 30px 30px 0 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1050; padding: 0 10px; }
-        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; text-decoration: none; font-size: 11px; font-weight: 600; width: 60px; height: 60px; transition: 0.3s; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; text-decoration: none; font-size: 10px; font-weight: 600; width: 60px; height: 60px; transition: 0.3s; }
         .nav-item.active { color: var(--primary); }
-        .nav-item.active i { font-size: 20px; }
-        .nav-item i { font-size: 18px; margin-bottom: 4px; }
-        .category-pill { background: white; border: 1px solid #eee; padding: 10px 22px; border-radius: 30px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 600; color: #777; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .nav-item.active i { font-size: 19px; }
+        .nav-item i { font-size: 18px; margin-bottom: 2px; }
+        .category-pill { background: white; border: 1px solid #eee; padding: 8px 18px; border-radius: 30px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 700; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-size: 13px; }
         .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
         .food-card { border: none; border-radius: 25px; box-shadow: 0 8px 18px rgba(0,0,0,0.04); overflow: hidden; height: 100%; transition: 0.3s; cursor: pointer; background: white; }
         .food-card:active { transform: scale(0.96); }
         .food-img { height: 150px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #ddd; position: relative; }
-        .cart-float { position: fixed; bottom: 85px; left: 20px; right: 20px; background: var(--dark); color: white; padding: 12px 20px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; }
+        .cart-float { position: fixed; bottom: 85px; left: 20px; right: 20px; background: var(--dark); color: white; padding: 10px 18px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; }
         .cart-float:active { transform: scale(0.98); }
         .modal-content { border-radius: 35px; border: none; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -50,8 +50,8 @@
             @else
                 <p class="small fw-bold text-uppercase mb-1" style="letter-spacing: 1px; color: var(--accent);">{{ $greet }}! What would you like to eat today? 👋</p>
             @endif
-            <h2 class="fw-800 fs-1 mb-0" style="letter-spacing: -1px;">FAST FOOD HUB</h2>
-            <p class="small opacity-75 fw-bold">Fresh • Fast • Delicious</p>
+            <h2 class="fw-800 fs-2 mb-0" style="letter-spacing: -1.5px;">FAST FOOD HUB</h2>
+            <p class="small opacity-75 fw-bold" style="font-size: 11px;">Fresh • Fast • Delicious</p>
         </div>
     </div>
 
@@ -130,9 +130,9 @@
                         </div>
                     </div>
                     <div class="card-body p-3">
-                        <h6 class="fw-bold mb-1">{{ $i->name }}</h6>
+                        <h6 class="fw-bold mb-1" style="font-size: 14px;">{{ $i->name }}</h6>
                         <div class="d-flex justify-content-between align-items-center">
-                            <div><span class="text-primary fw-bold">₹{{ number_format($i->price, 2) }}</span></div>
+                            <div><span class="text-primary fw-bold" style="font-size: 13px;">₹{{ number_format($i->price, 2) }}</span></div>
                         </div>
                     </div>
                 </div>
@@ -156,9 +156,9 @@
         <h5 class="fw-bold mb-4">Customer Login</h5>
         <div id="login-error-tag" class="alert alert-danger py-2 small fw-bold d-none mb-3 border-0 rounded-3"></div>
         <div id="login-phone-section">
-            <label class="small fw-bold text-muted mb-2">MOBILE NUMBER</label>
-            <input type="tel" id="login-phone" class="form-control form-control-lg border-0 bg-light rounded-3 mb-3" placeholder="10-digit number">
-            <button class="btn btn-primary btn-lg w-100 rounded-pill fw-bold" onclick="checkPhoneExists()">CONTINUE</button>
+            <label class="small fw-bold text-muted mb-2" style="font-size: 11px;">MOBILE NUMBER</label>
+            <input type="tel" id="login-phone" class="form-control form-control-lg border-0 bg-light rounded-3 mb-3" style="font-size: 16px;" placeholder="10-digit number">
+            <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="checkPhoneExists()"><i class="fas fa-arrow-right me-2"></i> Continue</button>
         </div>
         <div id="login-pin-section" class="d-none text-center">
             <p class="text-muted small mb-1" id="pin-modal-subtitle"></p>
@@ -177,7 +177,7 @@
                     <i class="fas fa-eye" id="pin-eye-icon-confirm"></i>
                 </button>
             </div>
-            <button class="btn btn-primary btn-lg w-100 rounded-pill fw-bold d-none" id="login-submit-btn" onclick="processPinLogin()">VERIFY & LOGIN</button>
+            <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" id="login-submit-btn" onclick="processPinLogin()"><i class="fas fa-lock-open me-2"></i> Verify & Login</button>
             <button class="btn btn-link btn-sm mt-3 text-muted text-decoration-none" onclick="goBackToLoginPhone()">Back</button>
         </div>
     </div></div></div></div>
@@ -196,7 +196,7 @@
             <div id="m-extras-list" class="row g-2"></div>
         </div>
         <div class="d-grid mt-4">
-            <button class="btn btn-danger btn-lg rounded-pill fw-bold py-3" onclick="addToCart()">ADD TO CART - ₹<span id="m-total">0.00</span></button>
+            <button class="btn btn-danger rounded-pill fw-bold py-2 px-4" onclick="addToCart()"><i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span></button>
         </div>
     </div></div></div></div>
 
@@ -223,16 +223,24 @@
             <input type="hidden" id="cust_phone" value="{{ $customer->phone }}">
         @endif
         <div class="mb-4">
-            <label class="small fw-bold text-muted mb-2 text-uppercase">Order Type</label>
-            <div class="btn-group w-100"><input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" checked><label class="btn btn-outline-danger py-2" for="t-dine">DINE-IN</label><input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway"><label class="btn btn-outline-danger py-2" for="t-away">TAKEAWAY</label></div>
+            <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Order Type</label>
+            <div class="btn-group w-100 shadow-sm rounded-pill overflow-hidden border">
+                <input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" checked>
+                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-dine"><i class="fas fa-chair me-2"></i> Dine-In</label>
+                <input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway">
+                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-away"><i class="fas fa-walking me-2"></i> Takeaway</label>
+            </div>
         </div>
-        <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Table No (Optional)"></div>
+        <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" style="font-size: 14px;" placeholder="Table No (Optional)"></div>
         <div class="mb-4">
-            <label class="small fw-bold text-muted mb-2 text-uppercase">Payment</label>
-            <div class="row g-2"><div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-cash" value="Cash" checked><label class="btn btn-outline-success w-100 py-3 fw-bold" for="p-cash">CASH</label></div><div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU"><label class="btn btn-outline-danger w-100 py-3 fw-bold" for="p-upi">ONLINE</label></div></div>
+            <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Payment Method</label>
+            <div class="row g-2">
+                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-cash" value="Cash" checked><label class="btn btn-outline-success w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-cash"><i class="fas fa-money-bill-wave me-2"></i> Cash</label></div>
+                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU"><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> Online</label></div>
+            </div>
         </div>
-        <div class="px-2 d-flex justify-content-between mb-4 border-top pt-3"><h5 class="fw-bold">Total</h5><h5 class="fw-bold text-success">₹<span id="checkout-total">0.00</span></h5><span id="checkout-subtotal" class="d-none">0</span></div>
-        <button class="btn btn-dark btn-lg w-100 rounded-pill py-3 fw-bold" id="placeOrderBtn" onclick="submitOrder()">PLACE ORDER</button>
+        <div class="px-2 d-flex justify-content-between mb-4 border-top pt-3 align-items-center"><h6 class="fw-bold mb-0">Total Amount</h6><h5 class="fw-bold text-success mb-0">₹<span id="checkout-total">0.00</span></h5><span id="checkout-subtotal" class="d-none">0</span></div>
+        <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
     </div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

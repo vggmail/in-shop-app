@@ -23,6 +23,8 @@ class StoreOrderRequest extends FormRequest
             'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:20',
+            'coupon_id' => 'nullable|exists:coupons,id',
+            'discount_amount' => 'nullable|numeric|min:0',
             'note' => 'nullable|string|max:500',
             'payment_method' => 'required|in:Cash,Card,UPI,PayU',
             'items' => 'required|array|min:1',

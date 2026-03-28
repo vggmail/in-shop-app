@@ -3,14 +3,15 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Repositories\ItemRepository;
 use App\Models\Category;
+use App\Models\Item;
 
 class ItemController extends Controller {
     protected $repo;
     public function __construct(ItemRepository $repo) { $this->repo = $repo; }
     
     public function index() { 
-        $items = $this->repo->getAll(); 
-        $categories = Category::all();
+        $items = Item::with(['category.parent', 'variants', 'extras'])->get(); 
+        $categories = Category::with('parent')->get();
         return view("admin.items.index", compact("items", "categories")); 
     }
     

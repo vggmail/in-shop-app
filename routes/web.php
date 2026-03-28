@@ -12,6 +12,7 @@ use App\Http\Controllers\ExpenseController;
 
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UserAdminController;
+use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PayUController;
 use App\Http\Controllers\CustomerAuthController;
 
@@ -36,7 +37,10 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     
     Route::post('items/bulk-upload', [ItemController::class, 'bulkUpload'])->name('items.bulkUpload');
     Route::get('items/sample-csv', [ItemController::class, 'sampleCsv'])->name('items.sampleCsv');
+    
+    Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
     Route::resource('items', ItemController::class)->except(['create', 'show', 'edit']);
+    Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('customers', CustomerController::class)->except(['create', 'show', 'edit']);
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
     

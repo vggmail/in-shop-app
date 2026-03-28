@@ -40,8 +40,11 @@
     
     @if($expenses->isEmpty())
     <div class="col-12 text-center py-5">
-        <i class="fas fa-money-bill-wave fa-4x text-muted mb-3"></i>
-        <h5 class="text-muted">No expenses recorded yet.</h5>
+        <div class="bg-white rounded-5 p-5 shadow-sm border">
+            <i class="fas fa-receipt fa-4x text-muted mb-3 opacity-25"></i>
+            <h5 class="text-muted fw-bold">No expenses recorded yet.</h5>
+            <p class="small text-muted mb-0">Start tracking your business expenditures here.</p>
+        </div>
     </div>
     @endif
 </div>
@@ -50,8 +53,8 @@
     @csrf
     <div class="modal-header border-0 pb-0 pt-4 px-4"><h5 class="modal-title fw-bold">Log New Expenditure</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body p-4">
-        <label class="small fw-bold text-muted text-uppercase mb-1">Expense Type</label>
-        <select name="category" class="form-select form-select-lg mb-3 shadow-none bg-light border-0" required>
+        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Expense Type</label>
+        <select name="category" class="form-select mb-3 shadow-none bg-light border-0" required>
             <option value="Rent">Rent</option>
             <option value="Salary">Salary Staff</option>
             <option value="Raw Material">Inventory / Raw Materials</option>
@@ -61,20 +64,20 @@
             <option value="Other">Other Expenses</option>
         </select>
         
-        <label class="small fw-bold text-muted text-uppercase mb-1">Expended Amount</label>
+        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Expended Amount</label>
         <div class="input-group mb-3">
             <span class="input-group-text bg-white border-0 fw-bold">&#8377;</span>
-            <input type="number" step="0.01" name="amount" class="form-control form-control-lg bg-light border-0 shadow-none text-danger fw-bold" placeholder="0.00" required>
+            <input type="number" step="0.01" name="amount" class="form-control bg-light border-0 shadow-none text-danger fw-bold" placeholder="0.00" required>
         </div>
 
-        <label class="small fw-bold text-muted text-uppercase mb-1">Date of Payment</label>
-        <input type="date" name="date" class="form-control form-control-lg mb-3 shadow-none bg-light border-0" required value="{{ date("Y-m-d") }}">
+        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Date of Payment</label>
+        <input type="date" name="date" class="form-control mb-3 shadow-none bg-light border-0" required value="{{ date("Y-m-d") }}">
         
-        <label class="small fw-bold text-muted text-uppercase mb-1">Expense Information</label>
-        <textarea name="description" class="form-control form-control-lg shadow-none bg-light border-0" rows="3" placeholder="Additional details (Vendor name, Check number)..."></textarea>
+        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.7rem;">Expense Information</label>
+        <textarea name="description" class="form-control shadow-none bg-light border-0" rows="3" placeholder="Additional details (Vendor name, Check number)..."></textarea>
     </div>
     <div class="modal-footer border-0 pb-4 pt-0 px-4">
-        <button type="submit" class="btn btn-danger btn-lg w-100 py-3 rounded-3 fw-bold shadow-sm">CONFIRM EXPENDITURE</button>
+        <button type="submit" class="btn btn-danger w-100 py-3 rounded-pill fw-bold shadow-lg"><i class="fas fa-save me-2"></i> Save Expenditure</button>
     </div>
 </form></div></div></div>
 @endsection

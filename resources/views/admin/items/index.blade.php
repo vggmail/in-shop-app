@@ -6,12 +6,16 @@
         <p class="text-muted small">Manage sizes, variations, and extra toppings.</p>
     </div>
     <div class="d-flex gap-2 align-items-center">
+        <div class="btn-group shadow-sm border rounded-pill overflow-hidden bg-white p-1 me-2" style="background: #f8fafc;">
+            <button class="btn btn-sm btn-light border-0 px-3 active-view" id="btnGrid" onclick="setViewMode('grid')"><i class="fas fa-th-large"></i></button>
+            <button class="btn btn-sm btn-light border-0 px-3" id="btnList" onclick="setViewMode('list')"><i class="fas fa-list"></i></button>
+        </div>
         <button class="btn btn-outline-success px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk Upload</button>
         <button class="btn btn-primary px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
     </div>
 </div>
 
-<div class="row">
+<div class="row" id="gridView">
     @foreach($items as $i)
     <div class="col-md-3 mb-4">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 item-hover">
@@ -29,7 +33,7 @@
                         @endif
                     </div>
                 </h5>
-                <p class="text-muted small mb-2">{{ $i->category->name }}</p>
+                <p class="text-muted small mb-2" title="{{ $i->category->full_name }}">{{ $i->category->full_name }}</p>
                 
                 <div class="mb-3">
                     <small class="text-uppercase fw-bold text-muted" style="font-size:10px;">Variants:</small>
@@ -46,19 +50,85 @@
                 </div>
 
                 <div class="d-flex gap-2 mt-auto">
-                    <button class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2" 
+                    <button class="btn btn-sm btn-outline-dark w-100 rounded-pill" 
                         onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
                         <i class="fas fa-edit small me-1"></i> Edit
                     </button>
                     <form action="{{ route('items.destroy', $i->id) }}" method="POST" class="w-100">
                         @csrf @method("DELETE")
-                        <button type="submit" class="btn btn-sm btn-outline-danger w-100 rounded-pill py-2" onclick="return confirm('Delete item?')"><i class="fas fa-trash small me-1"></i> Del</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger w-100 rounded-pill" 
+                            onclick="confirmAction('Delete Item?', 'Are you sure you want to remove this item?', () => this.closest('form').submit())">
+                            <i class="fas fa-trash small me-1"></i> Del
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
     @endforeach
+</div>
+
+<div class="card border-0 shadow-sm rounded-4 d-none mb-4" id="listView">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small text-uppercase" style="font-size: 11px;">
+                    <tr>
+                        <th class="ps-4 py-3">Item Name</th>
+                        <th class="py-3">Category</th>
+                        <th class="py-3">Price</th>
+                        <th class="py-3">Stock</th>
+                        <th class="py-3">Status</th>
+                        <th class="text-end pe-4 py-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($items as $i)
+                    <tr>
+                        <td class="ps-4">
+                            <div class="fw-bold text-dark">{{ $i->name }}</div>
+                            <div class="small text-muted">{{ $i->variants->count() }} Variants · {{ $i->extras->count() }} Extras</div>
+                        </td>
+                        <td><span class="badge bg-light text-dark fw-normal border">{{ $i->category->name }}</span></td>
+                        <td>
+                            <div class="fw-bold">&#8377;{{ number_format($i->price, 2) }}</div>
+                            @if($i->mrp && $i->mrp > $i->price)
+                                <div class="text-muted small text-decoration-line-through">&#8377;{{ number_format($i->mrp, 2) }}</div>
+                            @endif
+                        </td>
+                        <td>
+                            <span class="fw-bold {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger' : 'text-dark' }}">
+                                {{ $i->stock_quantity }}
+                            </span>
+                        </td>
+                        <td>
+                            @if($i->is_available)
+                                <span class="badge bg-success-subtle text-success px-2 py-1 rounded-pill"><i class="fas fa-check-circle me-1"></i> Active</span>
+                            @else
+                                <span class="badge bg-danger-subtle text-danger px-2 py-1 rounded-pill"><i class="fas fa-times-circle me-1"></i> Inactive</span>
+                            @endif
+                        </td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex justify-content-end gap-2">
+                                <button class="btn btn-sm btn-light border shadow-sm rounded-pill px-3" title="Edit"
+                                onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
+                                    <i class="fas fa-edit text-primary small me-1"></i> <small class="fw-bold">Edit</small>
+                                </button>
+                                <form action="{{ route('items.destroy', $i->id) }}" method="POST">
+                                    @csrf @method("DELETE")
+                                    <button type="button" class="btn btn-sm btn-light border shadow-sm rounded-pill px-3" title="Delete"
+                                        onclick="confirmAction('Delete Item?', 'Are you sure?', () => this.closest('form').submit())">
+                                        <i class="fas fa-trash text-danger small me-1"></i> <small class="fw-bold">Del</small>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <!-- BULK UPLOAD MODAL -->
@@ -80,7 +150,7 @@
             <p class="small text-muted mb-0"><b>CSV Format:</b> category_name, name, price, stock_quantity, is_available</p>
         </div>
         <div class="modal-footer border-0 pb-4 pt-0 px-4">
-            <button type="submit" class="btn btn-success btn-lg w-100 py-3 rounded-3 fw-bold shadow-sm"><i class="fas fa-upload me-2"></i> UPLOAD ITEMS</button>
+            <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-lg"><i class="fas fa-upload me-2"></i> Upload Items</button>
         </div>
     </form>
 </div></div></div>
@@ -98,7 +168,7 @@
             <div class="col-md-6">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Category</label>
                 <select name="category_id" id="f_category_id" class="form-select bg-light border-0" required>
-                    @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->name }}</option>@endforeach
+                    @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->full_name }}</option>@endforeach
                 </select>
             </div>
             <div class="col-md-3">
@@ -138,7 +208,9 @@
             </div>
         </div>
     </div>
-    <div class="modal-footer border-0 pb-4 pt-0 px-4"><button type="submit" class="btn btn-dark btn-lg w-100 py-3 rounded-3 fw-800 shadow-sm">SAVE PRODUCT SETTINGS</button></div>
+    <div class="modal-footer border-0 pb-4 pt-0 px-4">
+        <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow-lg"><i class="fas fa-save me-2"></i> Save Product Settings</button>
+    </div>
 </form></div></div></div>
 
 <div class="modal fade" id="addItemModal" tabindex="-1" aria-hidden="true"></div>
@@ -187,9 +259,29 @@ function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, ex
     new bootstrap.Modal(document.getElementById("itemModal")).show();
 }
 
-// Intercept New Item Btn
-$('[data-bs-target="#addItemModal"]').attr('data-bs-target', '').attr('onclick', 'openAddItem()');
+    // Intercept New Item Btn
+    $('[data-bs-target="#addItemModal"]').attr('data-bs-target', '').attr('onclick', 'openAddItem()');
+</script>
+
+<script>
+function setViewMode(mode) {
+    localStorage.setItem('menu_view_mode', mode);
+    if(mode === 'list') {
+        $('#gridView').addClass('d-none');
+        $('#listView').removeClass('d-none');
+        $('#btnList').addClass('active-view bg-primary text-white').removeClass('btn-light');
+        $('#btnGrid').addClass('btn-light').removeClass('active-view bg-primary text-white');
+    } else {
+        $('#listView').addClass('d-none');
+        $('#gridView').removeClass('row').addClass('row').removeClass('d-none');
+        $('#btnGrid').addClass('active-view bg-primary text-white').removeClass('btn-light');
+        $('#btnList').addClass('btn-light').removeClass('active-view bg-primary text-white');
+    }
+}
+
+$(document).ready(function() {
+    let mode = localStorage.getItem('menu_view_mode') || 'grid';
+    setViewMode(mode);
+});
 </script>
 @endsection
-
-

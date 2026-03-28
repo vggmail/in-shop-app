@@ -39,9 +39,16 @@ class CouponController extends Controller {
     
     public function check(Request $request) {
         $coupon = $this->repo->findByCode($request->code);
-        if($coupon) {
-            return response()->json(["status" => true, "coupon" => $coupon]);
+        if(!$coupon) return response()->json(["status" => false, "msg" => "Invalid or inactive coupon"]);
+        
+        if($coupon->expiry_date && $coupon->expiry_date < date('Y-m-d')) {
+            return response()->json(["status" => false, "msg" => "This coupon has expired on " . $coupon->expiry_date]);
         }
-        return response()->json(["status" => false, "msg" => "Invalid Coupon"]);
+
+        if($request->total && $coupon->min_bill_amount > $request->total) {
+            return response()->json(["status" => false, "msg" => "Minimum bill amount required: ₹" . $coupon->min_bill_amount]);
+        }
+
+        return response()->json(["status" => true, "coupon" => $coupon]);
     }
 }

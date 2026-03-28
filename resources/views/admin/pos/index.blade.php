@@ -2,77 +2,81 @@
 
 @section("styles")
 <style>
-    .item-card { cursor: pointer; transition: transform 0.2s; border: none; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-    .item-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .cart-item { font-size: 0.9rem; }
-    .nav-pills .nav-link { border-radius: 20px; font-weight: 500; padding: 8px 20px; color: #495057; }
-    .nav-pills .nav-link.active { background-color: #ff4757; color: white; }
-    .btn-qty { width: 28px; height: 28px; padding: 0; line-height: 26px; border-radius: 50%; }
+    .item-card { cursor: pointer; transition: transform 0.2s; border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); background: #fff; }
+    .item-card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+    .cart-item { font-size: 0.95rem; border-bottom: 1px dashed #eee!important; }
+    .nav-pills .nav-link { border-radius: 10px; font-weight: 600; padding: 10px 20px; color: #64748b; background: #fff; margin-right: 8px; border: 1px solid #e2e8f0; }
+    .nav-pills .nav-link.active { background-color: #ff4757; color: white; border-color: #ff4757; box-shadow: 0 4px 12px rgba(255, 71, 87, 0.2); }
+    .btn-qty { width: 32px; height: 32px; padding: 0; display: flex; align-items: center; justify-content: center; border-radius: 8px; }
+    .cart-container { sticky; top: 100px; height: calc(100vh - 120px); }
+    .category-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+    .category-scroll::-webkit-scrollbar { display: none; }
 </style>
 @endsection
 
 @section("content")
-<div class="row">
+<div class="row g-4">
     <!-- Menu Grid -->
-    <div class="col-lg-7 col-md-12">
-        <ul class="nav nav-pills mb-3 border-bottom pb-2 overflow-auto flex-nowrap" id="pills-tab" role="tablist">
+    <div class="col-lg-7">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+            <h4 class="fw-bold mb-0">Menu Selection</h4>
+            <div class="input-group w-50 shadow-sm rounded-pill overflow-hidden border-0">
+                <span class="input-group-text bg-white border-0"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" class="form-control border-0" placeholder="Search menu..." id="menuSearch">
+            </div>
+        </div>
+
+        <ul class="nav nav-pills mb-4 category-scroll flex-nowrap overflow-auto pb-2" id="pills-tab" role="tablist">
             <li class="nav-item">
                 <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#cat-all" type="button">All Items</button>
             </li>
             @foreach($items->groupBy("category.name") as $catName => $catItems)
             <li class="nav-item">
-                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#cat-{{ Str::slug($catName) }}" type="button">{{ $catName }}</button>
+                <button class="nav-link text-nowrap" data-bs-toggle="pill" data-bs-target="#cat-{{ Str::slug($catName) }}" type="button">{{ $catName }}</button>
             </li>
             @endforeach
         </ul>
         
-        <div class="tab-content border-end pe-3" id="pills-tabContent" style="max-height: 75vh; overflow-y: auto;">
-            <!-- All Items -->
+        <div class="tab-content" id="pills-tabContent">
             <div class="tab-pane fade show active" id="cat-all" role="tabpanel">
                 <div class="row g-3">
                     @foreach($items as $i)
-                    <div class="col-xl-3 col-lg-4 col-md-4 col-6">
-                        <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50 grayscale' : '' }}" 
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-6 item-element" data-name="{{ strtolower($i->name) }}">
+                        <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50' : '' }}" 
                              @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})" @endif>
                             
                             @if($i->stock_quantity <= 0)
-                                <div class="position-absolute top-50 start-50 translate-middle w-100">
-                                    <span class="badge bg-danger">OUT OF STOCK</span>
+                                <div class="position-absolute top-50 start-50 translate-middle w-100 z-3">
+                                    <span class="badge bg-danger rounded-pill px-3 shadow">OUT OF STOCK</span>
                                 </div>
                             @endif
 
-                            <i class="fas fa-hamburger fa-2x text-warning mb-2"></i>
-                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">&#8377;{{ number_format($i->price, 2) }}</span>
-                            <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
-                                Stock: {{ $i->stock_quantity }}
+                            <div class="bg-light rounded-3 p-3 mb-3">
+                                <i class="fas fa-hamburger fa-2x text-warning"></i>
+                            </div>
+                            <h6 class="mb-1 fw-bold text-dark">{{ $i->name }}</h6>
+                            <div class="text-danger fw-bold small mb-2">&#8377;{{ number_format($i->price, 2) }}</div>
+                            <div class="progress mb-0" style="height: 4px;">
+                                <div class="progress-bar {{ $i->stock_quantity <= $i->low_stock_limit ? 'bg-danger' : 'bg-success' }}" style="width: {{ min(100, ($i->stock_quantity / 50) * 100) }}%"></div>
                             </div>
                         </div>
                     </div>
                     @endforeach
                 </div>
             </div>
-            <!-- Category Specific Items -->
+            
             @foreach($items->groupBy("category.name") as $catName => $catItems)
             <div class="tab-pane fade" id="cat-{{ Str::slug($catName) }}" role="tabpanel">
                 <div class="row g-3">
                     @foreach($catItems as $i)
-                    <div class="col-xl-3 col-lg-4 col-md-4 col-6">
-                        <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50 grayscale' : '' }}" 
+                    <div class="col-xl-3 col-lg-4 col-md-6 col-6 item-element" data-name="{{ strtolower($i->name) }}">
+                         <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50' : '' }}" 
                              @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})" @endif>
-                            
-                            @if($i->stock_quantity <= 0)
-                                <div class="position-absolute top-50 start-50 translate-middle w-100">
-                                    <span class="badge bg-danger">OUT OF STOCK</span>
-                                </div>
-                            @endif
-
-                            <i class="fas fa-utensils fa-2x text-success mb-2"></i>
-                            <h6 class="mb-1 fw-bold text-dark" style="font-size: 0.85rem;">{{ $i->name }}</h6>
-                            <span class="text-secondary small font-weight-bold">&#8377;{{ number_format($i->price, 2) }}</span>
-                            <div class="mt-1 small {{ $i->stock_quantity <= $i->low_stock_limit ? 'text-danger fw-bold' : 'text-muted' }}">
-                                Stock: {{ $i->stock_quantity }}
+                            <div class="bg-light rounded-3 p-3 mb-3">
+                                <i class="fas fa-utensils fa-2x text-success"></i>
                             </div>
+                            <h6 class="mb-1 fw-bold text-dark">{{ $i->name }}</h6>
+                            <div class="text-danger fw-bold small">&#8377;{{ number_format($i->price, 2) }}</div>
                         </div>
                     </div>
                     @endforeach
@@ -83,85 +87,83 @@
     </div>
     
     <!-- Cart System -->
-    <div class="col-lg-5 col-md-12 mt-4 mt-lg-0">
-        <div class="card border-0 shadow-lg rounded-3" style="min-height: 80vh;">
-            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
-                <h5 class="fw-bold mb-0">Current Order</h5>
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden d-flex flex-column" style="height: calc(100vh - 140px);">
+            <div class="p-4 bg-white border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0 text-dark"><i class="fas fa-receipt text-muted me-2"></i>Current Order</h5>
+                <button class="btn btn-sm btn-outline-danger border-0 rounded-pill" onclick="clearCart()"><i class="fas fa-trash-alt me-1"></i> Clear</button>
             </div>
             
-            <div class="card-body d-flex flex-column p-0">
-                <!-- Order Type Switches -->
-                <div class="d-flex p-3 bg-light border-bottom">
-                    <div class="btn-group w-100" role="group">
-                        <input type="radio" class="btn-check" name="order_type" id="type-dinein" value="Dine-in" checked autocomplete="off">
-                        <label class="btn btn-outline-danger" for="type-dinein"><i class="fas fa-chair"></i> Dine In</label>
-                        <input type="radio" class="btn-check" name="order_type" id="type-takeaway" value="Takeaway" autocomplete="off">
-                        <label class="btn btn-outline-danger" for="type-takeaway"><i class="fas fa-shopping-bag"></i> Takeaway</label>
+            <div class="p-3 bg-light-subtle border-bottom">
+                <div class="btn-group w-100 rounded-3 overflow-hidden shadow-sm" role="group">
+                    <input type="radio" class="btn-check" name="order_type" id="type-dinein" value="Dine-in" checked autocomplete="off">
+                    <label class="btn btn-outline-primary py-2" for="type-dinein"><i class="fas fa-chair me-2"></i>Dine In</label>
+                    <input type="radio" class="btn-check" name="order_type" id="type-takeaway" value="Takeaway" autocomplete="off">
+                    <label class="btn btn-outline-primary py-2" for="type-takeaway"><i class="fas fa-walking me-2"></i>Takeaway</label>
+                </div>
+                <div class="mt-3" id="table-number-box">
+                    <div class="input-group shadow-sm rounded-3 overflow-hidden">
+                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-hashtag text-muted"></i></span>
+                        <input type="text" id="table_number" class="form-control border-start-0 ps-0" placeholder="Table Number (e.g. T-04)">
                     </div>
                 </div>
-                
-                <div class="p-3 bg-light border-bottom" id="table-number-box">
-                    <input type="text" id="table_number" class="form-control form-control-sm" placeholder="Table Number (e.g. T-04)">
+            </div>
+
+            <div class="flex-grow-1 overflow-auto p-3" id="cartContainer">
+                <div id="cartBody">
+                    <div class="text-center py-5">
+                        <i class="fas fa-shopping-basket fa-4x text-light mb-3"></i>
+                        <p class="text-muted">No items in the cart yet.</p>
+                    </div>
                 </div>
+            </div>
             
-                <div class="table-responsive p-2 flex-grow-1" style="max-height: 250px; overflow-y:auto; background: #fff;">
-                    <table class="table table-sm table-hover mb-0" id="cartTable">
-                        <tbody id="cartBody">
-                            <tr class="text-center text-muted"><td class="py-4">Cart is empty</td></tr>
-                        </tbody>
-                    </table>
+            <div class="px-4 py-3 border-top bg-light-subtle">
+                <div class="row g-2">
+                    <div class="col-7 position-relative">
+                        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.65rem;">Customer Phone (Optional)</label>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-0"><i class="fas fa-search small"></i></span>
+                            <input type="text" id="customer_phone" class="form-control border-0 shadow-none" placeholder="Search by phone..." autocomplete="off">
+                            <button class="btn btn-outline-secondary border-0 bg-white d-none" type="button" id="clear_cust"><i class="fas fa-times small"></i></button>
+                        </div>
+                        <div id="customer_dropdown" class="position-absolute w-100 bg-white shadow-lg rounded-3 border d-none" style="z-index: 1060; max-height: 200px; overflow-y: auto; top: 100%;"></div>
+                        <input type="hidden" id="selected_customer_id">
+                    </div>
+                    <div class="col-5">
+                        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.65rem;">Coupon Code</label>
+                        <div class="input-group input-group-sm">
+                            <input type="text" id="coupon_code" class="form-control border-0 shadow-none text-uppercase" placeholder="Code">
+                            <button class="btn btn-dark border-0" type="button" onclick="applyCoupon()"><i class="fas fa-check small"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-4 border-top bg-white">
+                <div class="d-flex justify-content-between mb-2">
+                    <span class="text-muted">Subtotal</span>
+                    <span class="fw-bold h6 mb-0">&#8377;<span id="subTotal">0.00</span></span>
+                </div>
+                <div class="d-flex justify-content-between mb-3 text-success">
+                    <span>Discount</span>
+                    <span class="fw-bold">-&#8377;<span id="discount">0.00</span></span>
+                </div>
+                <div class="d-flex justify-content-between mb-4 pt-3 border-top">
+                    <span class="h5 fw-bold text-dark">Total Payable</span>
+                    <span class="h4 fw-bold text-primary mb-0">&#8377;<span id="grandTotal">0.00</span></span>
                 </div>
                 
-                <div class="p-3 bg-light border-top mt-auto">
-                    <!-- Discount -->
-                    <div class="input-group input-group-sm mb-3">
-                        <input type="text" id="couponCode" class="form-control" placeholder="Discount Coupon Code">
-                        <button class="btn btn-dark" onclick="applyCoupon()">Validate</button>
-                    </div>
-                    <div id="couponMsg" class="mb-2 font-weight-bold" style="font-size: 13px;"></div>
-                    
-                    <div class="d-flex justify-content-between mb-1">
-                        <span class="text-secondary fw-bold">Subtotal</span>
-                        <span class="fw-bold">&#8377;<span id="subTotal">0.00</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2 text-danger">
-                        <span class="fw-bold">Discount</span>
-                        <span class="fw-bold">-&#8377;<span id="discount">0.00</span></span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3 border-top pt-2 fs-4">
-                        <span class="fw-bold text-dark">Total</span>
-                        <span class="fw-bold text-success">&#8377;<span id="grandTotal">0.00</span></span>
-                    </div>
-                    
-                    <div class="mb-3 bg-white p-2 border rounded">
-                        <label class="small fw-bold text-muted mb-1 text-uppercase">Customer (Optional)</label>
-                        <div class="input-group input-group-sm mb-1">
-                            <span class="input-group-text bg-white border-end-0"><i class="fas fa-user"></i></span>
-                            <input type="text" id="customer_search" class="form-control border-start-0 ps-0" placeholder="Search or add by Name/Phone...">
-                            <input type="hidden" id="customer_id">
-                        </div>
-                        <div id="customer_info_display" class="d-none">
-                            <div class="d-flex justify-content-between align-items-center bg-light p-2 rounded border">
-                                <div><i class="fas fa-check-circle text-success me-1"></i> <span id="sel_customer_name" class="fw-bold"></span></div>
-                                <button class="btn btn-sm text-danger p-0" onclick="clearCustomer()"><i class="fas fa-times-circle"></i></button>
-                            </div>
-                        </div>
-                        <div id="customer_add_display" class="d-none mt-2 p-2 border rounded border-primary bg-light">
-                             <div class="small fw-bold text-primary mb-1">REGISTER NEW CUSTOMER?</div>
-                             <input type="text" id="new_cust_phone" class="form-control form-control-sm mb-1" placeholder="Mobile Number">
-                             <button class="btn btn-primary btn-sm w-100" onclick="confirmNewCust()">Apply as New Customer</button>
-                        </div>
-                    </div>
-                    
-                    <textarea id="order_note" class="form-control mb-3" rows="2" placeholder="Kitchen Note (e.g. Less Spicy, No Onions)..."></textarea>
-                    
-                    <div class="d-flex gap-2">
-                        <select id="payment_method" class="form-select form-select-lg shadow-sm border-0 font-weight-bold text-center">
-                            <option value="Cash">ðŸ’µ CASH</option>
-                            <option value="Card">ðŸ’³ CARD</option>
-                            <option value="UPI">ðŸ“± UPI</option>
+                <div class="row g-2">
+                    <div class="col-7">
+                        <select id="payment_method" class="form-select border-2 border-primary-subtle fw-bold">
+                            <option value="Cash">💵 CASH</option>
+                            <option value="Card">💳 CARD</option>
+                            <option value="UPI">📱 UPI</option>
                         </select>
-                        <button class="btn btn-success btn-lg w-50 fw-bold shadow-sm" onclick="processOrder(event)"><i class="fas fa-print"></i> PLACE ORDER</button>
+                    </div>
+                    <div class="col-5">
+                         <button class="btn btn-primary w-100 fw-bold shadow-sm" style="height: 100%;" onclick="processOrder(event)">PLACE ORDER</button>
                     </div>
                 </div>
             </div>
@@ -172,35 +174,32 @@
 <!-- Item Options Modal -->
 <div class="modal fade" id="itemModal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0 shadow">
-            <div class="modal-header border-bottom-0 pb-0">
-                <h5 class="modal-title fw-bold" id="modalItemName">Item Name</h5>
+        <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="modal-header bg-light border-0">
+                <h5 class="modal-title fw-bold" id="modalItemName">Customize Item</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
+            <div class="modal-body p-4">
                 <input type="hidden" id="m_item_id">
                 <input type="hidden" id="m_base_price">
                 <input type="hidden" id="m_item_name">
                 
-                <h6 class="text-muted mb-3">Base Price: &#8377;<span id="m_display_price"></span></h6>
-                
-                <div id="variantsBox" class="mb-3 d-none">
-                    <h6 class="fw-bold fs-6">Choose Size/Variant</h6>
-                    <select id="m_variant" class="form-select" onchange="calcModalPrice()">
-                        <!-- filled dynamically -->
-                    </select>
+                <div id="variantsBox" class="mb-4 d-none">
+                    <label class="small fw-bold mb-2 text-muted text-uppercase">Select Variation</label>
+                    <div id="m_variants_list" class="d-flex flex-column gap-2"></div>
                 </div>
                 
-                <div id="extrasBox" class="mb-3 d-none">
-                    <h6 class="fw-bold fs-6">Extra Toppings</h6>
-                    <div id="m_extras_list" class="d-flex flex-wrap gap-2">
-                        <!-- filled dynamically -->
-                    </div>
+                <div id="extrasBox" class="mb-0 d-none">
+                    <label class="small fw-bold mb-2 text-muted text-uppercase">Add Extras</label>
+                    <div id="m_extras_list" class="row g-2"></div>
                 </div>
             </div>
-            <div class="modal-footer justify-content-between border-top-0 bg-light">
-                <h5 class="fw-bold text-danger mb-0">Total: &#8377;<span id="m_total_price">0.00</span></h5>
-                <button type="button" class="btn btn-primary px-4 rounded-pill" onclick="addConfiguredItem()"><i class="fas fa-shopping-cart"></i> Add to Cart</button>
+            <div class="modal-footer justify-content-between bg-dark text-white border-0 p-3 pt-4">
+                <div class="ps-2">
+                    <span class="small opacity-75 d-block text-uppercase" style="font-size: 0.7rem; letter-spacing: 0.5px;">Current Total</span>
+                    <h4 class="fw-bold mb-0 text-success">&#8377;<span id="m_total_price">0.00</span></h4>
+                </div>
+                <button type="button" class="btn btn-primary px-4 py-2 rounded-pill fw-bold" onclick="addConfiguredItem()">ADD ITEM</button>
             </div>
         </div>
     </div>
@@ -211,64 +210,76 @@
 @section("scripts")
 <script>
     let cart = [];
-    let pos_discount_val = 0;
-    let pos_cust_name = null;
-    let pos_cust_phone = null;
     
-    // Switch table number visibility
+    // Load Cart from LocalStorage
+    $(document).ready(function() {
+        let saved = localStorage.getItem('pos_cart');
+        if(saved) {
+            cart = JSON.parse(saved);
+            renderCart();
+        }
+    });
+
+    let pos_discount_val = 0;
+    
+    // Search functionality
+    $("#menuSearch").on("keyup", function() {
+        let value = $(this).val().toLowerCase();
+        $(".item-element").filter(function() {
+            $(this).toggle($(this).data("name").indexOf(value) > -1)
+        });
+    });
+
     $("input[name='order_type']").change(function(){
         if(this.value === "Takeaway") $("#table-number-box").slideUp();
         else $("#table-number-box").slideDown();
     });
 
-    // Item Configurator
-    let currentExtras = [];
-    let currentVariants = [];
-    
     function openItemModal(id, name, price, variants, extras) {
         $("#m_item_id").val(id);
         $("#m_item_name").val(name);
         $("#m_base_price").val(price);
         $("#modalItemName").text(name);
-        $("#m_display_price").text(parseFloat(price).toFixed(2));
         
-        currentVariants = variants;
-        currentExtras = extras;
-        
-        if(variants.length > 0) {
-            let options = `<option value="" data-price="${price}">Standard Size (Default)</option>`;
+        if(variants && variants.length > 0) {
+            let varHtml = `<div class="form-check p-0 mb-2">
+                <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_def" value="" data-price="${price}" data-name="Regular" checked onchange="calcModalPrice()">
+                <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_def">Regular <span class="float-end">&#8377;${price}</span></label>
+            </div>`;
             variants.forEach(v => {
-                options += `<option value="${v.id}" data-price="${v.price}">${v.name} (+&#8377;${v.price})</option>`;
+                varHtml += `<div class="form-check p-0 mb-2">
+                    <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}" onchange="calcModalPrice()">
+                    <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_${v.id}">${v.name} <span class="float-end">&#8377;${v.price}</span></label>
+                </div>`;
             });
-            $("#m_variant").html(options);
+            $("#m_variants_list").html(varHtml);
             $("#variantsBox").removeClass("d-none");
         } else {
             $("#variantsBox").addClass("d-none");
-            $("#m_variant").html('<option value="" data-price="'+price+'"></option>');
+            $("#m_variants_list").html("");
         }
         
-        if(extras.length > 0) {
+        if(extras && extras.length > 0) {
             let extHtml = "";
             extras.forEach(e => {
-                extHtml += `<div class="form-check border rounded p-2 ps-4 mb-0 bg-white" style="flex: 1 1 45%;">
-                                <input class="form-check-input m_extra_cb" type="checkbox" value="${e.id}" data-price="${e.price}" data-name="${e.name}" id="ext_${e.id}" onchange="calcModalPrice()">
-                                <label class="form-check-label w-100" style="cursor:pointer;" for="ext_${e.id}">${e.name} <span class="text-success float-end">+&#8377;${e.price}</span></label>
-                            </div>`;
+                extHtml += `<div class="col-6">
+                    <input type="checkbox" class="btn-check m_extra_cb" id="ext_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}" onchange="calcModalPrice()">
+                    <label class="btn btn-outline-success btn-sm w-100 text-start p-2 fw-medium" for="ext_${e.id}">${e.name} <br>+&#8377;${e.price}</label>
+                </div>`;
             });
             $("#m_extras_list").html(extHtml);
             $("#extrasBox").removeClass("d-none");
         } else {
             $("#extrasBox").addClass("d-none");
-            $("#m_extras_list").html("");
         }
         
         calcModalPrice();
-        var myModal = new bootstrap.Modal(document.getElementById("itemModal"));
-        myModal.show();
+        new bootstrap.Modal(document.getElementById("itemModal")).show();
     }
     
     function calcModalPrice() {
-        let base = parseFloat($("#m_variant option:selected").data("price") || $("#m_base_price").val());
+        let v_el = $(".m_variant_sel:checked");
+        let base = v_el.length ? parseFloat(v_el.data("price")) : parseFloat($("#m_base_price").val());
         let extTotal = 0;
         $(".m_extra_cb:checked").each(function(){
             extTotal += parseFloat($(this).data("price"));
@@ -279,8 +290,9 @@
     function addConfiguredItem() {
         let id = $("#m_item_id").val();
         let name = $("#m_item_name").val();
-        let varId = $("#m_variant").val();
-        let varName = varId ? $("#m_variant option:selected").text().split(" ")[0] : "";
+        let v_el = $(".m_variant_sel:checked");
+        let varId = v_el.val() || null;
+        let varName = v_el.data("name") || "";
         let finalPrice = parseFloat($("#m_total_price").text());
         
         let selExtras = [];
@@ -290,213 +302,199 @@
             extNames.push($(this).data("name"));
         });
         
-        // Check if identical configuration exists in cart
-        let existingIdx = cart.findIndex(c => c.id == id && c.variant_id == varId && JSON.stringify(c.extras) == JSON.stringify(selExtras));
-        
-        if(existingIdx !== -1) {
-            cart[existingIdx].qty++;
-            cart[existingIdx].total = cart[existingIdx].qty * cart[existingIdx].price;
-        } else {
-            cart.push({
-                cartId: Date.now(),
-                id: id,
-                name: name,
-                variant_id: varId,
-                variant_name: varName,
-                price: finalPrice,
-                qty: 1,
-                total: finalPrice,
-                extras: selExtras,
-                extras_text: extNames.join(", ")
-            });
-        }
+        cart.push({
+            cartId: Date.now(), id: id, name: name,
+            variant_id: varId, variant_name: varName,
+            price: finalPrice, qty: 1, total: finalPrice,
+            extras: selExtras, extras_text: extNames.join(", ")
+        });
         
         bootstrap.Modal.getInstance(document.getElementById("itemModal")).hide();
         renderCart();
+        showToast('success', 'Added!', name + ' added to cart.');
     }
     
-    function updateCartQty(idx, action) {
-        if(action === 1) cart[idx].qty++;
-        else if(action === -1) cart[idx].qty--;
-        
+    function updateCartQty(idx, delta) {
+        cart[idx].qty += delta;
         if(cart[idx].qty <= 0) cart.splice(idx, 1);
         else cart[idx].total = cart[idx].qty * cart[idx].price;
         renderCart();
     }
-    
-    function renderCart() {
-        if(cart.length === 0) {
-            $("#cartBody").html(`<tr class="text-center text-muted"><td class="py-4 border-0">Cart is empty</td></tr>`);
-            $("#subTotal, #grandTotal").text("0.00");
-            return;
-        }
-        
-        let html = ""; let sub = 0;
-        cart.forEach((item, idx) => {
-            sub += item.total;
-            
-            let details = "";
-            if(item.variant_name) details += `<span class="badge bg-secondary me-1">${item.variant_name}</span>`;
-            if(item.extras_text) details += `<small class="text-muted d-block mt-1" style="font-size:10px;"><i class="fas fa-plus"></i> ${item.extras_text}</small>`;
-            
-            html += `<tr class="border-bottom cart-item">
-                <td class="pt-2 w-50" style="white-space:normal; line-height:1.2;">
-                    <strong class="d-block mb-1">${item.name}</strong>
-                    ${details}
-                </td>
-                <td class="text-center pt-2 align-middle">
-                    <div class="d-flex align-items-center justify-content-center bg-white border rounded">
-                        <button class="btn btn-sm btn-light border-0 px-2 py-1 text-danger fw-bold" onclick="updateCartQty(${idx}, -1)">-</button>
-                        <span class="px-2 font-weight-bold">${item.qty}</span>
-                        <button class="btn btn-sm btn-light border-0 px-2 py-1 text-success fw-bold" onclick="updateCartQty(${idx}, 1)">+</button>
-                    </div>
-                </td>
-                <td class="pt-3 fw-bold text-end align-middle bg-light text-dark">&#8377;${item.total.toFixed(2)}</td>
-            </tr>`;
-        });
-        $("#cartBody").html(html);
-        $("#subTotal").text(sub.toFixed(2));
-        calcTotals(sub);
-    }
-    
-    function applyCoupon() {
-        let code = $("#couponCode").val();
-        if(!code) return;
-        $.post("{{ route('coupons.check') }}", {_token: "{{ csrf_token() }}", code: code}, function(res) {
-            if(res.status) {
-                let sub = parseFloat($("#subTotal").text());
-                let c = res.coupon;
-                if(c.min_bill_amount > 0 && sub < c.min_bill_amount) {
-                    $("#couponMsg").html(`<span class="text-danger">Minimum amount: $${c.min_bill_amount} required</span>`);
-                    return;
-                }
-                discountVal = sub * (parseFloat(c.discount_percentage) / 100);
-                $("#couponMsg").html(`<span class="text-success"><i class="fas fa-check-circle"></i> Applied ${c.discount_percentage}% OFF (-&#8377;${discountVal.toFixed(2)})   </span>`);
-                calcTotals(sub);
-            } else {
-                $("#couponMsg").html(`<span class="text-danger"><i class="fas fa-times-circle"></i> Invalid Code</span>`);
+
+    function clearCart() {
+        if(cart.length == 0) return;
+        Swal.fire({
+            title: 'Clear Cart?',
+            text: "Are you sure you want to remove all items?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ff4757',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Yes, clear it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                cart = [];
+                localStorage.removeItem('pos_cart');
+                renderCart();
             }
         });
     }
     
-    function calcTotals() {
-        let sub = cart.reduce((a, b) => a + b.total, 0);
-        $("#subTotal").text(sub.toFixed(2));
-        $("#discount").text(pos_discount_val.toFixed(2));
-        $("#grandTotal").text((sub - pos_discount_val > 0 ? sub - pos_discount_val : 0).toFixed(2));
-    }
+    let pos_coupon_id = null;
     
-    // Customer Add / Search
-    let allCustomers = @json($customers);
-    $("#customer_search").on("input", function(){
-        let query = $(this).val().trim();
-        $(this).removeClass("is-invalid");
-        if(query.length < 2) { $("#customer_add_display").addClass("d-none"); return; }
-        
-        let found = allCustomers.find(c => c.phone == query || c.name.toLowerCase().includes(query.toLowerCase()));
-        if(found) {
-            selectCustomer(found.id, found.name);
-            $("#customer_add_display").addClass("d-none");
-        } else {
-            $("#customer_add_display").removeClass("d-none");
-            $("#new_cust_phone").val(query).removeClass("is-invalid");
-        }
+    // Customer search logic
+    $("#customer_phone").on("input", function() {
+        let q = $(this).val();
+        if(q.length < 1) { $("#customer_dropdown").addClass("d-none"); return; }
+        $.get("{{ route('customers.search') }}", { q: q }, function(data) {
+            let html = "";
+            if(data && Array.isArray(data)) {
+                data.forEach(c => {
+                    html += `<div class="p-2 border-bottom pointer cust-item" data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}">
+                        <div class="fw-bold" style="font-size: 0.8rem;">${c.name}</div>
+                        <div class="small text-muted" style="font-size: 0.7rem;">${c.phone}</div>
+                    </div>`;
+                });
+            }
+            if(html) $("#customer_dropdown").html(html).removeClass("d-none");
+            else $("#customer_dropdown").addClass("d-none");
+        });
     });
 
-    function selectCustomer(id, name) {
-        $("#customer_id").val(id);
-        $("#sel_customer_name").text(name);
-        $("#customer_info_display").removeClass("d-none");
-        $("#customer_search").val("").addClass("d-none");
-        $("#customer_add_display").addClass("d-none");
+    $(document).on("click", ".cust-item", function() {
+        let id = $(this).data("id");
+        let phone = $(this).data("phone");
+        $("#selected_customer_id").val(id);
+        $("#customer_phone").val(phone).prop("readonly", true);
+        $("#clear_cust").removeClass("d-none");
+        $("#customer_dropdown").addClass("d-none");
+    });
+
+    $("#clear_cust").on("click", function() {
+        $("#selected_customer_id").val("");
+        $("#customer_phone").val("").prop("readonly", false);
+        $(this).addClass("d-none");
+    });
+
+    // Coupon logic
+    window.applyCoupon = function() {
+        let code = $("#coupon_code").val();
+        if(!code) return showToast('warning', 'Empty!', 'Please enter a coupon code.');
+        let subVal = parseFloat($("#subTotal").text()) || 0;
+        $.post("{{ route('coupons.check') }}", {code: code, total: subVal, _token: "{{ csrf_token() }}"}, function(res) {
+            if(res.status) {
+                let cp = res.coupon;
+                if(subVal <= 0) return showToast('error', 'Empty Cart', 'Add items before applying coupon!');
+                
+                pos_discount_val = (subVal * (parseFloat(cp.discount_percentage) || 0)) / 100;
+                pos_coupon_id = cp.id;
+                
+                $("#discount").text(pos_discount_val.toFixed(2));
+                renderCart();
+                showToast('success', 'Applied!', 'Discount of ' + cp.discount_percentage + '% applied.');
+            } else {
+                showToast('error', 'Invalid!', res.msg || 'Invalid Coupon');
+            }
+        }).fail(function() {
+            showToast('error', 'Error!', 'Failed to verify coupon. Server error.');
+        });
     }
 
-    function clearCustomer() {
-        $("#customer_id").val("");
-        $("#customer_search").removeClass("d-none");
-        $("#customer_info_display").addClass("d-none");
-    }
-
-    function confirmNewCust() {
-        let name = $("#customer_search").val().trim();
-        let phone = $("#new_cust_phone").val().trim();
+    function renderCart() {
+        localStorage.setItem('pos_cart', JSON.stringify(cart));
+        if(cart.length === 0) {
+            $("#cartBody").html(`<div class="text-center py-5"><i class="fas fa-shopping-basket fa-4x text-light mb-3"></i><p class="text-muted">No items in the cart yet.</p></div>`);
+            $("#subTotal, #grandTotal").text("0.00");
+            return;
+        }
         
-        if(!name || name.length < 2) { $("#customer_search").addClass("is-invalid").focus(); return; }
-        if(!/^\d{10}$/.test(phone)) { $("#new_cust_phone").addClass("is-invalid").focus(); return; }
-        
-        selectCustomer("new", name + " (" + phone + ") ");
-        pos_cust_name = name;
-        pos_cust_phone = phone;
+        let html = '<div class="list-group list-group-flush">';
+        let sub = 0;
+        cart.forEach((item, idx) => {
+            sub += item.total;
+            html += `<div class="list-group-item cart-item bg-transparent px-0 py-3 border-0">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div class="pe-3">
+                        <div class="fw-bold text-dark">${item.name}</div>
+                        <div class="small text-muted mb-1">${item.variant_name ? item.variant_name : ''} ${item.extras_text ? '· ' + item.extras_text : ''}</div>
+                        <div class="text-primary fw-bold small">&#8377;${item.price.toFixed(2)}</div>
+                    </div>
+                    <div class="text-end">
+                        <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm mb-1 px-1">
+                            <button class="btn btn-sm btn-qty text-danger p-0" onclick="updateCartQty(${idx}, -1)"><i class="fas fa-minus-circle"></i></button>
+                            <span class="px-2 fw-bold" style="min-width: 30px;">${item.qty}</span>
+                            <button class="btn btn-sm btn-qty text-success p-0" onclick="updateCartQty(${idx}, 1)"><i class="fas fa-plus-circle"></i></button>
+                        </div>
+                        <div class="fw-bold text-dark">&#8377;${item.total.toFixed(2)}</div>
+                    </div>
+                </div>
+            </div>`;
+        });
+        html += '</div>';
+        $("#cartBody").html(html);
+        $("#subTotal").text(sub.toFixed(2));
+        $("#grandTotal").text((sub - pos_discount_val).toFixed(2));
     }
-
+    
     function processOrder(e) {
-        if(cart.length === 0) return alert("Cart is empty!");
+        if(cart.length === 0) return showToast('error', 'Cart Empty', 'Please add some items first!');
         
-        let customerId = $("#customer_id").val() || null;
-        let customerName = pos_cust_name || null;
-        let customerPhone = pos_cust_phone || null;
-        
-        // Prepare items
         let pItems = cart.map(c => ({
             item_id: String(c.id),
             variant_id: c.variant_id ? String(c.variant_id) : null,
-            price: parseFloat(c.price) || 0,
-            quantity: parseInt(c.qty) || 1,
-            total: parseFloat(c.total) || 0,
-            extras: Array.isArray(c.extras) ? c.extras.map(ex => ({id: String(ex.id), price: parseFloat(ex.price) || 0})) : []
+            price: parseFloat(c.price),
+            quantity: parseInt(c.qty),
+            total: parseFloat(c.total),
+            extras: c.extras.map(ex => ({id: String(ex.id), price: parseFloat(ex.price)}))
         }));
         
-        let btn = e ? $(e.target).closest('button') : $("button:contains('PLACE ORDER')");
-        btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i> Processing...');
+        let btn = $(e.target).closest('button');
+        let oldHtml = btn.html();
+        btn.prop("disabled", true).html('<i class="fas fa-spinner fa-spin"></i>');
         
         let orderData = {
-            order_type: $("input[name='order_type']:checked").val() || "Dine-in",
+            order_type: $("input[name='order_type']:checked").val(),
             table_number: $("#table_number").val() || "",
-            customer_id: customerId === "new" ? null : (customerId || null),
-            customer_name: customerName,
-            customer_phone: customerPhone,
-            note: $("#order_note").val() || "",
-            payment_method: $("#payment_method").val() || "Cash",
+            payment_method: $("#payment_method").val(),
+            customer_id: $("#selected_customer_id").val() || null,
+            customer_phone: $("#customer_phone").val() || null,
+            coupon_id: pos_coupon_id,
             items: pItems,
-            total_amount: parseFloat($("#subTotal").text()) || 0,
-            discount_amount: parseFloat($("#discount").text()) || 0,
-            grand_total: parseFloat($("#grandTotal").text()) || 0
+            total_amount: parseFloat($("#subTotal").text()),
+            discount_amount: pos_discount_val,
+            grand_total: parseFloat($("#grandTotal").text()),
+            _token: "{{ csrf_token() }}"
         };
 
-        console.log("Submitting Raw JSON:", orderData);
-        
         $.ajax({
-            url: "{{ route('pos.store', [], false) }}",
+            url: "{{ route('pos.store') }}",
             method: "POST",
-            headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-            contentType: "application/json",
-            data: JSON.stringify(orderData),
+            data: orderData,
             success: function(res) {
-                console.log("Success Response:", res);
                 if(res.status) {
-                    let printUrl = "{{ url('/cp/orders') }}/" + res.order_id + "/invoice";
-                    window.open(printUrl, "_blank", "width=420,height=650");
-                    setTimeout(function(){
-                        location.reload();
-                    }, 1000);
+                    showToast('success', 'Order Placed!', 'Order #'+res.order_number+' has been created.');
+                    cart = [];
+                    localStorage.removeItem('pos_cart');
+                    pos_discount_val = 0;
+                    pos_coupon_id = null;
+                    $("#discount").text("0.00");
+                    $("#coupon_code").val("");
+                    $("#clear_cust").click();
+                    renderCart();
+                    $("#table_number").val("");
                 } else {
-                    alert(res.message || res.msg || "Error processing order.");
-                    btn.prop("disabled", false).html('<i class="fas fa-print"></i> PLACE ORDER');
+                    showAlert('error', 'Failed', res.message || 'Something went wrong');
                 }
             },
             error: function(xhr) {
-                console.error("Order Error:", xhr);
-                let errorMsg = "Server Error. Please try again.";
-                if(xhr.responseJSON && xhr.responseJSON.msg) {
-                    errorMsg = xhr.responseJSON.msg;
-                } else if(xhr.responseJSON && xhr.responseJSON.message) {
-                    errorMsg = xhr.responseJSON.message;
-                }
-                alert(errorMsg);
-                btn.prop("disabled", false).html('<i class="fas fa-print"></i> PLACE ORDER');
+                let msg = 'Failed to place order';
+                if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                showAlert('error', 'Error', msg);
+            },
+            complete: function() {
+                btn.prop("disabled", false).html(oldHtml);
             }
         });
     }
 </script>
 @endsection
-

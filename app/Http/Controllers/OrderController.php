@@ -27,7 +27,9 @@ class OrderController extends Controller {
     
     public function store(StoreOrderRequest $request) {
         try {
-            $order = $this->repo->createOrder($request->validated());
+            $data = $request->validated();
+            $data['source'] = 'POS';
+            $order = $this->repo->createOrder($data);
             return response()->json([
                 'status' => true,
                 'order_id' => $order->id,
@@ -93,8 +95,8 @@ class OrderController extends Controller {
     }
 
     public function checkPending() {
-        $count = \App\Models\Order::where('status', '!=', 'Completed')->count();
-        $latest = \App\Models\Order::orderBy('id', 'desc')->first();
+        $count = \App\Models\Order::where('status', '!=', 'Completed')->where('source', 'Online')->count();
+        $latest = \App\Models\Order::where('source', 'Online')->orderBy('id', 'desc')->first();
         return response()->json([
             'count' => $count,
             'latest_id' => $latest ? $latest->id : 0,

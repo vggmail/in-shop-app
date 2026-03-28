@@ -26,4 +26,9 @@ class CustomerController extends Controller {
         $this->repo->delete($id);
         return redirect()->back()->with("success", "Customer deleted successfully");
     }
+
+    public function search(Request $request) {
+        $q = $request->query('q', '');
+        return response()->json($this->repo->search($q));
+    }
 }

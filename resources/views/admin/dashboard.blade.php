@@ -142,11 +142,11 @@
                 legend: { display: false },
                 tooltip: {
                     backgroundColor: '#1e293b',
-                    callbacks: { label: (c) => `&#8377;${c.parsed.y.toLocaleString()}` }
+                    callbacks: { label: (c) => `₹${c.parsed.y.toLocaleString()}` }
                 }
             },
             scales: {
-                y: { beginAtZero: true, ticks: { callback: (v) => '&#8377;' + v } },
+                y: { beginAtZero: true, ticks: { callback: (v) => '₹' + v } },
                 x: { grid: { display: false } }
             }
         }

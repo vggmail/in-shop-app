@@ -36,7 +36,9 @@ class OrderRepository extends BaseRepository {
             $order = Order::create([
                 "order_number" => $orderNum,
                 "customer_id" => $customerId,
+                "coupon_id" => $data["coupon_id"] ?? null,
                 "order_type" => $data["order_type"],
+                "source" => $data["source"] ?? "Online",
                 "table_number" => $data["table_number"] ?? null,
                 "note" => $data["note"] ?? null,
                 "total_amount" => $data["total_amount"],
