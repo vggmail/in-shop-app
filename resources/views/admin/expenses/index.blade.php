@@ -16,7 +16,7 @@
         <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
             <div class="card-header bg-white border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
                 <span class="badge border text-dark fw-bold rounded-pill px-3 py-2 bg-light"><i class="fas fa-tag me-1 text-primary"></i> {{ $cat }}</span>
-                <span class="fw-bold text-danger">-₹{{ number_format($group->sum('amount'), 2) }}</span>
+                <span class="fw-bold text-danger">-&#8377;{{ number_format($group->sum('amount'), 2) }}</span>
             </div>
             <div class="card-body px-0">
                 <div class="list-group list-group-flush">
@@ -26,7 +26,7 @@
                             <p class="mb-0 fw-bold small">{{ $e->description ?: "Unspecified Item" }}</p>
                             <small class="text-muted">{{ date("d M, Y", strtotime($e->date)) }}</small>
                         </div>
-                        <span class="text-secondary small fw-bold">-₹{{ number_format($e->amount, 2) }}</span>
+                        <span class="text-secondary small fw-bold">-&#8377;{{ number_format($e->amount, 2) }}</span>
                     </div>
                     @endforeach
                 </div>
@@ -63,7 +63,7 @@
         
         <label class="small fw-bold text-muted text-uppercase mb-1">Expended Amount</label>
         <div class="input-group mb-3">
-            <span class="input-group-text bg-white border-0 fw-bold">$</span>
+            <span class="input-group-text bg-white border-0 fw-bold">&#8377;</span>
             <input type="number" step="0.01" name="amount" class="form-control form-control-lg bg-light border-0 shadow-none text-danger fw-bold" placeholder="0.00" required>
         </div>
 

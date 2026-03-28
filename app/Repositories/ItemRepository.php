@@ -76,7 +76,7 @@ class ItemRepository extends BaseRepository {
                     }
                 }
             }
-            return $i;
+            return true;
         });
     }
 

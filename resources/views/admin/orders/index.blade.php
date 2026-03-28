@@ -1,4 +1,4 @@
-﻿@extends("layouts.admin")
+@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-3">
     <h2>Kitchen / Order Queue</h2>
@@ -19,7 +19,7 @@
                     @endif
                 </td>
                 <td style="max-width: 150px;" class="small text-danger">{{ $o->note }}</td>
-                <td class="font-weight-bold text-success">₹{{ $o->grand_total }}</td>
+                <td class="font-weight-bold text-success">&#8377;{{ $o->grand_total }}</td>
                 <td>
                     <form action="{{ route('orders.updateStatus', $o->id) }}" method="POST">
                         @csrf
