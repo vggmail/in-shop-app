@@ -96,7 +96,7 @@ class CustomerAuthController extends Controller
         $orders = Order::where('customer_id', $customerId)
             ->with(['items.item', 'items.variant', 'items.extras.extra'])
             ->orderBy('id', 'DESC')
-            ->paginate(5); // Load 5 at a time for autoloading
+            ->paginate(12); // Divisible by 2, 3, 4 for grid consistency
 
         if ($request->ajax()) {
             return view('customer.partials.order_cards', compact('orders'))->render();

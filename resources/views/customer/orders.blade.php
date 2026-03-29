@@ -10,11 +10,18 @@
     <style>
         :root { --primary: #ff4757; --dark: #2f3542; --light: #f1f2f6; }
         body { background-color: #f8f9fa; font-family: "Outfit", sans-serif; color: var(--dark); padding-bottom: 90px; }
-        .order-card { border-radius: 25px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; background: white; }
-        .status-badge { font-size: 0.75rem; padding: 6px 15px; border-radius: 30px; font-weight: bold; }
+        .order-card { border-radius: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; background: white; height: 100%; transition: 0.3s; }
+        .order-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
+        .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+        .payment-badge { font-size: 10px; padding: 4px 10px; border-radius: 30px; font-weight: 700; margin-left: 5px; }
+        
+        .orders-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        @media (max-width: 991px) { .orders-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 576px) { .orders-grid { grid-template-columns: 1fr; } .order-card { margin-bottom: 0; } }
+
         .btn-primary { border-radius: 30px; padding: 10px 25px; font-weight: bold; background: var(--primary); border-color: var(--primary); }
         
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; height: 75px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #eee; border-radius: 30px 30px 0 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1050; padding: 0 10px; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); height: 75px; display: flex; align-items: center; justify-content: space-around; border-top: 1px solid #eee; border-radius: 30px 30px 0 0; box-shadow: 0 -5px 25px rgba(0,0,0,0.05); z-index: 1050; padding: 0 10px; }
         .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; text-decoration: none; font-size: 11px; font-weight: 600; width: 60px; height: 60px; transition: 0.3s; }
         .nav-item.active { color: var(--primary); }
         .nav-item i { font-size: 18px; margin-bottom: 4px; }
@@ -56,7 +63,7 @@
             <p class="text-muted small">Swipe down to see more history</p>
         </div>
 
-        <div id="orders-container">
+        <div id="orders-container" class="orders-grid">
             @if($orders->count() > 0)
                 @include('customer.partials.order_cards')
             @else
@@ -86,11 +93,18 @@
         let loading = false;
         let hasMore = @if($orders->hasMorePages()) true @else false @endif;
 
-        $(window).scroll(function() {
-            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 200) {
+        $(window).on('scroll', function() {
+            if ($(window).scrollTop() + $(window).height() >= $(document).height() - 400) {
                 if (!loading && hasMore) {
                     loadMoreOrders();
                 }
+            }
+        });
+
+        $(document).ready(function() {
+            // Check if user is already at the bottom or the content is tiny
+            if ($(window).height() >= $(document).height() && hasMore) {
+                setTimeout(loadMoreOrders, 500);
             }
         });
 

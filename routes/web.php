@@ -20,7 +20,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
 Route::get('/order/{order_number}/success', [HomeController::class, 'orderSuccess'])->name('home.orderSuccess');
 Route::get('/order/{order_number}/check-status', [HomeController::class, 'checkStatus'])->name('home.checkStatus');
-Route::post('/payu/pay/{order_number}', [PayUController::class, 'pay'])->name('payu.pay');
+Route::match(['get', 'post'], '/payu/pay/{order_number}', [PayUController::class, 'pay'])->name('payu.pay');
 Route::match(['get', 'post'], '/payu/success', [PayUController::class, 'success'])->name('payu.success');
 Route::match(['get', 'post'], '/payu/failure', [PayUController::class, 'failure'])->name('payu.failure');
 
