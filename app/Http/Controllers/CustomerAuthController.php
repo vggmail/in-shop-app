@@ -14,7 +14,7 @@ class CustomerAuthController extends Controller
     public function checkPhone(Request $request)
     {
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
-        $customer = Customer::where('phone', $phone)->first();
+        $customer = Customer::withTrashed()->where('phone', $phone)->first();
         
         return response()->json([
             'status' => true,
@@ -32,7 +32,12 @@ class CustomerAuthController extends Controller
         ]);
 
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
-        $customer = Customer::where('phone', $phone)->first();
+        $customer = Customer::withTrashed()->where('phone', $phone)->first();
+
+        // Restore if previously soft-deleted
+        if ($customer && $customer->trashed()) {
+            $customer->restore();
+        }
 
         if ($customer && $customer->pin) {
             // Existing Customer - Verify PIN
