@@ -88,6 +88,7 @@
                 <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Reports</span></a>
                 
                 @if(auth()->user()->role_id == 1)
+                <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}"><i class="fas fa-store"></i> <span>Store Settings</span></a>
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-user-shield"></i> <span>Staff Management</span></a>
                 <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Activity Logs</span></a>
                 @endif
@@ -124,7 +125,7 @@
                             </div>
                         </div>
                         <div class="dropdown">
-                            <div class="d-flex align-items-center pointer ms-2" data-bs-toggle="dropdown">
+                            <div class="d-flex align-items-center pointer ms-2" data-bs-toggle="dropdown" style="cursor: pointer;">
                                 <div class="avatar-circle me-2">
                                     {{ substr(auth()->user()->name, 0, 1) }}
                                 </div>
@@ -133,6 +134,20 @@
                                     <div class="text-muted small" style="font-size: 0.7rem;">{{ auth()->user()->role->name ?? 'Staff' }}</div>
                                 </div>
                             </div>
+                            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mt-2">
+                                <li>
+                                    <a class="dropdown-item py-2 fw-bold small text-dark" href="{{ route('admin.password') }}">
+                                        <i class="fas fa-key me-2 text-muted"></i> Change Password
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{{ route('logout') }}" method="POST" class="m-0 p-0">
+                                        @csrf
+                                        <button type="submit" class="dropdown-item py-2 fw-bold small text-danger"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </nav>

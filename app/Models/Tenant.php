@@ -9,5 +9,5 @@ class Tenant extends Model
 {
     use HasFactory;
     protected $connection = 'mysql';
-    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active'];
+    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active', 'logo', 'tagline', 'address', 'city', 'state', 'pincode', 'phone', 'gst_number'];
 }

@@ -1,15 +1,30 @@
 @extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-3">
+<div class="d-flex justify-content-between mb-3 align-items-center">
     <h2>Kitchen / Order Queue</h2>
+    <form action="{{ route('orders.index') }}" method="GET" class="d-flex" style="max-width: 400px; width: 100%;">
+        <input type="text" name="customer_search" class="form-control me-2 rounded-pill px-3 shadow-sm border-0" placeholder="Search order, mobile or name..." value="{{ request('customer_search') }}">
+        <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="min-width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;"><i class="fas fa-search"></i></button>
+        @if(request('customer_search'))
+            <a href="{{ route('orders.index') }}" class="btn btn-danger ms-2 rounded-circle shadow-sm" style="min-width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;" title="Clear Search"><i class="fas fa-times"></i></a>
+        @endif
+    </form>
 </div>
 <div class="card bg-white p-3 shadow-sm border-0">
     <table class="table table-hover">
-        <thead class="table-light"><tr><th>Order #</th><th>Type/Table</th><th>Note</th><th>Total</th><th>Status</th><th>Payment</th><th>Time</th><th>Action</th></tr></thead>
+        <thead class="table-light"><tr><th>Order / Customer</th><th>Type/Table</th><th>Total</th><th>Status</th><th>Payment</th><th>Time</th><th>Action</th></tr></thead>
         <tbody>
             @foreach($orders as $o)
             <tr>
-                <td class="fw-bold">{{ $o->order_number }}</td>
+                <td>
+                    <div class="fw-bold text-primary" style="font-size: 14px;">{{ $o->order_number }}</div>
+                    @if($o->customer)
+                        <div class="small fw-bold text-dark mt-1">{{ Str::limit($o->customer->name, 15) }}</div>
+                        <div class="small text-muted" style="font-size: 10px;"><i class="fas fa-mobile-alt"></i> {{ $o->customer->phone }}</div>
+                    @else
+                        <div class="small text-muted mt-1" style="font-size: 11px;"><i class="fas fa-user-secret"></i> Guest</div>
+                    @endif
+                </td>
                 <td>
                     @if($o->order_type == "Takeaway")
                         <span class="badge bg-secondary"><i class="fas fa-shopping-bag"></i> Takeaway</span>
@@ -18,7 +33,6 @@
                         <div class="small fw-bold text-muted">{{ $o->table_number }}</div>
                     @endif
                 </td>
-                <td style="max-width: 150px;" class="small text-danger">{{ $o->note }}</td>
                 <td class="font-weight-bold text-success">&#8377;{{ $o->grand_total }}</td>
                 <td>
                     <form action="{{ route('orders.updateStatus', $o->id) }}" method="POST">

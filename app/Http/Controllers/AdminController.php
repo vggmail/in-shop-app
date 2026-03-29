@@ -10,13 +10,14 @@ class AdminController extends Controller {
         $range = $request->get('range', '30d');
         $days = ($range === '6m') ? 180 : 30;
 
-        $todaySales = Order::whereDate("created_at", date("Y-m-d"))->sum("grand_total");
+        $todaySales = Order::whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])->sum('grand_total');
         $totalOrders = Order::count();
         $totalRevenue = Order::sum("grand_total");
         $totalCustomers = \App\Models\Customer::count();
 
         // Real Top Items by Sales Count
         $topItems = \App\Models\OrderItem::select('item_id', \DB::raw('count(*) as total'))
+            ->where('created_at', '>=', now()->subDays($days))
             ->groupBy('item_id')
             ->orderBy('total', 'desc')
             ->with('item')

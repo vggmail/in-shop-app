@@ -1,4 +1,4 @@
-﻿@extends("layouts.admin")
+@extends("layouts.admin")
 @section("content")
 <div class="d-flex justify-content-between mb-4 mt-2">
     <h2><i class="fas fa-users text-primary me-2"></i> CRM - Loyal Customers</h2>
@@ -29,7 +29,7 @@
                 </div>
                 
                 <div class="d-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary w-100 rounded-pill py-1"><i class="fas fa-history small"></i> History</button>
+                    <a href="{{ route('orders.index', ['customer_search' => $c->phone]) }}" class="btn btn-sm btn-outline-primary w-100 rounded-pill py-1 d-flex align-items-center justify-content-center"><i class="fas fa-history small me-1"></i> History</a>
                     <form action="{{ route('customers.destroy', $c->id) }}" method="POST" class="w-100">
                         @csrf @method("DELETE")
                         <button class="btn btn-sm btn-outline-danger w-100 rounded-pill py-1"><i class="fas fa-trash small"></i> Delete</button>
