@@ -40,11 +40,11 @@
     <p>Generated on {{ date('d M Y, h:i A') }}</p>
 </div>
 
-<div class="d-flex justify-content-between mb-4 mt-2 no-print">
+<div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 no-print gap-3 gap-md-0">
     <h2><i class="fas fa-chart-pie text-primary"></i> Analytical Reports</h2>
     <div class="d-flex gap-2">
-        <input type="date" id="report_date" class="form-control" value="{{ date("Y-m-d") }}">
-        <button class="btn btn-dark" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
+        <input type="date" id="report_date" class="form-control w-auto" value="{{ date("Y-m-d") }}">
+        <button class="btn btn-dark text-nowrap" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>
     </div>
 </div>
 
@@ -78,7 +78,8 @@
 <div class="card border-0 shadow-sm mb-4">
     <div class="card-header bg-white fw-bold py-3"><i class="fas fa-list me-2"></i> Recent Orders Breakdown</div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" style="min-width: 600px;">
             <thead class="table-light">
                 <tr>
                     <th>Date</th>
@@ -99,14 +100,16 @@
                 </tr>
                 @endforeach
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-header bg-white fw-bold py-3"><i class="fas fa-wallet me-2"></i> Recent Expenses Breakdown</div>
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0" style="min-width: 600px;">
             <thead class="table-light">
                 <tr>
                     <th>Date</th>
@@ -125,7 +128,8 @@
                 </tr>
                 @endforeach
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
 </div>
 @endsection

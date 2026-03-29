@@ -1,6 +1,6 @@
-﻿@extends("layouts.admin")
+@extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-4 mt-2">
+<div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 gap-3 gap-md-0">
     <div>
         <h2 class="mb-0 fw-bold"><i class="fas fa-users-cog text-danger me-2"></i> User Management</h2>
         <p class="text-muted small">Manage staff access and roles for your shop.</p>

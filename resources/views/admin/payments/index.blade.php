@@ -1,11 +1,11 @@
 @extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 mt-2 gap-3 gap-md-0">
     <div>
         <h2 class="mb-0 fw-bold"><i class="fas fa-credit-card text-success me-2"></i> Payment Reconciliations</h2>
         <p class="text-muted small mb-0">Tracking all cash, card, and digital transactions.</p>
     </div>
-    <a href="{{ route('payments.export') }}" class="btn btn-success fw-bold rounded-pill px-4">
+    <a href="{{ route('payments.export') }}" class="btn btn-success fw-bold rounded-pill px-4 shadow-sm w-100 w-md-auto text-center" style="max-width: fit-content;">
         <i class="fas fa-file-csv me-2"></i> Export CSV
     </a>
 </div>
@@ -15,7 +15,8 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
             <div class="card-header bg-white border-0 py-3 px-4 fw-bold">Recent Transactions</div>
             <div class="card-body p-0">
-                <table class="table table-hover mb-0">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" style="min-width: 600px;">
                     <thead class="table-light">
                         <tr>
                             <th class="ps-4">Reference</th>
@@ -46,6 +47,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
             @if($payments->hasPages())
             <div class="card-footer bg-white border-0 py-3 px-4">

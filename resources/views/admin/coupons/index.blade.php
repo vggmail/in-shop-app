@@ -1,8 +1,13 @@
-﻿@extends("layouts.admin")
+@extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-3 mt-2">
-    <h2><i class="fas fa-ticket-alt text-danger me-2"></i> Promotional Coupons</h2>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCouponModal"><i class="fas fa-plus"></i> New Coupon</button>
+<div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 gap-3 gap-md-0">
+    <div>
+        <h2 class="mb-0 fw-bold"><i class="fas fa-tags text-warning me-2"></i> Discount Coupons</h2>
+        <p class="text-muted small">Create and manage promotional offers for your customers.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <button class="btn btn-warning px-4 rounded-pill shadow-sm text-dark fw-bold" data-bs-toggle="modal" data-bs-target="#addCouponModal"><i class="fas fa-plus small me-2"></i> Create Coupon</button>
+    </div>
 </div>
 
 <div class="row">

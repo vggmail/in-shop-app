@@ -1,17 +1,17 @@
 @extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-4 mt-2">
+<div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 gap-3 gap-md-0">
     <div>
         <h2 class="mb-0 fw-bold"><i class="fas fa-hamburger text-danger me-2"></i> Menu Master</h2>
         <p class="text-muted small">Manage sizes, variations, and extra toppings.</p>
     </div>
-    <div class="d-flex gap-2 align-items-center">
+    <div class="d-flex flex-wrap gap-2 align-items-center">
         <div class="btn-group shadow-sm border rounded-pill overflow-hidden bg-white p-1 me-2" style="background: #f8fafc;">
             <button class="btn btn-sm btn-light border-0 px-3 active-view" id="btnGrid" onclick="setViewMode('grid')"><i class="fas fa-th-large"></i></button>
             <button class="btn btn-sm btn-light border-0 px-3" id="btnList" onclick="setViewMode('list')"><i class="fas fa-list"></i></button>
         </div>
-        <button class="btn btn-outline-success px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk Upload</button>
-        <button class="btn btn-primary px-4 rounded-pill shadow-sm" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
+        <button class="btn btn-outline-success px-4 rounded-pill shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk Upload</button>
+        <button class="btn btn-primary px-4 rounded-pill shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
     </div>
 </div>
 

@@ -1,17 +1,18 @@
 @extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-3 align-items-center">
+<div class="d-flex flex-column flex-md-row justify-content-between mb-3 align-items-md-center gap-3 gap-md-0">
     <h2>Kitchen / Order Queue</h2>
-    <form action="{{ route('orders.index') }}" method="GET" class="d-flex" style="max-width: 400px; width: 100%;">
+    <form action="{{ route('orders.index') }}" method="GET" class="d-flex w-100" style="max-width: 400px;">
         <input type="text" name="customer_search" class="form-control me-2 rounded-pill px-3 shadow-sm border-0" placeholder="Search order, mobile or name..." value="{{ request('customer_search') }}">
-        <button type="submit" class="btn btn-primary rounded-circle shadow-sm" style="min-width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;"><i class="fas fa-search"></i></button>
+        <button type="submit" class="btn btn-primary rounded-circle shadow-sm flex-shrink-0" style="width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;"><i class="fas fa-search"></i></button>
         @if(request('customer_search'))
-            <a href="{{ route('orders.index') }}" class="btn btn-danger ms-2 rounded-circle shadow-sm" style="min-width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;" title="Clear Search"><i class="fas fa-times"></i></a>
+            <a href="{{ route('orders.index') }}" class="btn btn-danger ms-2 rounded-circle shadow-sm flex-shrink-0" style="width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center;" title="Clear Search"><i class="fas fa-times"></i></a>
         @endif
     </form>
 </div>
 <div class="card bg-white p-3 shadow-sm border-0">
-    <table class="table table-hover">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle" style="min-width: 800px;">
         <thead class="table-light"><tr><th>Order / Customer</th><th>Type/Table</th><th>Total</th><th>Status</th><th>Payment</th><th>Time</th><th>Action</th></tr></thead>
         <tbody>
             @foreach($orders as $o)
@@ -61,8 +62,11 @@
             </tr>
             @endforeach
         </tbody>
-    </table>
-    {{ $orders->links("pagination::bootstrap-5") }}
+        </table>
+    </div>
+    <div class="mt-3">
+        {{ $orders->links("pagination::bootstrap-5") }}
+    </div>
 </div>
 @endsection
 

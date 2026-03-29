@@ -1,6 +1,6 @@
 @extends("layouts.admin")
 @section("content")
-<div class="d-flex justify-content-between mb-4 mt-2">
+<div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 gap-3 gap-md-0">
     <h2><i class="fas fa-users text-primary me-2"></i> CRM - Loyal Customers</h2>
 </div>
 
