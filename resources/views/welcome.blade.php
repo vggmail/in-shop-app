@@ -157,12 +157,16 @@
         <div id="login-error-tag" class="alert alert-danger py-2 small fw-bold d-none mb-3 border-0 rounded-3"></div>
         <div id="login-phone-section">
             <label class="small fw-bold text-muted mb-2" style="font-size: 11px;">MOBILE NUMBER</label>
-            <input type="tel" id="login-phone" class="form-control form-control-lg border-0 bg-light rounded-3 mb-3" style="font-size: 16px;" placeholder="10-digit number">
+            <input type="tel" id="login-phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg border-0 bg-light rounded-3 mb-3" style="font-size: 16px;" placeholder="10-digit number">
             <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="checkPhoneExists()"><i class="fas fa-arrow-right me-2"></i> Continue</button>
         </div>
         <div id="login-pin-section" class="d-none text-center">
             <p class="text-muted small mb-1" id="pin-modal-subtitle"></p>
             <h4 class="fw-bold mb-4" id="pin-modal-title"></h4>
+            <div id="setup-name-box" class="mb-3 text-start d-none">
+                <label class="small fw-bold text-muted mb-2" style="font-size: 11px;">YOUR NAME</label>
+                <input type="text" id="login-name" class="form-control form-control-lg border-0 bg-light rounded-3" placeholder="Enter your full name">
+            </div>
             <div class="mb-3 position-relative">
                 <label id="pin-label" class="small fw-bold text-muted d-block mb-2"></label>
                 <input type="password" id="login-pin" maxlength="4" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
@@ -209,7 +213,7 @@
         @if(!isset($customer))
         <div class="row g-3 mb-4">
             <div class="col-12"><label class="small fw-bold text-muted mb-1">YOUR NAME</label><input type="text" id="cust_name" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
-            <div class="col-12"><label class="small fw-bold text-muted mb-1">MOBILE NUMBER</label><input type="tel" id="cust_phone" maxlength="10" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
+            <div class="col-12"><label class="small fw-bold text-muted mb-1">MOBILE NUMBER</label><input type="tel" id="cust_phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
         </div>
         @else
             <div class="mb-4 bg-light p-3 rounded-4 d-flex align-items-center justify-content-between">
@@ -277,7 +281,7 @@
         function submitOrder() {
             @if(!isset($customer))
                 let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();
-                if(!phone || phone.length!==10) return alert("Valid mobile required");
+                if(!phone || !/^[6-9]\d{9}$/.test(phone)) return alert("Please enter a valid 10-digit mobile number.");
                 localStorage.setItem('pending_name', name); 
                 localStorage.setItem('checkout_after_login', 'true'); // Flag to continue after login
                 $("#checkoutModal").modal("hide"); 
@@ -293,7 +297,7 @@
             });
         }
         function checkPhoneExists() {
-            let p = $("#login-phone").val().trim(); if(p.length!==10) return alert("10-digit number required");
+            let p = $("#login-phone").val().trim(); if(!/^[6-9]\d{9}$/.test(p)) return showLoginError("Please enter a valid 10-digit mobile number.");
             $.post("{{ route('customer.checkPhone') }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
                 if(res.status) { 
                     $("#login-phone-section").addClass("d-none"); 
@@ -302,9 +306,12 @@
                     $("#pin-modal-subtitle").text(p);
                     if(!res.exists) {
                         $("#confirm-pin-box").removeClass("d-none");
+                        $("#setup-name-box").removeClass("d-none");
+                        if(localStorage.getItem('pending_name')) { $("#login-name").val(localStorage.getItem('pending_name')); }
                         $("#pin-label").text("CREATE 4-DIGIT PIN");
                     } else {
                         $("#confirm-pin-box").addClass("d-none");
+                        $("#setup-name-box").addClass("d-none");
                         $("#pin-label").text("ENTER PIN");
                     }
                 }
@@ -314,13 +321,15 @@
             let p = $("#login-phone").val().trim(); 
             let pin = $("#login-pin").val().trim();
             let pinConfirm = $("#login-pin-confirm").val().trim();
+            let name = $("#login-name").val() ? $("#login-name").val().trim() : (localStorage.getItem('pending_name') || '');
             
             // Check if confirm box is visible
             if(!$("#confirm-pin-box").hasClass("d-none")) {
+                if(!name) return showLoginError("Please enter your name!");
                 if(pin !== pinConfirm) return showLoginError("PINs do not match!");
             }
 
-            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: localStorage.getItem('pending_name') || '' }, function(res) {
+            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: name }, function(res) {
                 if(res.status) { if(res.device_token) localStorage.setItem('customer_device_token', res.device_token); location.reload(); } else showLoginError(res.message || "Invalid PIN");
             }).fail(function(xhr) {
                 let msg = "Invalid PIN!";
@@ -341,7 +350,7 @@
         function goBackToLoginPhone() {
             $("#login-pin-section").addClass("d-none");
             $("#login-phone-section").removeClass("d-none");
-            $("#login-pin, #login-pin-confirm").val("");
+            $("#login-pin, #login-pin-confirm, #login-name").val("");
             $("#login-error-tag").addClass("d-none");
         }
         function showLoginError(msg) {
