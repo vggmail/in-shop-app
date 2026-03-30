@@ -19,8 +19,9 @@ class IdentifyTenant
         $parts = explode('.', $host);
         $subdomain = null;
 
-        // Skip IP addresses (e.g., 127.0.0.1)
+        // Skip IP addresses (e.g., 127.0.0.1) for DB switching, but still share tenant info
         if (filter_var($host, FILTER_VALIDATE_IP)) {
+            $this->shareFallbackTenant();
             return $next($request);
         }
 
@@ -35,8 +36,9 @@ class IdentifyTenant
             }
         }
 
-        // If no subdomain identified (bare localhost or www), just continue
+        // If no subdomain identified (bare localhost or www), share fallback and continue
         if (!$subdomain) {
+            $this->shareFallbackTenant();
             return $next($request);
         }
 
@@ -63,5 +65,21 @@ class IdentifyTenant
         view()->share('tenant_info', $tenant);
 
         return $next($request);
+    }
+
+    /**
+     * Share a fallback tenant (first record) for local dev / no-subdomain scenarios.
+     */
+    private function shareFallbackTenant(): void
+    {
+        try {
+            $tenant = \App\Models\Tenant::first();
+            if ($tenant) {
+                app()->instance('tenant', $tenant);
+                view()->share('tenant_info', $tenant);
+            }
+        } catch (\Exception $e) {
+            // Silently fail if tenants table doesn't exist
+        }
     }
 }

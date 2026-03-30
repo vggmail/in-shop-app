@@ -20,7 +20,9 @@ class AdminController extends Controller {
             ->where('created_at', '>=', now()->subDays($days))
             ->groupBy('item_id')
             ->orderBy('total', 'desc')
-            ->with('item')
+            ->with(['item' => function($q) {
+                $q->withTrashed();
+            }])
             ->take(5)
             ->get();
 
@@ -35,7 +37,7 @@ class AdminController extends Controller {
     }
 
     public function logs() {
-        $logs = \App\Models\ActivityLog::with('user')->orderBy('id', 'desc')->paginate(50);
+        $logs = \App\Models\ActivityLog::with(['user' => fn($q) => $q->withTrashed()])->orderBy('id', 'desc')->paginate(50);
         return view("admin.logs.index", compact("logs"));
     }
 }

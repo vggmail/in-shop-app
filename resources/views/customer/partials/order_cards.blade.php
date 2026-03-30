@@ -29,7 +29,7 @@
                 @php $itemCount = $order->items->count(); @endphp
                 @foreach($order->items->take(2) as $item)
                     <div class="d-flex justify-content-between x-small mb-1" style="font-size: 11px;">
-                        <span class="text-truncate me-2">{{ $item->quantity }}x {{ $item->item->name }}</span>
+                        <span class="text-truncate me-2">{{ $item->quantity }}x {{ $item->item->name ?? 'Deleted Item' }}</span>
                         <span class="fw-bold">&#8377;{{ number_format($item->total, 0) }}</span>
                     </div>
                 @endforeach

@@ -43,14 +43,14 @@ class OrderController extends Controller {
     }
     
     public function index(Request $request) {
-        $query = \App\Models\Order::with('customer')->orderBy('id', 'desc');
+        $query = \App\Models\Order::with(['customer' => fn($q) => $q->withTrashed()])->orderBy('id', 'desc');
 
         if ($request->filled('customer_search')) {
             $search = $request->customer_search;
             $query->where(function($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
                   ->orWhereHas('customer', function($cq) use ($search) {
-                      $cq->where('name', 'like', "%{$search}%")
+                      $cq->withTrashed()->where('name', 'like', "%{$search}%")
                          ->orWhere('phone', 'like', "%{$search}%");
                   });
             });

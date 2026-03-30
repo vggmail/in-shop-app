@@ -93,7 +93,7 @@
                     <div class="list-group-item px-0 border-0 mb-3 p-2">
                         <div class="d-flex align-items-center">
                             <div class="flex-grow-1">
-                                <h6 class="fw-700 mb-0 text-dark">{{ $ti->item->name }}</h6>
+                                <h6 class="fw-700 mb-0 text-dark">{{ $ti->item ? $ti->item->name : 'Item Deleted (#' . $ti->item_id . ')' }}</h6>
                                 <div class="progress mt-2" style="height: 6px;">
                                     <div class="progress-bar bg-primary rounded-pill" style="width: {{ ($ti->total / ($topItems->first()->total ?: 1)) * 100 }}%"></div>
                                 </div>

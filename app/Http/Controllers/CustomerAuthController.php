@@ -99,7 +99,11 @@ class CustomerAuthController extends Controller
 
         $customer = Customer::find($customerId);
         $orders = Order::where('customer_id', $customerId)
-            ->with(['items.item', 'items.variant', 'items.extras.extra'])
+            ->with([
+                'items.item' => fn($q) => $q->withTrashed(),
+                'items.variant',
+                'items.extras.extra'
+            ])
             ->orderBy('id', 'DESC')
             ->paginate(12); // Divisible by 2, 3, 4 for grid consistency
 
@@ -117,7 +121,11 @@ class CustomerAuthController extends Controller
 
         $order = Order::where('order_number', $order_number)
             ->where('customer_id', $customerId)
-            ->with(['items.item', 'items.variant', 'items.extras.extra'])
+            ->with([
+                'items.item' => fn($q) => $q->withTrashed(),
+                'items.variant',
+                'items.extras.extra'
+            ])
             ->firstOrFail();
 
         $cart = [];

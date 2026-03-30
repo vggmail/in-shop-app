@@ -97,9 +97,14 @@
             <div class="p-3 bg-light-subtle border-bottom">
                 <div class="btn-group w-100 rounded-3 overflow-hidden shadow-sm" role="group">
                     <input type="radio" class="btn-check" name="order_type" id="type-dinein" value="Dine-in" checked autocomplete="off">
-                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-dinein" style="height: 42px;"><i class="fas fa-chair me-2"></i>Dine In</label>
+                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-dinein" style="height: 42px;"><i class="fas fa-chair me-1"></i>Dine In</label>
                     <input type="radio" class="btn-check" name="order_type" id="type-takeaway" value="Takeaway" autocomplete="off">
-                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-takeaway" style="height: 42px;"><i class="fas fa-walking me-2"></i>Takeaway</label>
+                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-takeaway" style="height: 42px;"><i class="fas fa-walking me-1"></i>Takeaway</label>
+                    <input type="radio" class="btn-check" name="order_type" id="type-delivery" value="Home Delivery" autocomplete="off">
+                    <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-delivery" style="height: 42px;"><i class="fas fa-motorcycle me-1"></i>Delivery</label>
+                </div>
+                <div id="delivery-addr-box" class="mt-2" style="display:none;">
+                    <textarea id="delivery_address" class="form-control border-0 bg-white rounded-3" rows="2" placeholder="Enter delivery address..." style="font-size: 0.85rem;"></textarea>
                 </div>
             </div>
 
@@ -232,8 +237,11 @@
     });
 
     $("input[name='order_type']").change(function(){
-        if(this.value === "Takeaway") $("#table-number-box").slideUp();
+        let val = this.value;
+        if(val === 'Takeaway' || val === 'Home Delivery') $("#table-number-box").slideUp();
         else $("#table-number-box").slideDown();
+        if(val === 'Home Delivery') $("#delivery-addr-box").slideDown();
+        else $("#delivery-addr-box").slideUp();
     });
 
     function openItemModal(id, name, price, variants, extras) {
@@ -464,6 +472,7 @@
             total_amount: parseFloat($("#subTotal").text()),
             discount_amount: pos_discount_val,
             grand_total: parseFloat($("#grandTotal").text()),
+            delivery_address: $("#delivery_address").val() || "",
             _token: "{{ csrf_token() }}"
         };
 

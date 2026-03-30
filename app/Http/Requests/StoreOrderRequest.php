@@ -18,8 +18,9 @@ class StoreOrderRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'order_type' => 'required|in:Dine-in,Takeaway',
+            'order_type' => 'required|in:Dine-in,Takeaway,Home Delivery',
             'table_number' => 'nullable|string|max:10',
+            'delivery_address' => 'nullable|string|max:500',
             'customer_id' => 'nullable|exists:customers,id',
             'customer_name' => 'nullable|string|max:255',
             'customer_phone' => 'nullable|string|max:20',

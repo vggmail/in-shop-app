@@ -32,7 +32,7 @@
                             <i class="fas fa-upload me-1"></i> Upload New Logo
                         </label>
                         <input type="file" id="logo" name="logo" class="d-none" accept="image/*">
-                        <small class="text-muted d-block mt-2" style="font-size: 11px;">Max size 2MB (PNG/JPG)</small>
+                        <small class="text-muted d-block mt-2" style="font-size: 11px;">Recommended: 512x512px Square. Max: 2MB (PNG/JPG)</small>
                     </div>
                     <div class="col-md-9">
                         <div class="mb-3">

@@ -1,4 +1,4 @@
-﻿@extends("layouts.admin")
+@extends("layouts.admin")
 @section("content")
 <div class="card p-4 shadow border-0">
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -12,10 +12,15 @@
             <p class="mb-1"><strong>Type:</strong> 
                 @if($order->order_type == "Takeaway")
                     <span class="badge bg-secondary"><i class="fas fa-shopping-bag"></i> Takeaway</span>
+                @elseif($order->order_type == "Home Delivery")
+                    <span class="badge bg-info text-dark"><i class="fas fa-motorcycle"></i> Home Delivery</span>
                 @else
                     <span class="badge bg-primary"><i class="fas fa-chair"></i> Dine-In</span> (Table: <strong>{{ $order->table_number }}</strong>)
                 @endif
             </p>
+            @if($order->order_type == "Home Delivery" && $order->delivery_address)
+            <p class="mb-1 small"><strong>Address:</strong> {{ $order->delivery_address }}</p>
+            @endif
             <p class="mb-0"><strong>Status:</strong> 
                 <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="d-inline-flex align-items-center mt-2">
                     @csrf
@@ -57,14 +62,14 @@
                 <td class="align-middle">
                     <span class="fw-bold fs-6">{{ $item->item ? $item->item->name : 'No Item' }}</span>
                     @if($item->variant)
-                        <span class="badge bg-secondary ms-2">{{ $item->variant->name }}</span>
+                        <span class="badge bg-secondary ms-2">{{ $item->variant->name ?? 'Default' }}</span>
                     @endif
                     
                     @if($item->extras->count() > 0)
                         <div class="mt-1 small text-muted">
                             <i class="fas fa-plus text-success" style="font-size: 10px;"></i> 
                             @foreach($item->extras as $e)
-                                {{ $e->extra->name }} (+₹{{ number_format($e->price, 2) }}){{ !$loop->last ? ', ' : '' }}
+                                {{ $e->extra->name ?? 'Extra' }} (+₹{{ number_format($e->price, 2) }}){{ !$loop->last ? ', ' : '' }}
                             @endforeach
                         </div>
                     @endif

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fast Food Hub - Fresh Burgers, Pizza & More | Order Online</title>
+    <title>{{ $tenant_info->name ?? 'Fast Food Hub' }} - Fresh Burgers, Pizza & More | Order Online</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -50,8 +50,12 @@
             @else
                 <p class="small fw-bold text-uppercase mb-1" style="letter-spacing: 1px; color: var(--accent);">{{ $greet }}! What would you like to eat today? 👋</p>
             @endif
-            <h2 class="fw-800 fs-2 mb-0" style="letter-spacing: -1.5px;">FAST FOOD HUB</h2>
-            <p class="small opacity-75 fw-bold" style="font-size: 11px;">Fresh • Fast • Delicious</p>
+            @if(!empty($tenant_info->logo))
+                <img src="{{ asset($tenant_info->logo) }}" class="mb-2 rounded-3 shadow-sm" style="height: 70px; object-fit: contain;" alt="Logo">
+            @else
+                <h2 class="fw-800 fs-2 mb-0" style="letter-spacing: -1.5px;">{{ strtoupper($tenant_info->name ?? 'FAST FOOD HUB') }}</h2>
+            @endif
+            <p class="small opacity-75 fw-bold" style="font-size: 11px;">{{ $tenant_info->tagline ?? 'Fresh • Fast • Delicious' }}</p>
         </div>
     </div>
 
@@ -89,8 +93,14 @@
             <label class="small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 1px;">Ready for seconds?</label>
             <div class="d-flex overflow-auto gap-3 pb-2 no-scrollbar">
                 @foreach($recentItems as $ri)
-                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }})">
-                    <i class="fas fa-history"></i>
+                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->image }}')">
+                    <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
+                        @if($ri->image)
+                            <img src="{{ asset('storage/'.$ri->image) }}" class="w-100 h-100 object-fit-cover">
+                        @else
+                            <i class="fas fa-history text-primary"></i>
+                        @endif
+                    </div>
                     <div class="small fw-bold text-truncate">{{ $ri->name }}</div>
                     <div class="small text-primary fw-bold">₹{{ $ri->price }}</div>
                 </div>
@@ -122,11 +132,15 @@
         <div class="row g-3 mt-2" id="menu-grid">
             @foreach($items as $i)
             <div class="col-6 col-md-4 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
-                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
-                    <div class="food-img position-relative">
-                        <i class="fas fa-hamburger fa-2x"></i>
+                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
+                    <div class="food-img position-relative overflow-hidden">
+                        @if($i->image)
+                            <img src="{{ asset('storage/'.$i->image) }}" class="w-100 h-100 object-fit-cover">
+                        @else
+                            <i class="fas fa-hamburger fa-2x"></i>
+                        @endif
                         <div class="position-absolute top-0 end-0 p-2">
-                            <span class="badge bg-success rounded-pill shadow-sm" style="font-size: 8px;">HOT & FRESH</span>
+                            <span class="badge bg-success rounded-pill shadow-sm d-none" style="font-size: 8px;">HOT & FRESH</span>
                         </div>
                     </div>
                     <div class="card-body p-3">
@@ -188,7 +202,9 @@
 
     <!-- Food Modal -->
     <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4">
-        <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
+        <div id="m-image-box" class="mb-3 rounded-4 overflow-hidden shadow-sm d-none" style="height: 180px;">
+            <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
+        </div>
         <h4 class="fw-bold mb-1" id="m-food-name">Food Name</h4>
         <p class="text-muted small mb-4">Fresh ingredients & special sauces.</p>
         <div id="m-variants-box" class="mb-4 d-none">
@@ -230,10 +246,15 @@
             <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Order Type</label>
             <div class="btn-group w-100 shadow-sm rounded-pill overflow-hidden border">
                 <input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" checked>
-                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-dine"><i class="fas fa-chair me-2"></i> Dine-In</label>
+                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-dine"><i class="fas fa-chair me-1"></i> Dine-In</label>
                 <input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway">
-                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-away"><i class="fas fa-walking me-2"></i> Takeaway</label>
+                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-away"><i class="fas fa-walking me-1"></i> Takeaway</label>
+                <input type="radio" class="btn-check" name="order_type" id="t-delivery" value="Home Delivery">
+                <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-delivery"><i class="fas fa-motorcycle me-1"></i> Delivery</label>
             </div>
+        </div>
+        <div class="mb-4" id="delivery-address-box" style="display: none;">
+            <textarea id="delivery_address" class="form-control border-0 bg-light rounded-4 px-4 py-3" style="font-size: 14px;" rows="2" placeholder="Enter delivery address..."></textarea>
         </div>
         <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" style="font-size: 14px;" placeholder="Table No (Optional)"></div>
         <div class="mb-4">
@@ -255,9 +276,19 @@
         $(document).ready(function() { renderCart(); });
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
-        function openFoodModal(id, name, price, variants, extras) {
+        $(document).on('change', 'input[name="order_type"]', function() {
+            let val = $(this).val();
+            if(val === 'Home Delivery') { $('#delivery-address-box').slideDown(); } else { $('#delivery-address-box').slideUp(); }
+        });
+        function openFoodModal(id, name, price, variants, extras, image = null) {
             currentItem = { id, name, price, variants, extras };
             $("#m-food-name").text(name); $("#m-variants-list, #m-extras-list").empty();
+            if(image && image !== 'null' && image !== '') {
+                $("#m-image-box").removeClass("d-none");
+                $("#m-food-image").attr("src", "/storage/" + image);
+            } else {
+                $("#m-image-box").addClass("d-none");
+            }
             if(variants.length) { $("#m-variants-box").removeClass("d-none"); $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="Standard" checked><label class="btn btn-outline-dark rounded-pill py-2" for="v_def">Standard</label>`); variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); } else { $("#m-variants-box").addClass("d-none"); }
             if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
             updateMTotal(); new bootstrap.Modal(document.getElementById("foodModal")).show();
@@ -292,7 +323,7 @@
             @endif
             let items = cart.map(c => ({ item_id: c.item_id, variant_id: c.variant_id, price: c.price, quantity: c.qty, total: c.price * c.qty, extras: c.extras.map(e => ({ id: e.id, price: e.price })) }));
             $("#placeOrderBtn").prop("disabled", true).text("Processing...");
-            $.post("{{ route('home.store') }}", { _token: "{{ csrf_token() }}", customer_name: $("#cust_name").val(), customer_phone: $("#cust_phone").val(), order_type: $("input[name='order_type']:checked").val(), payment_method: $("input[name='payment_method']:checked").val(), table_number: $("#table_number").val(), items: JSON.stringify(items), total_amount: parseFloat($("#checkout-total").text()), grand_total: parseFloat($("#checkout-total").text()) }, function(res) {
+            $.post("{{ route('home.store') }}", { _token: "{{ csrf_token() }}", customer_name: $("#cust_name").val(), customer_phone: $("#cust_phone").val(), order_type: $("input[name='order_type']:checked").val(), payment_method: $("input[name='payment_method']:checked").val(), table_number: $("#table_number").val(), delivery_address: $("#delivery_address").val(), items: JSON.stringify(items), total_amount: parseFloat($("#checkout-total").text()), grand_total: parseFloat($("#checkout-total").text()) }, function(res) {
                 if(res.status) { localStorage.removeItem('cart'); if(res.redirect_url) window.location.href = res.redirect_url; else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; } else alert(res.message || "Error placing order");
             });
         }

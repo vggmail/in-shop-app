@@ -46,9 +46,12 @@
             </div>
             <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-muted">Type</span>
-                <span class="text-dark fw-bold">
+                <span class="text-dark fw-bold text-end">
                     {{ $order->order_type }}
                     @if($order->table_number) <span class="badge bg-danger ms-1">Table {{ $order->table_number }}</span> @endif
+                    @if($order->order_type == "Home Delivery" && $order->delivery_address)
+                        <br><span class="text-muted" style="font-size: 11px; font-weight: normal;">{{ $order->delivery_address }}</span>
+                    @endif
                 </span>
             </div>
             <div class="d-flex justify-content-between mb-2 small">
@@ -137,7 +140,7 @@
                     <div>
                         <div class="fw-bold">{{ $orderItem->quantity }}x {{ $orderItem->item->name ?? 'Food Item' }}</div>
                         @if($orderItem->variant)
-                            <div class="small text-muted mb-1"><i class="fas fa-caret-right me-1"></i>{{ $orderItem->variant->name }}</div>
+                            <div class="small text-muted mb-1"><i class="fas fa-caret-right me-1"></i>{{ $orderItem->variant->name ?? 'Default' }}</div>
                         @endif
                         @if($orderItem->extras->count() > 0)
                             <div class="small text-success"><i class="fas fa-plus me-1"></i>

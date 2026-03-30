@@ -29,6 +29,11 @@
                 <td>
                     @if($o->order_type == "Takeaway")
                         <span class="badge bg-secondary"><i class="fas fa-shopping-bag"></i> Takeaway</span>
+                    @elseif($o->order_type == "Home Delivery")
+                        <span class="badge bg-info text-dark"><i class="fas fa-motorcycle"></i> Home Delivery</span>
+                        @if($o->delivery_address)
+                        <div class="small text-muted" style="font-size: 11px;" title="{{ $o->delivery_address }}">{{ Str::limit($o->delivery_address, 20) }}</div>
+                        @endif
                     @else
                         <span class="badge bg-primary"><i class="fas fa-chair"></i> Dine-In</span>
                         <div class="small fw-bold text-muted">{{ $o->table_number }}</div>

@@ -16,12 +16,20 @@ class ItemController extends Controller {
     }
     
     public function store(Request $request) {
-        $this->repo->create($request->all());
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('items', 'public');
+        }
+        $this->repo->create($data);
         return redirect()->back()->with("success", "Item added successfully");
     }
     
     public function update(Request $request, $id) {
-        $this->repo->update($id, $request->all());
+        $data = $request->all();
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('items', 'public');
+        }
+        $this->repo->update($id, $data);
         return redirect()->back()->with("success", "Item updated successfully");
     }
     

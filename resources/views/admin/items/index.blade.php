@@ -19,9 +19,15 @@
     @foreach($items as $i)
     <div class="col-md-3 mb-4">
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 item-hover">
-            <div class="position-relative bg-light text-center py-4 text-muted">
-                <i class="fas fa-utensils fa-3x"></i>
-                <span class="badge {{ $i->stock_quantity > 0 ? 'bg-success' : 'bg-danger' }} position-absolute" style="top:10px; right:10px;">{{ $i->stock_quantity }} in stock</span>
+            <div class="position-relative bg-light text-center rounded-top-4 overflow-hidden" style="height: 180px;">
+                @if($i->image)
+                    <img src="{{ asset('storage/'.$i->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $i->name }}">
+                @else
+                    <div class="d-flex align-items-center justify-content-center h-100 text-muted">
+                        <i class="fas fa-utensils fa-3x"></i>
+                    </div>
+                @endif
+                <span class="badge {{ $i->stock_quantity > 0 ? 'bg-success' : 'bg-danger' }} position-absolute shadow-sm" style="top:10px; right:10px;">{{ $i->stock_quantity }} in stock</span>
             </div>
             <div class="card-body p-4">
                 <h5 class="fw-bold mb-1 d-flex justify-content-between align-items-center">
@@ -51,7 +57,7 @@
 
                 <div class="d-flex gap-2 mt-auto">
                     <button class="btn btn-sm btn-outline-dark w-100 rounded-pill" 
-                        onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
+                        onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
                         <i class="fas fa-edit small me-1"></i> Edit
                     </button>
                     <form action="{{ route('items.destroy', $i->id) }}" method="POST" class="w-100">
@@ -86,8 +92,19 @@
                     @foreach($items as $i)
                     <tr>
                         <td class="ps-4">
-                            <div class="fw-bold text-dark">{{ $i->name }}</div>
-                            <div class="small text-muted">{{ $i->variants->count() }} Variants · {{ $i->extras->count() }} Extras</div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-3 me-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px; min-width: 48px; overflow: hidden;">
+                                    @if($i->image)
+                                        <img src="{{ asset('storage/'.$i->image) }}" class="w-100 h-100 object-fit-cover">
+                                    @else
+                                        <i class="fas fa-utensils text-muted small"></i>
+                                    @endif
+                                </div>
+                                <div>
+                                    <div class="fw-bold text-dark">{{ $i->name }}</div>
+                                    <div class="small text-muted">{{ $i->variants->count() }} Variants · {{ $i->extras->count() }} Extras</div>
+                                </div>
+                            </div>
                         </td>
                         <td><span class="badge bg-light text-dark fw-normal border">{{ $i->category->name }}</span></td>
                         <td>
@@ -111,7 +128,7 @@
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
                                 <button class="btn btn-sm btn-light border shadow-sm rounded-pill px-3" title="Edit"
-                                onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})">
+                                onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
                                     <i class="fas fa-edit text-primary small me-1"></i> <small class="fw-bold">Edit</small>
                                 </button>
                                 <form action="{{ route('items.destroy', $i->id) }}" method="POST">
@@ -156,7 +173,7 @@
 </div></div></div>
 
 <!-- ITEM MODAL (ADD/EDIT) -->
-<div class="modal fade" id="itemModal"><div class="modal-dialog modal-lg"><div class="modal-content border-0 shadow-lg"><form id="itemForm" method="POST">
+<div class="modal fade" id="itemModal"><div class="modal-dialog modal-lg"><div class="modal-content border-0 shadow-lg"><form id="itemForm" method="POST" enctype="multipart/form-data">
     @csrf <span id="method_field"></span>
     <div class="modal-header border-0 pb-0 pt-4 px-4"><h5 class="modal-title fw-bold" id="itemModalTitle">Manage Menu Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body p-4">
@@ -186,6 +203,16 @@
             <div class="col-md-3">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Low Alert Limit</label>
                 <input type="number" name="low_stock_limit" id="f_limit" class="form-control bg-light border-0" value="10" required>
+            </div>
+            <div class="col-md-12">
+                <label class="small fw-bold text-muted text-uppercase mb-1">Item Image</label>
+                <div class="d-flex align-items-center bg-light p-2 rounded-3">
+                    <div id="image_preview" class="me-3 rounded shadow-sm overflow-hidden d-none" style="width: 60px; height: 60px; min-width: 60px;">
+                        <img src="" id="img_preview_tag" class="w-100 h-100 object-fit-cover">
+                    </div>
+                    <input type="file" name="image" id="f_image" class="form-control bg-transparent border-0" accept="image/*">
+                </div>
+                <small class="text-muted" style="font-size: 10px;">Best size: 500x500px square (1:1 ratio). Max 2MB. PNG/JPG/WebP. Leave empty to keep existing.</small>
             </div>
         </div>
 
@@ -241,7 +268,7 @@ function openAddItem() {
     new bootstrap.Modal(document.getElementById("itemModal")).show();
 }
 
-function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, extras) {
+function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, extras, image = null) {
     $("#itemForm").attr("action", "/cp/items/" + id);
     $("#method_field").html('@method("PUT")');
     $("#itemModalTitle").text("Edit Item Details");
@@ -251,6 +278,14 @@ function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, ex
     $("#f_mrp").val(mrp);
     $("#f_stock").val(stock);
     $("#f_limit").val(limit);
+    $("#f_image").val('');
+    
+    if (image) {
+        $("#image_preview").removeClass('d-none');
+        $("#img_preview_tag").attr('src', '/storage/' + image);
+    } else {
+        $("#image_preview").addClass('d-none');
+    }
     
     $("#v-container, #e-container").empty();
     variants.forEach(v => addRow('v-container', 'variants', v.name, v.price));

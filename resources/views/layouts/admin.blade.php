@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Restaurant POS Management</title>
+    <title>{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? 'Restaurant POS' }} - Admin Panel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -69,8 +69,15 @@
     <div class="sidebar-overlay" id="sidebar-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1040; display: none;"></div>
     <div class="row g-0 flex-nowrap min-vh-100">
         <div class="col-auto sidebar" id="admin-sidebar">
-                <div class="px-3 py-3">
-                    <h3 class="text-white fw-bold mb-0 d-flex align-items-center"><i class="fas fa-utensils text-danger me-2"></i> Fast Food</h3>
+                <div class="px-3 py-3 d-flex align-items-center">
+                    @if(isset($tenant_info) && $tenant_info->logo)
+                        <img src="{{ asset($tenant_info->logo) }}" class="rounded-circle me-2 shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
+                    @else
+                        <div class="bg-danger rounded-circle me-2 d-flex align-items-center justify-content-center shadow-sm" style="width: 32px; height: 32px; min-width: 32px;">
+                            <i class="fas fa-utensils text-white small"></i>
+                        </div>
+                    @endif
+                    <h5 class="text-white fw-bold mb-0 text-truncate">{{ $tenant_info->name ?? 'Fast Food' }}</h5>
                 </div>
                 
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>

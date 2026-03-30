@@ -23,10 +23,29 @@ class UserAdminController extends Controller {
     public function store(Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => 'required|string|email|max:255',
             'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id'
         ]);
+
+        $user = User::withTrashed()->where("email", $request->email)->first();
+        
+        if ($user) {
+            if (!$user->trashed()) {
+                return redirect()->back()->withErrors(['email' => 'This email is already in use by an active staff member.'])->withInput();
+            }
+            
+            // Re-activate previously deleted user
+            $user->restore();
+            $user->update([
+                'name' => $request->name,
+                'password' => Hash::make($request->password),
+                'role_id' => $request->role_id,
+                'phone' => $request->phone
+            ]);
+            
+            return redirect()->back()->with("success", "Previously deleted staff account (" . $request->email . ") has been restored.");
+        }
 
         User::create([
             'name' => $request->name,
@@ -40,6 +59,12 @@ class UserAdminController extends Controller {
     }
 
     public function update(Request $request, $id) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'role_id' => 'required|exists:roles,id'
+        ]);
+
         $user = User::findOrFail($id);
         $user->name = $request->name;
         $user->email = $request->email;
@@ -54,8 +79,17 @@ class UserAdminController extends Controller {
     }
 
     public function destroy($id) {
-        if($id == auth()->id()) return redirect()->back()->with("error", "You cannot delete yourself.");
+        $isSelf = ($id == auth()->id());
+        
         User::destroy($id);
+        
+        if ($isSelf) {
+            auth()->logout();
+            request()->session()->invalidate();
+            request()->session()->regenerateToken();
+            return redirect('/login')->with("success", "Your account has been deleted.");
+        }
+        
         return redirect()->back()->with("success", "User deleted successfully");
     }
 }

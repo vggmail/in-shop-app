@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -41,6 +41,10 @@
                 <b>{{ strtoupper($order->order_type) }}</b>
                 @if($order->order_type == "Dine-in")
                     - TABLE: <b>{{ $order->table_number }}</b>
+                @elseif($order->order_type == "Home Delivery" && $order->delivery_address)
+                    <div style="font-size: 11px; font-weight: normal; margin-top: 3px; border-top: 1px dashed #000; padding-top: 3px;">
+                        <b>Address:</b> {{ $order->delivery_address }}
+                    </div>
                 @endif
             </div>
         </div>
@@ -67,12 +71,12 @@
                         <td style="padding-bottom: 3px;">
                             <span class="fw-bold">{{ strtoupper($item->item ? $item->item->name : "ITEM") }}</span>
                             @if($item->variant)
-                                <br><small>[{{ substr($item->variant->name, 0, 8) }}]</small>
+                                <br><small>[{{ substr($item->variant->name ?? 'Default', 0, 8) }}]</small>
                             @endif
                             @if($item->extras->count() > 0)
                                 <div style="font-size: 9px; margin-top: 1px;">
                                 @foreach($item->extras as $e)
-                                    +{{ substr($e->extra->name, 0, 10) }}
+                                    +{{ substr($e->extra->name ?? 'Extra', 0, 10) }}
                                 @endforeach
                                 </div>
                             @endif

@@ -15,7 +15,13 @@ class OrderRepository extends BaseRepository {
 
     public function getAll() { return $this->paginate(15, ["*"], ["customer"]); }
     public function find(int $id, array $relations = []): ?\Illuminate\Database\Eloquent\Model { 
-        return parent::find($id, ["customer", "items.item", "items.variant", "items.extras.extra", "payments"]); 
+        return parent::find($id, [
+            "customer" => fn($q) => $q->withTrashed(), 
+            "items.item" => fn($q) => $q->withTrashed(), 
+            "items.variant", 
+            "items.extras.extra", 
+            "payments"
+        ]); 
     }
     
     public function createOrder($data) {
@@ -40,6 +46,7 @@ class OrderRepository extends BaseRepository {
                 "order_type" => $data["order_type"],
                 "source" => $data["source"] ?? "Online",
                 "table_number" => $data["table_number"] ?? null,
+                "delivery_address" => $data["delivery_address"] ?? null,
                 "note" => $data["note"] ?? null,
                 "total_amount" => $data["total_amount"],
                 "discount_amount" => $data["discount_amount"] ?? 0,
