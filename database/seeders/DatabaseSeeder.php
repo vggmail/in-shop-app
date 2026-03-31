@@ -12,40 +12,43 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminRole = Role::create(['name' => 'Admin']);
-        $cashierRole = Role::create(['name' => 'Cashier']);
+        // 1. Seed Tenant dynamically based on the current database connection
+        if (\Illuminate\Support\Facades\DB::connection('tenant')->table('tenants')->count() === 0) {
+            $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+            $prefix = env('DB_PREFIX', '');
+            
+            // Extract subdomain from the database name
+            $subdomain = str_replace($prefix, '', $dbName);
+            
+            // Fallback for local main database migrations
+            if (empty($subdomain) || $subdomain === 'forge' || $subdomain === env('DB_DATABASE')) {
+                $subdomain = 'retail'; 
+            }
 
-        User::factory()->create([
-            'name' => 'Admin User',
-            'email' => 'admin@admin.com',
-            'phone' => '1234567890',
-            'role_id' => $adminRole->id,
-            'password' => bcrypt('password'),
-        ]);
+            \Illuminate\Support\Facades\DB::connection('tenant')->table('tenants')->insert([
+                'subdomain' => $subdomain,
+                'name' => ucfirst($subdomain) . ' Store',
+                'is_active' => true,
+                'tagline' => 'Fresh & Fast!',
+                'phone' => '1234567890',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
 
-        $cat1 = Category::create(['name' => 'Burger', 'slug' => 'burger']);
-        $cat2 = Category::create(['name' => 'Pizza', 'slug' => 'pizza']);
-        $cat3 = Category::create(['name' => 'Chowmein', 'slug' => 'chowmein']);
+        // 2. Roles & Admin
+        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $cashierRole = Role::firstOrCreate(['name' => 'Cashier']);
 
-        // Burger
-        $item1 = Item::create([
-            'category_id' => $cat1->id,
-            'name' => 'Chicken Burger',
-            'price' => 5.00,
-            'is_available' => true,
-        ]);
-        ItemExtra::create(['item_id' => $item1->id, 'name' => 'Extra Cheese', 'price' => 1.00]);
-        ItemExtra::create(['item_id' => $item1->id, 'name' => 'Extra Mayo', 'price' => 0.50]);
+        if (User::count() === 0) {
+            User::create([
+                'name' => 'Admin User',
+                'email' => 'admin@admin.com',
+                'phone' => '1234567890',
+                'role_id' => $adminRole->id,
+                'password' => bcrypt('password'),
+            ]);
+        }
 
-        // Pizza
-        $item2 = Item::create([
-            'category_id' => $cat2->id,
-            'name' => 'Pepperoni Pizza',
-            'price' => 10.00,
-            'is_available' => true,
-        ]);
-        ItemVariant::create(['item_id' => $item2->id, 'name' => 'Medium', 'price' => 10.00]);
-        ItemVariant::create(['item_id' => $item2->id, 'name' => 'Large', 'price' => 15.00]);
-        ItemExtra::create(['item_id' => $item2->id, 'name' => 'Mushroom Topping', 'price' => 2.00]);
     }
 }
