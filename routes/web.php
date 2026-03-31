@@ -34,6 +34,18 @@ Route::get('/run-migrate', function () {
     return 'Migrations executed successfully!';
 });
 
+Route::get('/optimize', function () {
+    \Illuminate\Support\Facades\Artisan::call('config:cache');
+    \Illuminate\Support\Facades\Artisan::call('route:cache');
+    \Illuminate\Support\Facades\Artisan::call('view:cache');
+    return 'Application optimized successfully! (Config, Route, and View cache created)';
+});
+
+Route::get('/clear-cache', function () {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return 'All cache cleared successfully!';
+});
+
 // Customer Auth & History
 Route::post('/customer/check-phone', [CustomerAuthController::class, 'checkPhone'])->name('customer.checkPhone');
 Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('customer.login');

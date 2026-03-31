@@ -1,2 +1,13 @@
 User-agent: *
-Disallow:
+Disallow: /cp/
+Disallow: /order/
+Disallow: /api/
+Disallow: /storage/
+Disallow: /private/
+Disallow: /temp/
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
