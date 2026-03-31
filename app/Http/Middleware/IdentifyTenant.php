@@ -50,7 +50,7 @@ class IdentifyTenant
         }
 
         // Configure the 'tenant' connection dynamically: prefix + subdomain
-        $prefix = env('DB_PREFIX', '');
+        $prefix = config('database.tenant_prefix', '');
         $dbName = $prefix . $subdomain;
 
         \Illuminate\Support\Facades\Config::set('database.connections.tenant.database', $dbName);

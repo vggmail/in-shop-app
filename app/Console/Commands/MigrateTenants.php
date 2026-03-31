@@ -32,7 +32,7 @@ class MigrateTenants extends Command
             return;
         }
 
-        $prefix = env('DB_PREFIX', '');
+        $prefix = config('database.tenant_prefix', '');
 
         foreach ($tenants as $tenant) {
             // Skip localhost and bare IPs
