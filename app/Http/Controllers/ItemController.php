@@ -39,12 +39,12 @@ class ItemController extends Controller {
     }
 
     public function sampleCsv() {
-        $headers = ['category_name', 'name', 'price', 'stock_quantity', 'is_available'];
+        $headers = ['category_name', 'name', 'description', 'default_size', 'price', 'mrp', 'stock_quantity', 'low_stock_limit', 'is_available'];
         $callback = function() use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
-            fputcsv($file, ['Burgers', 'Cheese Burger', '5.99', '50', '1']);
-            fputcsv($file, ['Drinks', 'Cola', '1.99', '100', '1']);
+            fputcsv($file, ['Burgers', 'Cheese Burger', 'Delicious burger with extra cheese', 'Regular', '99.00', '120.00', '50', '10', '1']);
+            fputcsv($file, ['Drinks', 'Cola', 'Cold bubbly drink', '500ml', '45.00', '50.00', '100', '20', '1']);
             fclose($file);
         };
         return response()->stream($callback, 200, [
@@ -88,8 +88,12 @@ class ItemController extends Controller {
             $this->repo->create([
                 'category_id' => $category->id,
                 'name' => trim($name),
+                'description' => trim($data['description'] ?? ''),
+                'default_size' => trim($data['default_size'] ?? ''),
                 'price' => $data['price'] ?? 0,
+                'mrp' => $data['mrp'] ?? null,
                 'stock_quantity' => $data['stock_quantity'] ?? 0,
+                'low_stock_limit' => $data['low_stock_limit'] ?? 10,
                 'is_available' => $data['is_available'] ?? 1,
             ]);
             $rowCount++;

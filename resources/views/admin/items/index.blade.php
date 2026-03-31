@@ -40,6 +40,11 @@
                     </div>
                 </h5>
                 <p class="text-muted small mb-2" title="{{ $i->category->full_name }}">{{ $i->category->full_name }}</p>
+                @if($i->description)
+                    <p class="text-muted small mb-3 text-truncate-2" style="font-size: 11px; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ $i->description }}</p>
+                @else
+                    <div style="height: 32px;"></div>
+                @endif
                 
                 <div class="mb-3">
                     <small class="text-uppercase fw-bold text-muted" style="font-size:10px;">Variants:</small>
@@ -57,7 +62,7 @@
 
                 <div class="d-flex gap-2 mt-auto">
                     <button class="btn btn-sm btn-outline-dark w-100 rounded-pill" 
-                        onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
+                        onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', '{{ addslashes($i->default_size) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
                         <i class="fas fa-edit small me-1"></i> Edit
                     </button>
                     <form action="{{ route('items.destroy', $i->id) }}" method="POST" class="w-100">
@@ -128,7 +133,7 @@
                         <td class="text-end pe-4">
                             <div class="d-flex justify-content-end gap-2">
                                 <button class="btn btn-sm btn-light border shadow-sm rounded-pill px-3" title="Edit"
-                                onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
+                                onclick="editItem({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', '{{ addslashes($i->default_size) }}', {{ $i->category_id }}, {{ $i->price }}, {{ $i->mrp ?? 'null' }}, {{ $i->is_available }}, {{ $i->stock_quantity }}, {{ $i->low_stock_limit }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
                                     <i class="fas fa-edit text-primary small me-1"></i> <small class="fw-bold">Edit</small>
                                 </button>
                                 <form action="{{ route('items.destroy', $i->id) }}" method="POST">
@@ -164,7 +169,7 @@
             <div class="text-end mb-2">
                 <a href="{{ route('items.sampleCsv') }}" class="small text-primary fw-bold text-decoration-none"><i class="fas fa-download me-1"></i> Download Sample CSV</a>
             </div>
-            <p class="small text-muted mb-0"><b>CSV Format:</b> category_name, name, price, stock_quantity, is_available</p>
+            <p class="small text-muted mb-0"><b>CSV Format:</b> category_name, name, description, default_size, price, mrp, stock_quantity, low_stock_limit, is_available</p>
         </div>
         <div class="modal-footer border-0 pb-4 pt-0 px-4">
             <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-lg"><i class="fas fa-upload me-2"></i> Upload Items</button>
@@ -178,15 +183,23 @@
     <div class="modal-header border-0 pb-0 pt-4 px-4"><h5 class="modal-title fw-bold" id="itemModalTitle">Manage Menu Item</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
     <div class="modal-body p-4">
         <div class="row g-3 mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Item Name</label>
                 <input type="text" name="name" id="f_name" class="form-control bg-light border-0" required>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label class="small fw-bold text-muted text-uppercase mb-1">Default Size/Variant</label>
+                <input type="text" name="default_size" id="f_default_size" class="form-control bg-light border-0" placeholder="e.g. 1 KG">
+            </div>
+            <div class="col-md-4">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Category</label>
                 <select name="category_id" id="f_category_id" class="form-select bg-light border-0" required>
                     @foreach($categories as $c)<option value="{{ $c->id }}">{{ $c->full_name }}</option>@endforeach
                 </select>
+            </div>
+            <div class="col-md-12">
+                <label class="small fw-bold text-muted text-uppercase mb-1">Item Description</label>
+                <textarea name="description" id="f_description" class="form-control bg-light border-0" rows="2" placeholder="Brief description of the item..."></textarea>
             </div>
             <div class="col-md-3">
                 <label class="small fw-bold text-muted text-uppercase mb-1">Base Price (&#8377;)</label>
@@ -268,11 +281,13 @@ function openAddItem() {
     new bootstrap.Modal(document.getElementById("itemModal")).show();
 }
 
-function editItem(id, name, catId, price, mrp, avail, stock, limit, variants, extras, image = null) {
+function editItem(id, name, description, defaultSize, catId, price, mrp, avail, stock, limit, variants, extras, image = null) {
     $("#itemForm").attr("action", "/cp/items/" + id);
     $("#method_field").html('@method("PUT")');
     $("#itemModalTitle").text("Edit Item Details");
     $("#f_name").val(name);
+    $("#f_description").val(description);
+    $("#f_default_size").val(defaultSize);
     $("#f_category_id").val(catId);
     $("#f_price").val(price);
     $("#f_mrp").val(mrp);

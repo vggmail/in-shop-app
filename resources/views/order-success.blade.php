@@ -138,7 +138,7 @@
             @foreach($order->items as $orderItem)
                 <div class="item-list d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="fw-bold">{{ $orderItem->quantity }}x {{ $orderItem->item->name ?? 'Food Item' }}</div>
+                        <div class="fw-bold">{{ $orderItem->quantity }}x {{ $orderItem->item->name ?? 'Deleted Item' }} {{ $orderItem->variant ? '- ' . $orderItem->variant->name : ($orderItem->item && $orderItem->item->default_size ? '- ' . $orderItem->item->default_size : '') }}</div>
                         @if($orderItem->variant)
                             <div class="small text-muted mb-1"><i class="fas fa-caret-right me-1"></i>{{ $orderItem->variant->name ?? 'Default' }}</div>
                         @endif

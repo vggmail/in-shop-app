@@ -19,9 +19,10 @@
         .nav-item i { font-size: 18px; margin-bottom: 2px; }
         .category-pill { background: white; border: 1px solid #eee; padding: 8px 18px; border-radius: 30px; white-space: nowrap; cursor: pointer; transition: 0.3s; font-weight: 700; color: #555; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-size: 13px; }
         .category-pill.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(255, 71, 87, 0.3); }
-        .food-card { border: none; border-radius: 25px; box-shadow: 0 8px 18px rgba(0,0,0,0.04); overflow: hidden; height: 100%; transition: 0.3s; cursor: pointer; background: white; }
+        .food-card { border: none; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); overflow: hidden; height: 100%; transition: 0.3s; cursor: pointer; background: white; display: flex; flex-direction: column; }
         .food-card:active { transform: scale(0.96); }
-        .food-img { height: 150px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #ddd; position: relative; }
+        .food-img { height: 280px; background: #fafafa; display: flex; align-items: center; justify-content: center; color: #ddd; position: relative; flex-shrink: 0; }
+        .card-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
         .cart-float { position: fixed; bottom: 85px; left: 20px; right: 20px; background: var(--dark); color: white; padding: 10px 18px; border-radius: 50px; display: flex; justify-content: space-between; align-items: center; z-index: 1000; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.15); display: none; }
         .cart-float:active { transform: scale(0.98); }
         .modal-content { border-radius: 35px; border: none; }
@@ -93,7 +94,7 @@
             <label class="small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 1px;">Ready for seconds?</label>
             <div class="d-flex overflow-auto gap-3 pb-2 no-scrollbar">
                 @foreach($recentItems as $ri)
-                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->image }}')">
+                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', '{{ addslashes($ri->description) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->image }}', '{{ addslashes($ri->default_size) }}')">
                     <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
                         @if($ri->image)
                             <img src="{{ asset('storage/'.$ri->image) }}" class="w-100 h-100 object-fit-cover">
@@ -131,8 +132,8 @@
 
         <div class="row g-3 mt-2" id="menu-grid">
             @foreach($items as $i)
-            <div class="col-6 col-md-4 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
-                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}')">
+            <div class="col-6 col-md-4 col-lg-3 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
+                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}', '{{ addslashes($i->default_size) }}')">
                     <div class="food-img position-relative overflow-hidden">
                         @if($i->image)
                             <img src="{{ asset('storage/'.$i->image) }}" class="w-100 h-100 object-fit-cover">
@@ -140,13 +141,21 @@
                             <i class="fas fa-hamburger fa-2x"></i>
                         @endif
                         <div class="position-absolute top-0 end-0 p-2">
+                            @if($i->mrp && $i->mrp > $i->price)
+                                <span class="badge bg-danger rounded-pill shadow-sm" style="font-size: 10px;">{{ round((($i->mrp - $i->price) / $i->mrp) * 100) }}% OFF</span>
+                            @endif
                             <span class="badge bg-success rounded-pill shadow-sm d-none" style="font-size: 8px;">HOT & FRESH</span>
                         </div>
                     </div>
                     <div class="card-body p-3">
-                        <h6 class="fw-bold mb-1" style="font-size: 14px;">{{ $i->name }}</h6>
+                        <h6 class="fw-bold mb-1" style="font-size: 14px;">{{ $i->name }} {{ $i->default_size ? '- ' . $i->default_size : '' }}</h6>
                         <div class="d-flex justify-content-between align-items-center">
-                            <div><span class="text-primary fw-bold" style="font-size: 13px;">₹{{ number_format($i->price, 2) }}</span></div>
+                            <div>
+                                <span class="text-primary fw-bold" style="font-size: 13px;">₹{{ number_format($i->price, 2) }}</span>
+                                @if($i->mrp && $i->mrp > $i->price)
+                                    <span class="text-muted text-decoration-line-through ms-1" style="font-size: 10px;">₹{{ number_format($i->mrp, 2) }}</span>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -206,7 +215,7 @@
             <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
         </div>
         <h4 class="fw-bold mb-1" id="m-food-name">Food Name</h4>
-        <p class="text-muted small mb-4">Fresh ingredients & special sauces.</p>
+        <p class="text-muted small mb-4" id="m-food-desc">Fresh ingredients & special sauces.</p>
         <div id="m-variants-box" class="mb-4 d-none">
             <label class="fw-bold small text-uppercase text-muted mb-2">Select Variant</label>
             <div id="m-variants-list" class="d-grid gap-2"></div>
@@ -280,16 +289,23 @@
             let val = $(this).val();
             if(val === 'Home Delivery') { $('#delivery-address-box').slideDown(); } else { $('#delivery-address-box').slideUp(); }
         });
-        function openFoodModal(id, name, price, variants, extras, image = null) {
-            currentItem = { id, name, price, variants, extras };
-            $("#m-food-name").text(name); $("#m-variants-list, #m-extras-list").empty();
+        function openFoodModal(id, name, description, price, variants, extras, image = null, defaultSize = '') {
+            currentItem = { id, name, price, variants, extras, defaultSize };
+            $("#m-food-name").text(name + (defaultSize ? ' - ' + defaultSize : ''));
+            $("#m-food-desc").text(description || 'Fresh ingredients & special sauces.');
+            $("#m-variants-list, #m-extras-list").empty();
             if(image && image !== 'null' && image !== '') {
                 $("#m-image-box").removeClass("d-none");
                 $("#m-food-image").attr("src", "/storage/" + image);
             } else {
                 $("#m-image-box").addClass("d-none");
             }
-            if(variants.length) { $("#m-variants-box").removeClass("d-none"); $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="Standard" checked><label class="btn btn-outline-dark rounded-pill py-2" for="v_def">Standard</label>`); variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); } else { $("#m-variants-box").addClass("d-none"); }
+            if(variants.length) { 
+                $("#m-variants-box").removeClass("d-none"); 
+                let defLabel = defaultSize || 'Standard';
+                $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="${defLabel}" checked><label class="btn btn-outline-dark rounded-pill py-2" for="v_def">${defLabel}</label>`); 
+                variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); 
+            } else { $("#m-variants-box").addClass("d-none"); }
             if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
             updateMTotal(); new bootstrap.Modal(document.getElementById("foodModal")).show();
         }
@@ -298,7 +314,11 @@
         function addToCart() {
             let v = $("input[name='f_var']:checked"); let ex = []; $(".m-extra-cb:checked").each(function(){ ex.push({ id: $(this).val(), price: parseFloat($(this).data("price")), name: $(this).data("name") }); });
             let p = currentItem.price + parseFloat(v.data("price") || 0) + ex.reduce((a, b) => a + b.price, 0);
-            cart.push({ item_id: currentItem.id, variant_id: v.val() || null, price: p, qty: 1, name: currentItem.name, variant_name: v.data("name") || 'Standard', extras: ex });
+            let finalName = currentItem.name;
+            let vName = v.data("name") || 'Standard';
+            if(vName && vName !== 'Standard') { finalName += ' - ' + vName; }
+            else if(currentItem.defaultSize) { finalName += ' - ' + currentItem.defaultSize; }
+            cart.push({ item_id: currentItem.id, variant_id: v.val() || null, price: p, qty: 1, name: finalName, variant_name: vName, extras: ex });
             saveCart(); bootstrap.Modal.getInstance(document.getElementById("foodModal")).hide();
         }
         function renderCart() {

@@ -24,6 +24,16 @@ Route::match(['get', 'post'], '/payu/pay/{order_number}', [PayUController::class
 Route::match(['get', 'post'], '/payu/success', [PayUController::class, 'success'])->name('payu.success');
 Route::match(['get', 'post'], '/payu/failure', [PayUController::class, 'failure'])->name('payu.failure');
 
+Route::get('/fix-storage', function () {
+    \Illuminate\Support\Facades\Artisan::call('storage:link');
+    return 'Storage link created! You can now check your images.';
+});
+
+Route::get('/run-migrate', function () {
+    \Illuminate\Support\Facades\Artisan::call('migrate', ["--force" => true]);
+    return 'Migrations executed successfully!';
+});
+
 // Customer Auth & History
 Route::post('/customer/check-phone', [CustomerAuthController::class, 'checkPhone'])->name('customer.checkPhone');
 Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('customer.login');

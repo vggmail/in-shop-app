@@ -6,7 +6,7 @@ use App\Traits\LogsActivity;
 
 class Item extends Model {
     use LogsActivity, SoftDeletes;
-    protected $fillable = ["category_id", "name", "image", "price", "mrp", "is_available", "stock_quantity", "low_stock_limit"];
+    protected $fillable = ["category_id", "name", "description", "default_size", "image", "price", "mrp", "is_available", "stock_quantity", "low_stock_limit"];
 
     public function isReallyAvailable() {
         return $this->is_available && $this->stock_quantity > 0;

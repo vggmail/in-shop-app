@@ -60,7 +60,7 @@
             @foreach($order->items as $item)
             <tr>
                 <td class="align-middle">
-                    <span class="fw-bold fs-6">{{ $item->item ? $item->item->name : 'No Item' }}</span>
+                    <span class="fw-bold fs-6">{{ $item->item ? $item->item->name : 'No Item' }} {{ ($item->item && $item->item->default_size && !$item->variant) ? '- ' . $item->item->default_size : '' }}</span>
                     @if($item->variant)
                         <span class="badge bg-secondary ms-2">{{ $item->variant->name ?? 'Default' }}</span>
                     @endif

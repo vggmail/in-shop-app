@@ -69,7 +69,7 @@
                     @foreach($order->items as $item)
                     <tr>
                         <td style="padding-bottom: 3px;">
-                            <span class="fw-bold">{{ strtoupper($item->item ? $item->item->name : "ITEM") }}</span>
+                            <span class="fw-bold">{{ strtoupper($item->item ? $item->item->name : "ITEM") }} {{ ($item->item && $item->item->default_size && !$item->variant) ? '- ' . strtoupper($item->item->default_size) : '' }}</span>
                             @if($item->variant)
                                 <br><small>[{{ substr($item->variant->name ?? 'Default', 0, 8) }}]</small>
                             @endif

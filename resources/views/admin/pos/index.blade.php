@@ -42,8 +42,8 @@
                 <div class="row g-3">
                     @foreach($items as $i)
                     <div class="col-xl-3 col-lg-4 col-md-6 col-6 item-element" data-name="{{ strtolower($i->name) }}">
-                        <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50' : '' }}" 
-                             @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})" @endif>
+                               <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50' : '' }}" 
+                             @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ addslashes($i->default_size) }}')" @endif>
                             
                             @if($i->stock_quantity <= 0)
                                 <div class="position-absolute top-50 start-50 translate-middle w-100 z-3">
@@ -71,7 +71,7 @@
                     @foreach($catItems as $i)
                     <div class="col-xl-3 col-lg-4 col-md-6 col-6 item-element" data-name="{{ strtolower($i->name) }}">
                          <div class="card item-card text-center p-3 h-100 {{ $i->stock_quantity <= 0 ? 'opacity-50' : '' }}" 
-                             @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }})" @endif>
+                             @if($i->stock_quantity > 0) onclick="openItemModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ addslashes($i->default_size) }}')" @endif>
                             <div class="bg-light rounded-3 p-3 mb-3">
                                 <i class="fas fa-utensils fa-2x text-success"></i>
                             </div>
@@ -189,6 +189,8 @@
                 <input type="hidden" id="m_item_id">
                 <input type="hidden" id="m_base_price">
                 <input type="hidden" id="m_item_name">
+                <input type="hidden" id="m_default_size">
+                <p class="text-muted small mb-3" id="m_item_description"></p>
                 
                 <div id="variantsBox" class="mb-4 d-none">
                     <label class="small fw-bold mb-2 text-muted text-uppercase">Select Variation</label>
@@ -244,16 +246,19 @@
         else $("#delivery-addr-box").slideUp();
     });
 
-    function openItemModal(id, name, price, variants, extras) {
+    function openItemModal(id, name, description, price, variants, extras, defaultSize = '') {
         $("#m_item_id").val(id);
         $("#m_item_name").val(name);
         $("#m_base_price").val(price);
-        $("#modalItemName").text(name);
+        $("#m_default_size").val(defaultSize);
+        $("#m_item_description").text(description || "");
+        $("#modalItemName").text(name + (defaultSize ? ' - ' + defaultSize : ''));
         
         if(variants && variants.length > 0) {
+            let defLabel = defaultSize || 'Regular';
             let varHtml = `<div class="form-check p-0 mb-2">
-                <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_def" value="" data-price="${price}" data-name="Regular" checked onchange="calcModalPrice()">
-                <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_def">Regular <span class="float-end">&#8377;${price}</span></label>
+                <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_def" value="" data-price="${price}" data-name="${defLabel}" checked onchange="calcModalPrice()">
+                <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_def">${defLabel} <span class="float-end">&#8377;${price}</span></label>
             </div>`;
             variants.forEach(v => {
                 varHtml += `<div class="form-check p-0 mb-2">
@@ -299,9 +304,17 @@
     function addConfiguredItem() {
         let id = $("#m_item_id").val();
         let name = $("#m_item_name").val();
+        let defaultSize = $("#m_default_size").val();
         let v_el = $(".m_variant_sel:checked");
         let varId = v_el.val() || null;
         let varName = v_el.data("name") || "";
+        
+        let displayName = name;
+        if(varName && varName !== 'Regular') {
+            displayName += ' - ' + varName;
+        } else if(defaultSize) {
+            displayName += ' - ' + defaultSize;
+        }
         let finalPrice = parseFloat($("#m_total_price").text());
         
         let selExtras = [];
@@ -312,7 +325,7 @@
         });
         
         cart.push({
-            cartId: Date.now(), id: id, name: name,
+            cartId: Date.now(), id: id, name: displayName,
             variant_id: varId, variant_name: varName,
             price: finalPrice, qty: 1, total: finalPrice,
             extras: selExtras, extras_text: extNames.join(", ")
