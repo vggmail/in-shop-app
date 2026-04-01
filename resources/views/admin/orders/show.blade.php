@@ -11,15 +11,18 @@
             <h5 class="fw-bold mb-3 text-secondary">Dining Details</h5>
             <p class="mb-1"><strong>Type:</strong> 
                 @if($order->order_type == "Takeaway")
-                    <span class="badge bg-secondary"><i class="fas fa-shopping-bag"></i> Takeaway</span>
-                @elseif($order->order_type == "Home Delivery")
-                    <span class="badge bg-info text-dark"><i class="fas fa-motorcycle"></i> Home Delivery</span>
+                    <span class="badge bg-secondary py-1 px-3"><i class="fas fa-shopping-bag"></i> Takeaway</span>
+                @elseif($order->order_type == "Home Delivery" || $order->order_type == "Delivery")
+                    <span class="badge bg-danger py-1 px-3 shadow-sm"><i class="fas fa-motorcycle"></i> Home Delivery</span>
                 @else
-                    <span class="badge bg-primary"><i class="fas fa-chair"></i> Dine-In</span> (Table: <strong>{{ $order->table_number }}</strong>)
+                    <span class="badge bg-primary py-1 px-3"><i class="fas fa-chair"></i> Dine-In</span> (Table: <strong>{{ $order->table_number }}</strong>)
                 @endif
             </p>
-            @if($order->order_type == "Home Delivery" && $order->delivery_address)
-            <p class="mb-1 small"><strong>Address:</strong> {{ $order->delivery_address }}</p>
+            @if(($order->order_type == "Home Delivery" || $order->order_type == "Delivery") && $order->delivery_address)
+            <div class="mt-3 p-2 border border-danger border-opacity-25 rounded bg-white">
+                <p class="mb-1 small fw-bold text-danger"><i class="fas fa-map-marker-alt"></i> DELIVERY ADDRESS:</p>
+                <p class="mb-0 small fw-bold">{{ $order->delivery_address }}</p>
+            </div>
             @endif
             <p class="mb-0"><strong>Status:</strong> 
                 <form action="{{ route('orders.updateStatus', $order->id) }}" method="POST" class="d-inline-flex align-items-center mt-2">

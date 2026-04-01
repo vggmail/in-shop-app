@@ -16,6 +16,14 @@ class ItemController extends Controller {
     }
     
     public function store(Request $request) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048'
+        ]);
+        
         $data = $request->all();
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');
@@ -25,6 +33,14 @@ class ItemController extends Controller {
     }
     
     public function update(Request $request, $id) {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string',
+            'image' => 'nullable|image|max:2048'
+        ]);
+
         $data = $request->all();
         if ($request->hasFile('image')) {
             $data['image'] = $request->file('image')->store('items', 'public');
@@ -65,9 +81,11 @@ class ItemController extends Controller {
         $handle = fopen($file->path(), 'r');
         $header = fgetcsv($handle);
         
-        // Remove BOM if present
-        if ($header && isset($header[0])) {
-            $header[0] = preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $header[0]);
+        // Remove BOM and trim headers to ensure exact matches
+        if ($header) {
+            $header = array_map(function($h) {
+                return trim(preg_replace('/[\x00-\x1F\x80-\xFF]/', '', $h));
+            }, $header);
         }
         
         $rowCount = 0;

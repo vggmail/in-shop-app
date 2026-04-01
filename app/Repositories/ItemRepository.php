@@ -46,15 +46,15 @@ class ItemRepository extends BaseRepository {
 
     public function update(int $id, array $data): bool { 
         return DB::transaction(function() use ($id, $data) {
-            $i = $this->find($id); 
+            $i = $this->find($id);
             $i->update($data); 
 
-            // Refresh variants
-            $i->variants()->delete();
-            if(!empty($data['variants'])) {
+            // Only update variants if they are present in the data to avoid accidental deletion
+            if (isset($data['variants'])) {
+                $i->variants()->delete();
                 foreach($data['variants'] as $v) {
                     if(!empty($v['name'])) {
-                        ItemVariant::create([
+                        \App\Models\ItemVariant::create([
                             'item_id' => $i->id,
                             'name' => $v['name'],
                             'price' => $v['price'] ?? 0
@@ -63,12 +63,12 @@ class ItemRepository extends BaseRepository {
                 }
             }
 
-            // Refresh extras
-            $i->extras()->delete();
-            if(!empty($data['extras'])) {
+            // Only update extras if they are present in the data
+            if (isset($data['extras'])) {
+                $i->extras()->delete();
                 foreach($data['extras'] as $e) {
                     if(!empty($e['name'])) {
-                        ItemExtra::create([
+                        \App\Models\ItemExtra::create([
                             'item_id' => $i->id,
                             'name' => $e['name'],
                             'price' => $e['price'] ?? 0

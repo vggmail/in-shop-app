@@ -148,7 +148,8 @@
                         </div>
                     </div>
                     <div class="card-body p-3">
-                        <h6 class="fw-bold mb-1" style="font-size: 14px;">{{ $i->name }} {{ $i->default_size ? '- ' . $i->default_size : '' }}</h6>
+                        <h6 class="fw-bold mb-1" style="font-size: 15px; color: var(--dark);">{{ $i->name }} {{ $i->default_size ? '- ' . $i->default_size : '' }}</h6>
+                        <p class="text-muted mb-2 lh-sm" style="font-size: 11px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 30px;">{{ $i->description ?? 'Delicious recipe prepared with fresh ingredients and special authentic spices.' }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <span class="text-primary fw-bold" style="font-size: 13px;">₹{{ number_format($i->price, 2) }}</span>
@@ -214,8 +215,10 @@
         <div id="m-image-box" class="mb-3 rounded-4 overflow-hidden shadow-sm d-none" style="height: 180px;">
             <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
         </div>
-        <h4 class="fw-bold mb-1" id="m-food-name">Food Name</h4>
-        <p class="text-muted small mb-4" id="m-food-desc">Fresh ingredients & special sauces.</p>
+        <h4 class="fw-800 mb-1" id="m-food-name" style="letter-spacing: -0.5px;">Food Name</h4>
+        <div class="bg-light p-3 rounded-4 mb-4 border-start border-primary border-4">
+            <p class="text-muted small mb-0 fw-bold" id="m-food-desc" style="line-height: 1.5; font-size: 12px;"></p>
+        </div>
         <div id="m-variants-box" class="mb-4 d-none">
             <label class="fw-bold small text-uppercase text-muted mb-2">Select Variant</label>
             <div id="m-variants-list" class="d-grid gap-2"></div>
@@ -287,7 +290,16 @@
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
         $(document).on('change', 'input[name="order_type"]', function() {
             let val = $(this).val();
-            if(val === 'Home Delivery') { $('#delivery-address-box').slideDown(); } else { $('#delivery-address-box').slideUp(); }
+            if(val === 'Home Delivery') { 
+                $('#delivery-address-box').slideDown(); 
+                $('#table_number').val('').parent().hide(); // Hide table no for delivery
+            } else if(val === 'Takeaway') {
+                $('#delivery-address-box').slideUp();
+                $('#table_number').val('').parent().hide(); // Hide table no for takeaway
+            } else { 
+                $('#delivery-address-box').slideUp(); 
+                $('#table_number').parent().show(); // Show table no for dine-in
+            }
         });
         function openFoodModal(id, name, description, price, variants, extras, image = null, defaultSize = '') {
             currentItem = { id, name, price, variants, extras, defaultSize };
@@ -333,8 +345,15 @@
             @if(!isset($customer))
                 let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();
                 if(!phone || !/^[6-9]\d{9}$/.test(phone)) return alert("Please enter a valid 10-digit mobile number.");
+                
+                // Save checkout preferences before login-reload
                 localStorage.setItem('pending_name', name); 
-                localStorage.setItem('checkout_after_login', 'true'); // Flag to continue after login
+                localStorage.setItem('checkout_after_login', 'true'); 
+                localStorage.setItem('pending_order_type', $("input[name='order_type']:checked").val());
+                localStorage.setItem('pending_delivery_address', $("#delivery_address").val());
+                localStorage.setItem('pending_table_number', $("#table_number").val());
+                localStorage.setItem('pending_payment_method', $("input[name='payment_method']:checked").val());
+
                 $("#checkoutModal").modal("hide"); 
                 $("#login-phone").val(phone); 
                 checkPhoneExists(); 
@@ -427,6 +446,26 @@
                 if(localStorage.getItem('checkout_after_login') === 'true') {
                     localStorage.removeItem('checkout_after_login');
                     @if(isset($customer))
+                        // Restore pending checkout preferences
+                        let pType = localStorage.getItem('pending_order_type');
+                        let pAddr = localStorage.getItem('pending_delivery_address');
+                        let pTable = localStorage.getItem('pending_table_number');
+                        let pPay = localStorage.getItem('pending_payment_method');
+                        
+                        if(pType) {
+                            $(`input[name='order_type'][value='${pType}']`).prop('checked', true).change();
+                            if(pType === 'Home Delivery') $('#delivery-address-box').show(); 
+                        }
+                        if(pAddr) $("#delivery_address").val(pAddr);
+                        if(pTable) $("#table_number").val(pTable);
+                        if(pPay) $(`input[name='payment_method'][value='${pPay}']`).prop('checked', true);
+
+                        // Clean up
+                        localStorage.removeItem('pending_order_type');
+                        localStorage.removeItem('pending_delivery_address');
+                        localStorage.removeItem('pending_table_number');
+                        localStorage.removeItem('pending_payment_method');
+
                         setTimeout(() => { submitOrder(); }, 500);
                     @endif
                 }
