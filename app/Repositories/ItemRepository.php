@@ -45,10 +45,18 @@ class ItemRepository extends BaseRepository {
     }
 
     public function update(int $id, array $data): bool { 
-        return DB::transaction(function() use ($id, $data) {
+        return \Illuminate\Support\Facades\DB::transaction(function() use ($id, $data) {
+            
             $i = $this->find($id);
+            if (!$i) {
+                \Illuminate\Support\Facades\Log::error("Item ID: $id not found in repository update");
+                return false;
+            }
+            
+            $i->description = $data['description'];
+            
             $i->update($data); 
-
+        
             // Only update variants if they are present in the data to avoid accidental deletion
             if (isset($data['variants'])) {
                 $i->variants()->delete();
