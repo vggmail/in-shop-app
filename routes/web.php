@@ -83,6 +83,7 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
     
     Route::get('payments', [OrderController::class, 'payments'])->name('payments.index');
+    Route::get('payments/{id}', [OrderController::class, 'paymentShow'])->name('payments.show');
     Route::get('payments/export', [OrderController::class, 'exportPayments'])->name('payments.export');
     Route::get('reports', [OrderController::class, 'reports'])->name('reports.index');
     Route::get('logs', [AdminController::class, 'logs'])->name('logs.index');

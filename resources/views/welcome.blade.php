@@ -357,6 +357,7 @@
     <script>
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         let currentItem = null;
+        const availableItemIds = {!! json_encode($items->pluck('id')->merge($recentItems->pluck('id'))->unique()->values()) !!};
         $(document).ready(function() { renderCart(); });
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
@@ -403,11 +404,18 @@
                 variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); 
             } else { $("#m-variants-box").addClass("d-none"); }
             if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
-            updateMTotal(); new bootstrap.Modal(document.getElementById("foodModal")).show();
+            let isAvailable = availableItemIds.includes(parseInt(id));
+            if(!isAvailable) {
+                $("#foodModal button.btn-danger").prop("disabled", true).text("SOLD OUT");
+            } else {
+                $("#foodModal button.btn-danger").prop("disabled", false).html('<i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span>');
+                updateMTotal();
+            }
+            new bootstrap.Modal(document.getElementById("foodModal")).show();
         }
         function updateMTotal() { 
-            if(!window.currentItem || !currentItem) return;
-            let t = currentItem.price || 0; 
+            if(!currentItem) return;
+            let t = parseFloat(currentItem.price || 0); 
             let v = parseFloat($("input[name='f_var']:checked").data("price") || 0); 
             let e = 0; 
             $(".m-extra-cb:checked").each(function(){ e += parseFloat($(this).data("price") || 0); }); 
@@ -416,7 +424,7 @@
         $(document).on("change", "#foodModal .btn-check, #foodModal .m-extra-cb", updateMTotal);
         function addToCart() {
             let v = $("input[name='f_var']:checked"); let ex = []; $(".m-extra-cb:checked").each(function(){ ex.push({ id: $(this).val(), price: parseFloat($(this).data("price")), name: $(this).data("name") }); });
-            let p = currentItem.price + parseFloat(v.data("price") || 0) + ex.reduce((a, b) => a + b.price, 0);
+            let p = parseFloat(currentItem.price || 0) + parseFloat(v.data("price") || 0) + ex.reduce((a, b) => a + b.price, 0);
             let finalName = currentItem.name;
             let vName = v.data("name") || 'Standard';
             if(vName && vName !== 'Standard') { finalName += ' - ' + vName; }
@@ -428,8 +436,21 @@
             let c = $("#cart-float"); let count = cart.reduce((a, b) => a + b.qty, 0); let total = cart.reduce((a, b) => a + (b.price * b.qty), 0);
             $("#cart-count").text(count); $("#cart-total-float").text(total.toFixed(2));
             count > 0 ? c.fadeIn().css("display", "flex") : c.fadeOut();
-            let list = $("#checkout-list").empty(); cart.forEach((item, i) => { list.append(`<div class="d-flex justify-content-between mb-2"><div><span class="fw-bold">${item.qty}x ${item.name}</span><br><small class="text-muted">${item.variant_name}</small></div><div class="text-end">₹${(item.price * item.qty).toFixed(2)}<br><button class="btn btn-sm text-danger p-0" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button></div></div>`); });
+            
+            let list = $("#checkout-list").empty(); 
+            let hasOutOfStock = false;
+            cart.forEach((item, i) => { 
+                let isAvailable = availableItemIds.includes(parseInt(item.item_id));
+                if(!isAvailable) hasOutOfStock = true;
+                list.append(`<div class="d-flex justify-content-between mb-2 ${!isAvailable ? 'opacity-50' : ''}"><div><span class="fw-bold">${item.qty}x ${item.name}</span>${!isAvailable ? '<br><small class="text-danger fw-bold">ITEM OUT OF STOCK - REMOVE THIS</small>' : ''}<br><small class="text-muted">${item.variant_name}</small></div><div class="text-end">₹${(item.price * item.qty).toFixed(2)}<br><button class="btn btn-sm text-danger p-0" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button></div></div>`); 
+            });
             $("#checkout-total, #checkout-subtotal").text(total.toFixed(2));
+
+            if(hasOutOfStock) {
+                $("#placeOrderBtn").prop("disabled", true).addClass("btn-secondary").removeClass("btn-dark").html('<i class="fas fa-exclamation-triangle me-2"></i> REMOVE OUT OF STOCK ITEMS');
+            } else {
+                $("#placeOrderBtn").prop("disabled", false).addClass("btn-dark").removeClass("btn-secondary").html('<i class="fas fa-check-circle me-2"></i> PLACE ORDER');
+            }
         }
         function removeFromCart(i) { cart.splice(i, 1); saveCart(); }
         function submitOrder() {
@@ -488,7 +509,19 @@
                 total_amount: parseFloat($("#checkout-total").text()), 
                 grand_total: parseFloat($("#checkout-total").text()) 
             }, function(res) {
-                if(res.status) { localStorage.removeItem('cart'); if(res.redirect_url) window.location.href = res.redirect_url; else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; } else alert(res.message || "Error placing order");
+                if(res.status) { 
+                    localStorage.removeItem('cart'); 
+                    if(res.redirect_url) window.location.href = res.redirect_url; 
+                    else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; 
+                } else {
+                    alert(res.message || "Error placing order");
+                    $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER");
+                }
+            }).fail(function(xhr) {
+                let msg = "Error placing order";
+                if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+                alert(msg);
+                $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER");
             });
         }
         function checkPhoneExists() {

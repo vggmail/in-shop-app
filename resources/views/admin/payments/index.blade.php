@@ -42,7 +42,12 @@
                             <td class="text-center align-middle">
                                 <span class="badge border border-success text-success px-2 py-1 rounded-pill small" style="font-size: 10px;">{{ $p->status }}</span>
                             </td>
-                            <td class="pe-4"><a href="{{ route('orders.show', $p->order_id) }}" class="btn btn-sm btn-light border small">View</a></td>
+                            <td class="pe-4 text-nowrap">
+                                <div class="btn-group">
+                                    <a href="{{ route('orders.show', $p->order_id) }}" class="btn btn-sm btn-light border small px-2" title="Order"><i class="fas fa-receipt"></i></a>
+                                    <a href="{{ route('payments.show', $p->id) }}" class="btn btn-sm btn-outline-info small px-2" title="Logs"><i class="fas fa-history"></i></a>
+                                </div>
+                            </td>
                         </tr>
                         @endforeach
                     </tbody>

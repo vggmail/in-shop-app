@@ -77,6 +77,12 @@ class OrderController extends Controller {
         return view("admin.payments.index", compact("payments", "allPayments"));
     }
 
+    public function paymentShow($id) {
+        $payment = Payment::with(['order', 'order.customer'])->findOrFail($id);
+        $attempts = \App\Models\PaymentAttempt::where('order_id', $payment->order_id)->orderBy('id', 'DESC')->get();
+        return view("admin.payments.show", compact("payment", "attempts"));
+    }
+
     public function exportPayments() {
         $payments = Payment::with("order")->orderBy("id", "DESC")->get();
 

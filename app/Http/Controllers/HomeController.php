@@ -22,6 +22,7 @@ class HomeController extends Controller {
             $recentItems = Item::with(['category', 'variants', 'extras'])
                 ->whereIn('id', $recentItemIds)
                 ->where('is_available', 1)
+                ->where('stock_quantity', '>', 0)
                 ->limit(10)
                 ->get();
         }
