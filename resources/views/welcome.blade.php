@@ -256,13 +256,27 @@
         @endif
         <div class="mb-4">
             <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Order Type</label>
+            @php
+                $first_option = null;
+                if ($tenant_info->dine_in_enabled) $first_option = 'Dine-in';
+                elseif ($tenant_info->takeaway_enabled) $first_option = 'Takeaway';
+                elseif ($tenant_info->home_delivery_enabled) $first_option = 'Home Delivery';
+            @endphp
             <div class="btn-group w-100 shadow-sm rounded-pill overflow-hidden border">
-                <input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" checked>
+                @if($tenant_info->dine_in_enabled)
+                <input type="radio" class="btn-check" name="order_type" id="t-dine" value="Dine-in" {{ $first_option == 'Dine-in' ? 'checked' : '' }}>
                 <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-dine"><i class="fas fa-chair me-1"></i> Dine-In</label>
-                <input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway">
+                @endif
+
+                @if($tenant_info->takeaway_enabled)
+                <input type="radio" class="btn-check" name="order_type" id="t-away" value="Takeaway" {{ $first_option == 'Takeaway' ? 'checked' : '' }}>
                 <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-away"><i class="fas fa-walking me-1"></i> Takeaway</label>
-                <input type="radio" class="btn-check" name="order_type" id="t-delivery" value="Home Delivery">
+                @endif
+
+                @if($tenant_info->home_delivery_enabled)
+                <input type="radio" class="btn-check" name="order_type" id="t-delivery" value="Home Delivery" {{ $first_option == 'Home Delivery' ? 'checked' : '' }}>
                 <label class="btn btn-outline-danger py-2 border-0 fw-bold" for="t-delivery"><i class="fas fa-motorcycle me-1"></i> Delivery</label>
+                @endif
             </div>
         </div>
         <div class="mb-4" id="delivery-address-box" style="display: none;">
@@ -272,12 +286,31 @@
         <div class="mb-4">
             <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Payment Method</label>
             <div class="row g-2">
+                @if($tenant_info->cash_enabled)
                 <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-cash" value="Cash" checked><label class="btn btn-outline-success w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-cash"><i class="fas fa-money-bill-wave me-2"></i> Cash</label></div>
-                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU"><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> Online</label></div>
+                @endif
+                
+                @if($tenant_info->online_enabled)
+                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU" {{ !$tenant_info->cash_enabled ? 'checked' : '' }}><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> Online</label></div>
+                @endif
+
+                @if(!$tenant_info->cash_enabled && !$tenant_info->online_enabled)
+                <div class="col-12"><div class="alert alert-danger py-2 small fw-bold">No payment methods available.</div></div>
+                @endif
             </div>
         </div>
         <div class="px-2 d-flex justify-content-between mb-4 border-top pt-3 align-items-center"><h6 class="fw-bold mb-0">Total Amount</h6><h5 class="fw-bold text-success mb-0">₹<span id="checkout-total">0.00</span></h5><span id="checkout-subtotal" class="d-none">0</span></div>
-        <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
+        @if(!$tenant_info->dine_in_enabled && !$tenant_info->takeaway_enabled && !$tenant_info->home_delivery_enabled)
+            <div class="alert alert-warning rounded-4 text-center fw-bold">
+                <i class="fas fa-exclamation-triangle me-2"></i> Ordering is currently disabled for this branch.
+            </div>
+        @elseif(!$tenant_info->cash_enabled && !$tenant_info->online_enabled)
+            <div class="alert alert-danger rounded-4 text-center fw-bold">
+                <i class="fas fa-exclamation-triangle me-2"></i> No payment methods enabled. Please contact support.
+            </div>
+        @else
+            <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
+        @endif
     </div></div></div></div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -288,19 +321,24 @@
         $(document).ready(function() { renderCart(); });
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
-        $(document).on('change', 'input[name="order_type"]', function() {
-            let val = $(this).val();
+        function updateOrderTypeUI() {
+            let val = $('input[name="order_type"]:checked').val();
             if(val === 'Home Delivery') { 
                 $('#delivery-address-box').slideDown(); 
-                $('#table_number').val('').parent().hide(); // Hide table no for delivery
+                $('#table_number').val('').parent().hide(); 
             } else if(val === 'Takeaway') {
                 $('#delivery-address-box').slideUp();
-                $('#table_number').val('').parent().hide(); // Hide table no for takeaway
-            } else { 
+                $('#table_number').val('').parent().hide();
+            } else if(val === 'Dine-in') { 
                 $('#delivery-address-box').slideUp(); 
-                $('#table_number').parent().show(); // Show table no for dine-in
+                $('#table_number').parent().show(); 
+            } else {
+                $('#delivery-address-box').hide();
+                $('#table_number').parent().hide();
             }
-        });
+        }
+        $(document).on('change', 'input[name="order_type"]', updateOrderTypeUI);
+        $('#checkoutModal').on('shown.bs.modal', updateOrderTypeUI);
         function openFoodModal(id, name, description, price, variants, extras, image = null, defaultSize = '') {
             currentItem = { id, name, price, variants, extras, defaultSize };
             $("#m-food-name").text(name + (defaultSize ? ' - ' + defaultSize : ''));

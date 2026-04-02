@@ -27,7 +27,8 @@
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 item-hover">
                     <div class="position-relative bg-light text-center rounded-top-4 overflow-hidden" style="height: 180px;">
                         @if($i->image)
-                            <img src="{{ asset('storage/' . $i->image) }}" class="w-100 h-100 object-fit-cover" alt="{{ $i->name }}">
+                            <img src="{{ asset('storage/' . $i->image) }}" class="w-100 h-100 object-fit-cover"
+                                alt="{{ $i->name }}">
                         @else
                             <div class="d-flex align-items-center justify-content-center h-100 text-muted">
                                 <i class="fas fa-utensils fa-3x"></i>
@@ -49,11 +50,6 @@
                             </div>
                         </h5>
                         <p class="text-muted small mb-2" title="{{ $i->category->full_name }}">{{ $i->category->full_name }}</p>
-                        @if($i->description)
-                            <p class="text-muted mb-2 text-truncate-2" style="font-size: 11px; height: 32px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">{{ $i->description }}</p>
-                        @else
-                            <div style="height: 34px;"></div>
-                        @endif
 
                         <div class="mb-3">
                             <small class="text-uppercase fw-bold text-muted" style="font-size:10px;">Variants:</small>
@@ -117,13 +113,12 @@
                                                 <i class="fas fa-utensils text-muted small"></i>
                                             @endif
                                         </div>
-                                    <div>
-                                        <div class="fw-bold text-dark">{{ $i->name }}</div>
-                                        <div class="small text-muted">
-                                            @if($i->description) <span class="text-primary fw-bold">{{ Str::limit($i->description, 30) }}</span> · @endif
-                                            {{ $i->variants->count() }} Variants · {{ $i->extras->count() }} Extras
+                                        <div>
+                                            <div class="fw-bold text-dark">{{ $i->name }}</div>
+                                            <div class="small text-muted">{{ $i->variants->count() }} Variants ·
+                                                {{ $i->extras->count() }} Extras
+                                            </div>
                                         </div>
-                                    </div>
                                     </div>
                                 </td>
                                 <td><span class="badge bg-light text-dark fw-normal border">{{ $i->category->name }}</span></td>
@@ -317,11 +312,11 @@
         function addRow(containerId, type, name = '', price = '') {
             let idx = type === 'variants' ? vIdx++ : eIdx++;
             let html = `
-            <div class="input-group mb-2 shadow-sm rounded overflow-hidden">
-                <input type="text" name="${type}[${idx}][name]" value="${name}" class="form-control border-0 bg-white" placeholder="Name" style="font-size:12px;">
-                <input type="number" step="0.01" name="${type}[${idx}][price]" value="${price}" class="form-control border-0 bg-white" placeholder="&#8377; Price" style="font-size:12px;">
-                <button class="btn btn-outline-danger border-0 bg-white" type="button" onclick="$(this).parent().remove()"><i class="fas fa-times small"></i></button>
-            </div>`;
+                <div class="input-group mb-2 shadow-sm rounded overflow-hidden">
+                    <input type="text" name="${type}[${idx}][name]" value="${name}" class="form-control border-0 bg-white" placeholder="Name" style="font-size:12px;">
+                    <input type="number" step="0.01" name="${type}[${idx}][price]" value="${price}" class="form-control border-0 bg-white" placeholder="&#8377; Price" style="font-size:12px;">
+                    <button class="btn btn-outline-danger border-0 bg-white" type="button" onclick="$(this).parent().remove()"><i class="fas fa-times small"></i></button>
+                </div>`;
             $(`#${containerId}`).append(html);
         }
 

@@ -38,7 +38,12 @@ class TenantSettingsController extends Controller
             'pincode' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
             'gst_number' => 'nullable|string|max:50',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048'
+            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'dine_in_enabled' => 'nullable|boolean',
+            'takeaway_enabled' => 'nullable|boolean',
+            'home_delivery_enabled' => 'nullable|boolean',
+            'cash_enabled' => 'nullable|boolean',
+            'online_enabled' => 'nullable|boolean'
         ]);
 
         $tenantModel = Tenant::find($tenant->id);
@@ -61,6 +66,11 @@ class TenantSettingsController extends Controller
         $tenantModel->pincode = $request->pincode;
         $tenantModel->phone = $request->phone;
         $tenantModel->gst_number = $request->gst_number;
+        $tenantModel->dine_in_enabled = $request->has('dine_in_enabled');
+        $tenantModel->takeaway_enabled = $request->has('takeaway_enabled');
+        $tenantModel->home_delivery_enabled = $request->has('home_delivery_enabled');
+        $tenantModel->cash_enabled = $request->has('cash_enabled');
+        $tenantModel->online_enabled = $request->has('online_enabled');
         $tenantModel->save();
 
         return redirect()->back()->with('success', 'Store settings updated successfully!');
