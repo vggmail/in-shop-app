@@ -61,7 +61,7 @@
     </div>
 
     <!-- Bottom App Navigation -->
-    <div class="bottom-nav">
+    <div class="bottom-nav shadow-lg">
         <a href="{{ url('/') }}" class="nav-item active">
             <i class="fas fa-home-alt"></i>
             <span>Menu</span>
@@ -71,19 +71,14 @@
             <span>My Orders</span>
         </a>
         @if(isset($customer))
-            <a href="#" class="nav-item text-primary" data-bs-toggle="dropdown">
+            <a href="{{ route('customer.profile') }}" class="nav-item">
                 <i class="fas fa-user-circle"></i>
-                <span>Account</span>
+                <span>Profile</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-2 mb-3">
-                <li class="px-3 py-2 fw-bold small text-muted text-uppercase" style="font-size: 10px;">Welcome, {{ $customer->name }}</li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item py-2 text-danger fw-bold" href="{{ route('customer.logout') }}" onclick="localStorage.removeItem('customer_device_token')"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
-            </ul>
         @else
-            <a href="#" class="nav-item" data-bs-toggle="modal" data-bs-target="#loginModal">
-                <i class="fas fa-user-lock"></i>
-                <span>Account</span>
+            <a href="javascript:void(0)" class="nav-item" onclick="new bootstrap.Modal(document.getElementById('loginModal')).show()">
+                <i class="fas fa-sign-in-alt"></i>
+                <span>Login</span>
             </a>
         @endif
     </div>
@@ -280,7 +275,51 @@
             </div>
         </div>
         <div class="mb-4" id="delivery-address-box" style="display: none;">
-            <textarea id="delivery_address" class="form-control border-0 bg-light rounded-4 px-4 py-3" style="font-size: 14px;" rows="2" placeholder="Enter delivery address..."></textarea>
+            @if(isset($customer) && $customer->addresses->count() > 0)
+                @php $default_addr = $customer->addresses->where('is_default', 1)->first() ?? $customer->addresses->first(); @endphp
+                <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Select Saved Address</label>
+                <div class="d-flex overflow-auto gap-2 pb-2 mb-2 no-scrollbar" id="saved-addresses-list">
+                    @foreach($customer->addresses as $addr)
+                        <div class="category-pill py-2 px-3 border shadow-sm small text-dark address-chip {{ $addr->id == $default_addr->id ? 'active' : '' }}" onclick="setSavedAddress('{{ addslashes($addr->street_address) }}', '{{ addslashes($addr->city) }}', '{{ addslashes($addr->state) }}', '{{ $addr->pincode }}', this)">
+                            <i class="fas {{ $addr->label == 'Home' ? 'fa-home' : ($addr->label == 'Work' ? 'fa-briefcase' : 'fa-map-marker-alt') }} me-1 text-danger"></i> {{ $addr->label }}
+                        </div>
+                    @endforeach
+                    <div class="category-pill py-2 px-3 border shadow-sm small text-dark address-chip {{ !$default_addr ? 'active' : '' }}" onclick="setSavedAddress('', '', '', '', this)">
+                        <i class="fas fa-plus me-1 text-primary"></i> New Address
+                    </div>
+                </div>
+            @endif
+
+            <div id="new-address-fields" class="{{ isset($default_addr) ? 'd-none' : '' }}">
+                <div class="mb-2">
+                    <input type="text" id="street_address" class="form-control border-0 bg-light rounded-4 px-4 py-3" style="font-size: 14px;" placeholder="Street Address / Building" value="{{ $default_addr->street_address ?? '' }}">
+                </div>
+                <div class="row g-2 mb-2">
+                    <div class="col-6">
+                        <input type="text" id="city" class="form-control border-0 bg-light rounded-pill px-4 py-2" style="font-size: 13px;" placeholder="City" value="{{ $default_addr->city ?? '' }}">
+                    </div>
+                    <div class="col-6">
+                        <input type="text" id="pincode" class="form-control border-0 bg-light rounded-pill px-4 py-2" style="font-size: 13px;" placeholder="Pincode" value="{{ $default_addr->pincode ?? '' }}">
+                    </div>
+                </div>
+                <div class="mb-2">
+                    <select id="state" class="form-select border-0 bg-light rounded-pill px-4 py-2" style="font-size: 13px;">
+                        <option value="">Select State</option>
+                        @php $states = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi"]; @endphp
+                        @foreach($states as $s)
+                            <option value="{{ $s }}" {{ (isset($default_addr) && $default_addr->state == $s) ? 'selected' : '' }}>{{ $s }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            @if(isset($customer))
+                <div class="form-check mt-2 small" id="save-address-check-box">
+                    <input class="form-check-input" type="checkbox" id="save_address" value="1">
+                    <label class="form-check-label text-muted fw-bold" for="save_address">Save this address</label>
+                    <input type="text" id="address_label" class="form-control form-control-sm border-0 bg-light rounded-pill px-3 mt-2 d-none" style="font-size: 11px; width: 150px;" placeholder="Label (Home/Work)">
+                </div>
+            @endif
         </div>
         <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" style="font-size: 14px;" placeholder="Table No (Optional)"></div>
         <div class="mb-4">
@@ -339,6 +378,13 @@
         }
         $(document).on('change', 'input[name="order_type"]', updateOrderTypeUI);
         $('#checkoutModal').on('shown.bs.modal', updateOrderTypeUI);
+        $(document).on('change', '#save_address', function() { if($(this).is(':checked')) $('#address_label').removeClass('d-none'); else $('#address_label').addClass('d-none'); });
+        function setSavedAddress(street, city, state, pin, el) {
+            $('.address-chip').removeClass('active'); $(el).addClass('active');
+            $('#street_address').val(street); $('#city').val(city); $('#state').val(state); $('#pincode').val(pin);
+            if(street) { $('#save-address-check-box, #new-address-fields').addClass('d-none'); } 
+            else { $('#save-address-check-box, #new-address-fields').removeClass('d-none'); }
+        }
         function openFoodModal(id, name, description, price, variants, extras, image = null, defaultSize = '') {
             currentItem = { id, name, price, variants, extras, defaultSize };
             $("#m-food-name").text(name + (defaultSize ? ' - ' + defaultSize : ''));
@@ -359,8 +405,15 @@
             if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
             updateMTotal(); new bootstrap.Modal(document.getElementById("foodModal")).show();
         }
-        function updateMTotal() { let t = currentItem.price; let v = parseFloat($("input[name='f_var']:checked").data("price") || 0); let e = 0; $(".m-extra-cb:checked").each(function(){ e += parseFloat($(this).data("price")); }); $("#m-total").text((t + v + e).toFixed(2)); }
-        $(document).on("change", ".btn-check", updateMTotal);
+        function updateMTotal() { 
+            if(!window.currentItem || !currentItem) return;
+            let t = currentItem.price || 0; 
+            let v = parseFloat($("input[name='f_var']:checked").data("price") || 0); 
+            let e = 0; 
+            $(".m-extra-cb:checked").each(function(){ e += parseFloat($(this).data("price") || 0); }); 
+            $("#m-total").text((t + v + e).toFixed(2)); 
+        }
+        $(document).on("change", "#foodModal .btn-check, #foodModal .m-extra-cb", updateMTotal);
         function addToCart() {
             let v = $("input[name='f_var']:checked"); let ex = []; $(".m-extra-cb:checked").each(function(){ ex.push({ id: $(this).val(), price: parseFloat($(this).data("price")), name: $(this).data("name") }); });
             let p = currentItem.price + parseFloat(v.data("price") || 0) + ex.reduce((a, b) => a + b.price, 0);
@@ -388,7 +441,10 @@
                 localStorage.setItem('pending_name', name); 
                 localStorage.setItem('checkout_after_login', 'true'); 
                 localStorage.setItem('pending_order_type', $("input[name='order_type']:checked").val());
-                localStorage.setItem('pending_delivery_address', $("#delivery_address").val());
+                localStorage.setItem('pending_street', $("#street_address").val() || '');
+                localStorage.setItem('pending_city', $("#city").val() || '');
+                localStorage.setItem('pending_state', $("#state").val() || '');
+                localStorage.setItem('pending_pincode', $("#pincode").val() || '');
                 localStorage.setItem('pending_table_number', $("#table_number").val());
                 localStorage.setItem('pending_payment_method', $("input[name='payment_method']:checked").val());
 
@@ -398,9 +454,40 @@
                 $("#loginModal").modal("show"); 
                 return;
             @endif
-            let items = cart.map(c => ({ item_id: c.item_id, variant_id: c.variant_id, price: c.price, quantity: c.qty, total: c.price * c.qty, extras: c.extras.map(e => ({ id: e.id, price: e.price })) }));
+            let items = cart.map(c => ({ 
+                item_id: c.item_id, 
+                variant_id: c.variant_id, 
+                price: c.price, 
+                quantity: c.qty, 
+                total: (c.price || 0) * (c.qty || 1), 
+                extras: (c.extras || []).map(e => ({ id: e.id, price: e.price })) 
+            }));
             $("#placeOrderBtn").prop("disabled", true).text("Processing...");
-            $.post("{{ route('home.store') }}", { _token: "{{ csrf_token() }}", customer_name: $("#cust_name").val(), customer_phone: $("#cust_phone").val(), order_type: $("input[name='order_type']:checked").val(), payment_method: $("input[name='payment_method']:checked").val(), table_number: $("#table_number").val(), delivery_address: $("#delivery_address").val(), items: JSON.stringify(items), total_amount: parseFloat($("#checkout-total").text()), grand_total: parseFloat($("#checkout-total").text()) }, function(res) {
+            
+            let s_addr = $("#street_address").val() || '';
+            let c_addr = $("#city").val() || '';
+            let st_addr = $("#state").val() || '';
+            let p_addr = $("#pincode").val() || '';
+            let full_addr = s_addr ? (s_addr + ', ' + c_addr + ', ' + st_addr + ' - ' + p_addr) : '';
+
+            $.post("{{ route('home.store') }}", { 
+                _token: "{{ csrf_token() }}", 
+                customer_name: $("#cust_name").val(), 
+                customer_phone: $("#cust_phone").val(), 
+                order_type: $("input[name='order_type']:checked").val() || "Takeaway", 
+                payment_method: $("input[name='payment_method']:checked").val() || "Cash", 
+                table_number: $("#table_number").val(), 
+                delivery_address: full_addr, 
+                street_address: s_addr,
+                city: c_addr,
+                state: st_addr,
+                pincode: p_addr,
+                save_address: $("#save_address").is(':checked') ? 1 : 0,
+                address_label: $("#address_label").val(),
+                items: JSON.stringify(items), 
+                total_amount: parseFloat($("#checkout-total").text()), 
+                grand_total: parseFloat($("#checkout-total").text()) 
+            }, function(res) {
                 if(res.status) { localStorage.removeItem('cart'); if(res.redirect_url) window.location.href = res.redirect_url; else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; } else alert(res.message || "Error placing order");
             });
         }
@@ -485,8 +572,10 @@
                     localStorage.removeItem('checkout_after_login');
                     @if(isset($customer))
                         // Restore pending checkout preferences
-                        let pType = localStorage.getItem('pending_order_type');
-                        let pAddr = localStorage.getItem('pending_delivery_address');
+                        let pStreet = localStorage.getItem('pending_street');
+                        let pCity = localStorage.getItem('pending_city');
+                        let pState = localStorage.getItem('pending_state');
+                        let pPin = localStorage.getItem('pending_pincode');
                         let pTable = localStorage.getItem('pending_table_number');
                         let pPay = localStorage.getItem('pending_payment_method');
                         
@@ -494,13 +583,19 @@
                             $(`input[name='order_type'][value='${pType}']`).prop('checked', true).change();
                             if(pType === 'Home Delivery') $('#delivery-address-box').show(); 
                         }
-                        if(pAddr) $("#delivery_address").val(pAddr);
+                        if(pStreet) $("#street_address").val(pStreet);
+                        if(pCity) $("#city").val(pCity);
+                        if(pState) $("#state").val(pState);
+                        if(pPin) $("#pincode").val(pPin);
                         if(pTable) $("#table_number").val(pTable);
                         if(pPay) $(`input[name='payment_method'][value='${pPay}']`).prop('checked', true);
 
                         // Clean up
                         localStorage.removeItem('pending_order_type');
-                        localStorage.removeItem('pending_delivery_address');
+                        localStorage.removeItem('pending_street');
+                        localStorage.removeItem('pending_city');
+                        localStorage.removeItem('pending_state');
+                        localStorage.removeItem('pending_pincode');
                         localStorage.removeItem('pending_table_number');
                         localStorage.removeItem('pending_payment_method');
 

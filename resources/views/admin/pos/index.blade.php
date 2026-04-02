@@ -104,7 +104,28 @@
                     <label class="btn btn-outline-primary d-flex align-items-center justify-content-center fw-bold" for="type-delivery" style="height: 42px;"><i class="fas fa-motorcycle me-1"></i>Delivery</label>
                 </div>
                 <div id="delivery-addr-box" class="mt-2" style="display:none;">
-                    <textarea id="delivery_address" class="form-control border-0 bg-white rounded-3" rows="2" placeholder="Enter delivery address..." style="font-size: 0.85rem;"></textarea>
+                    <div id="pos-saved-addresses" class="mb-2 d-none">
+                        <label class="small fw-bold text-muted text-uppercase mb-1" style="font-size: 0.65rem;">Saved Address</label>
+                        <select id="pos_saved_address_list" class="form-select form-select-sm border-0 bg-white rounded-3 mb-1" style="font-size: 0.8rem;">
+                            <option value="">+ Add New Address</option>
+                        </select>
+                    </div>
+                    <div id="pos-new-address-fields">
+                        <textarea id="street_address" class="form-control border-0 bg-white rounded-3 mb-1" rows="1" placeholder="Street Address / Building" style="font-size: 0.8rem;"></textarea>
+                        <div class="row g-1 mb-1">
+                            <div class="col-6"><input type="text" id="city" class="form-control form-control-sm border-0 bg-white rounded-3" placeholder="City" style="font-size: 0.75rem;"></div>
+                            <div class="col-6"><input type="text" id="pincode" class="form-control form-control-sm border-0 bg-white rounded-3" placeholder="Pin" style="font-size: 0.75rem;"></div>
+                        </div>
+                        <select id="state" class="form-select form-select-sm border-0 bg-white rounded-3 mb-1" style="font-size: 0.75rem;">
+                            <option value="">Select State</option>
+                            <option value="Andhra Pradesh">Andhra Pradesh</option><option value="Arunachal Pradesh">Arunachal Pradesh</option><option value="Assam">Assam</option><option value="Bihar">Bihar</option><option value="Chhattisgarh">Chhattisgarh</option><option value="Goa">Goa</option><option value="Gujarat">Gujarat</option><option value="Haryana">Haryana</option><option value="Himachal Pradesh">Himachal Pradesh</option><option value="Jharkhand">Jharkhand</option><option value="Karnataka">Karnataka</option><option value="Kerala">Kerala</option><option value="Madhya Pradesh">Madhya Pradesh</option><option value="Maharashtra">Maharashtra</option><option value="Manipur">Manipur</option><option value="Meghalaya">Meghalaya</option><option value="Mizoram">Mizoram</option><option value="Nagaland">Nagaland</option><option value="Odisha">Odisha</option><option value="Punjab">Punjab</option><option value="Rajasthan">Rajasthan</option><option value="Sikkim">Sikkim</option><option value="Tamil Nadu">Tamil Nadu</option><option value="Telangana">Telangana</option><option value="Tripura">Tripura</option><option value="Uttar Pradesh">Uttar Pradesh</option><option value="Uttarakhand">Uttarakhand</option><option value="West Bengal">West Bengal</option><option value="Delhi">Delhi</option>
+                        </select>
+                    </div>
+                    <div id="pos-save-addr-check" class="form-check mt-1 d-none">
+                        <input class="form-check-input" type="checkbox" id="pos_save_address" value="1">
+                        <label class="form-check-label text-muted small fw-bold" for="pos_save_address" style="font-size: 0.75rem;">Save for later</label>
+                        <input type="text" id="pos_address_label" class="form-control form-control-sm border-0 rounded-pill bg-white mt-1 d-none" style="font-size: 0.7rem; width: 120px;" placeholder="Label (Home/Work)">
+                    </div>
                 </div>
             </div>
 
@@ -119,30 +140,29 @@
             
             <div class="px-3 py-3 border-top bg-light-subtle">
                 <div class="row g-2 align-items-end">
-                    <div class="col-7 position-relative">
-                        <label class="text-center small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.65rem;">Customer (Optional)</label>
-                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 42px;">
-                            <span class="input-group-text bg-transparent border-0 ps-3 h-100 d-flex align-items-center"><i class="fas fa-search small text-muted"></i></span>
-                            <input type="text" id="customer_phone" class="form-control border-0 shadow-none px-2 h-100" placeholder="Search phone..." autocomplete="off" style="font-size: 0.85rem;">
-                            <button class="btn btn-outline-secondary border-0 bg-transparent d-none px-3 h-100" type="button" id="clear_cust"><i class="fas fa-times small"></i></button>
+                    <div class="col-4 position-relative">
+                        <label class="small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.6rem;">Customer (Optional)</label>
+                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 40px;">
+                            <span class="input-group-text bg-transparent border-0 ps-2 h-100 d-flex align-items-center"><i class="fas fa-user small text-muted"></i></span>
+                            <input type="text" id="customer_phone" class="form-control border-0 shadow-none px-1 h-100" placeholder="Phone..." autocomplete="off" style="font-size: 0.8rem;">
+                            <button class="btn btn-outline-secondary border-0 bg-transparent d-none px-2 h-100" type="button" id="clear_cust"><i class="fas fa-times small"></i></button>
                         </div>
                         <div id="customer_dropdown" class="position-absolute w-100 bg-white shadow-lg rounded-3 border d-none" style="z-index: 1060; max-height: 200px; overflow-y: auto; bottom: 100%; left: 0;"></div>
                         <input type="hidden" id="selected_customer_id">
                     </div>
-                    <div class="col-5" id="table-number-box">
-                        <label class="text-center small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.65rem;">Table No.</label>
-                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 42px;">
-                            <span class="input-group-text bg-transparent border-0 ps-3 h-100 d-flex align-items-center"><i class="fas fa-hashtag text-muted small"></i></span>
-                            <input type="text" id="table_number" class="form-control border-0 shadow-none ps-1 h-100" placeholder="T-00" style="font-size: 0.85rem;">
+                    <div class="col-2" id="table-number-box">
+                        <label class="small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.6rem;">Table</label>
+                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 40px;">
+                            <input type="text" id="table_number" class="form-control border-0 shadow-none text-center h-100" placeholder="No" style="font-size: 0.8rem;">
                         </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="px-3 py-3 border-top bg-white">
-                <div class="input-group shadow-sm border p-0 m-0" style="border-radius: 50px; overflow: hidden; background: #fff; display: flex; height: 44px;">
-                    <input type="text" id="coupon_code" class="form-control border-0 shadow-none px-3 h-80" placeholder="DISCOUNT COUPON CODE" style="font-weight: 600; font-size: 0.825rem; letter-spacing: 0.5px; color: #475569; border-radius: 0;">
-                    <button class="btn text-white border-0 px-3 fw-bold m-0 h-100" type="button" onclick="applyCoupon()" style="background: #1e293b; font-size: 0.8rem; z-index: 2; border-radius: 0; min-width: 90px;">VALIDATE</button>
+                    <div class="col-6">
+                        <label class="small fw-bold text-muted text-uppercase mb-1 d-block" style="font-size: 0.6rem;">Coupon Code</label>
+                        <div class="input-group shadow-sm border" style="border-radius: 50px; overflow: hidden; background: #fff; height: 40px;">
+                            <input type="text" id="coupon_code" class="form-control border-0 shadow-none px-3 h-100 text-uppercase" placeholder="COUPON" style="font-weight: 600; font-size: 0.75rem; letter-spacing: 0.5px; border-radius: 0;">
+                            <button class="btn text-white border-0 px-2 fw-bold h-100" type="button" onclick="applyCoupon()" style="background: #1e293b; font-size: 0.7rem; border-radius: 0;">APPLY</button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -372,7 +392,7 @@
             let html = "";
             if(data && Array.isArray(data)) {
                 data.forEach(c => {
-                    html += `<div class="p-2 border-bottom pointer cust-item" data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}">
+                    html += `<div class="p-2 border-bottom pointer cust-item" data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}" data-addresses="${JSON.stringify(c.addresses || []).replace(/"/g, '&quot;')}">
                         <div class="fw-bold" style="font-size: 0.8rem;">${c.name}</div>
                         <div class="small text-muted" style="font-size: 0.7rem;">${c.phone}</div>
                     </div>`;
@@ -386,16 +406,58 @@
     $(document).on("click", ".cust-item", function() {
         let id = $(this).data("id");
         let phone = $(this).data("phone");
+        let addresses = $(this).data("addresses");
         $("#selected_customer_id").val(id);
         $("#customer_phone").val(phone).prop("readonly", true);
         $("#clear_cust").removeClass("d-none");
         $("#customer_dropdown").addClass("d-none");
+
+        // Handle POS Addresses
+        let addrOpt = '<option value="">+ Add New Address</option>';
+        let defaultAddr = addresses.find(a => a.is_default);
+        if(addresses.length > 0) {
+            addresses.forEach(a => {
+                addrOpt += `<option value="${a.street_address}" data-city="${a.city}" data-state="${a.state}" data-pin="${a.pincode}">${a.label}: ${a.street_address}</option>`;
+            });
+            $("#pos-saved-addresses").removeClass("d-none");
+            if(defaultAddr) {
+                setTimeout(() => {
+                    $("#pos_saved_address_list").val(defaultAddr.street_address).trigger('change');
+                }, 100);
+            }
+        } else {
+            $("#pos-saved-addresses").addClass("d-none");
+            $("#pos-save-addr-check, #pos-new-address-fields").removeClass("d-none");
+        }
+        $("#pos_saved_address_list").html(addrOpt);
+    });
+
+    $("#pos_saved_address_list").on("change", function() {
+        let opt = $(this).find('option:selected');
+        let val = opt.val();
+        $("#street_address").val(val);
+        $("#city").val(opt.data("city") || "");
+        $("#state").val(opt.data("state") || "");
+        $("#pincode").val(opt.data("pin") || "");
+        
+        if(val) {
+            $("#pos-save-addr-check, #pos-new-address-fields").addClass("d-none");
+        } else {
+            $("#pos-save-addr-check, #pos-new-address-fields").removeClass("d-none");
+        }
+    });
+
+    $(document).on('change', '#pos_save_address', function() {
+        if($(this).is(':checked')) $('#pos_address_label').removeClass('d-none');
+        else $('#pos_address_label').addClass('d-none');
     });
 
     $("#clear_cust").on("click", function() {
         $("#selected_customer_id").val("");
         $("#customer_phone").val("").prop("readonly", false);
         $(this).addClass("d-none");
+        $("#pos-saved-addresses, #pos-save-addr-check, #pos-new-address-fields").addClass("d-none");
+        $("#street_address, #city, #state, #pincode").val("");
     });
 
     // Coupon logic
@@ -464,10 +526,10 @@
         let pItems = cart.map(c => ({
             item_id: String(c.id),
             variant_id: c.variant_id ? String(c.variant_id) : null,
-            price: parseFloat(c.price),
-            quantity: parseInt(c.qty),
-            total: parseFloat(c.total),
-            extras: c.extras.map(ex => ({id: String(ex.id), price: parseFloat(ex.price)}))
+            price: parseFloat(c.price || 0),
+            quantity: parseInt(c.qty || 1),
+            total: parseFloat(c.total || 0),
+            extras: (c.extras || []).map(ex => ({id: String(ex.id), price: parseFloat(ex.price || 0)}))
         }));
         
         let btn = $(e.target).closest('button');
@@ -484,8 +546,14 @@
             items: pItems,
             total_amount: parseFloat($("#subTotal").text()),
             discount_amount: pos_discount_val,
-            grand_total: parseFloat($("#grandTotal").text()),
-            delivery_address: $("#delivery_address").val() || "",
+            grand_total: parseFloat($("#grandTotal").text()), 
+            delivery_address: $("#street_address").val() + ', ' + $("#city").val() + ', ' + $("#state").val() + ' - ' + $("#pincode").val(),
+            street_address: $("#street_address").val(),
+            city: $("#city").val(),
+            state: $("#state").val(),
+            pincode: $("#pincode").val(),
+            save_address: $("#pos_save_address").is(':checked') ? 1 : 0,
+            address_label: $("#pos_address_label").val(),
             _token: "{{ csrf_token() }}"
         };
 
@@ -505,6 +573,9 @@
                     $("#clear_cust").click();
                     renderCart();
                     $("#table_number").val("");
+                    
+                    // Open Invoice in new tab
+                    window.open("{{ url('cp/orders') }}/" + res.order_id + "/invoice", '_blank');
                 } else {
                     showAlert('error', 'Failed', res.message || 'Something went wrong');
                 }

@@ -52,6 +52,10 @@ Route::post('/customer/login', [CustomerAuthController::class, 'login'])->name('
 Route::post('/customer/auto-login', [CustomerAuthController::class, 'autoLogin'])->name('customer.autoLogin');
 Route::get('/customer/reorder/{order_number}', [CustomerAuthController::class, 'reorder'])->name('customer.reorder');
 Route::get('/customer/orders', [CustomerAuthController::class, 'myOrders'])->name('customer.orders');
+Route::get('/customer/profile', [CustomerAuthController::class, 'profile'])->name('customer.profile');
+Route::post('/customer/address/save', [CustomerAuthController::class, 'saveAddress'])->name('customer.address.save');
+Route::delete('/customer/address/{id}', [CustomerAuthController::class, 'deleteAddress'])->name('customer.address.delete');
+Route::post('/customer/address/{id}/default', [CustomerAuthController::class, 'setDefaultAddress'])->name('customer.address.default');
 Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 Route::middleware('auth')->prefix('cp')->group(function () {

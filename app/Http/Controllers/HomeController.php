@@ -11,7 +11,7 @@ class HomeController extends Controller {
         $items = Item::with(["category", "variants", "extras"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
         $coupons = \App\Models\Coupon::where('show_on_home', 1)->where('coupon_type', '!=', 'Internal')->get();
         
-        $customer = \App\Models\Customer::find(session('customer_id'));
+        $customer = \App\Models\Customer::with('addresses')->find(session('customer_id'));
         $recentItems = collect();
         if($customer) {
             $orderIds = \App\Models\Order::where('customer_id', $customer->id)->pluck('id');
@@ -31,6 +31,7 @@ class HomeController extends Controller {
 
     public function placeOrder(Request $request, OrderRepository $repo) {
         try {
+            \Illuminate\Support\Facades\Log::info("PlaceOrder: Received request", $request->all());
             $data = $request->all();
             if(isset($data['items']) && is_string($data['items'])) {
                 $data['items'] = json_decode($data['items'], true);
@@ -40,7 +41,9 @@ class HomeController extends Controller {
             $data["payment_status"] = "Pending";
             $data["customer_id"] = session("customer_id");
             
+            \Illuminate\Support\Facades\Log::info("PlaceOrder: Creating order with method: " . $data["payment_method"]);
             $order = $repo->createOrder($data);
+            \Illuminate\Support\Facades\Log::info("PlaceOrder: Order created successfully. Order #: " . $order->order_number);
             
             if ($order->payment_method == 'UPI' || $order->payment_method == 'PayU') {
                 $tenant = app()->bound('tenant') ? app('tenant') : null;
@@ -54,6 +57,7 @@ class HomeController extends Controller {
                     // Standard UPI Deep Link: upi://pay?pa=VPA&pn=NAME&am=AMOUNT&cu=INR&tn=MESSAGE
                     $upi_url = "upi://pay?pa=" . $upi_vpa . "&pn=" . urlencode($shop_name) . "&am=" . $order->grand_total . "&cu=INR&tn=" . urlencode($order_msg);
                     
+                    \Illuminate\Support\Facades\Log::info("PlaceOrder: Redirecting to UPI App: " . $upi_url);
                     return response()->json([
                         'status' => true,
                         'is_upi' => true,
@@ -65,17 +69,20 @@ class HomeController extends Controller {
                 }
 
                 // Fallback to PayU for ONLINE or if UPI ID is missing
+                $redirectUrl = route('payu.pay', $order->order_number);
+                \Illuminate\Support\Facades\Log::info("PlaceOrder: Redirecting to PayU: " . $redirectUrl);
                 return response()->json([
                     'status' => true,
                     'is_upi' => false,
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
-                    'redirect_url' => route('payu.pay', $order->order_number),
+                    'redirect_url' => $redirectUrl,
                     'data' => $order,
                     'message' => 'Redirecting to payment gateway...'
                 ]);
             }
 
+            \Illuminate\Support\Facades\Log::info("PlaceOrder: Order completed for Cash/Offline.");
             return response()->json([
                 'status' => true,
                 'order_number' => $order->order_number,
@@ -83,6 +90,7 @@ class HomeController extends Controller {
                 'message' => 'Order placed successfully!'
             ]);
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("PlaceOrder Error: " . $e->getMessage() . "\n" . $e->getTraceAsString());
             return $this->sendError($e->getMessage(), 422);
         }
     }

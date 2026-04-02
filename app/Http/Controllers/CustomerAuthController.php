@@ -156,11 +156,69 @@ class CustomerAuthController extends Controller
 
     public function logout()
     {
-        $customerId = Session::get('customer_id');
-        if ($customerId) {
-            Customer::where('id', $customerId)->update(['device_token' => null]);
-        }
         Session::forget('customer_id');
         return redirect()->route('home')->with('success', 'Logged out successfully');
+    }
+
+    public function profile()
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return redirect()->route('home');
+
+        $customer = Customer::with('addresses')->find($customerId);
+        return view('customer.profile', compact('customer'));
+    }
+
+    public function saveAddress(Request $request)
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+
+        $request->validate([
+            'street_address' => 'required|string|max:255',
+            'city' => 'required|string|max:100',
+            'state' => 'required|string|max:100',
+            'pincode' => 'required|string|max:10',
+            'label' => 'required|string|max:50',
+            'is_default' => 'nullable|boolean'
+        ]);
+
+        if ($request->is_default) {
+            \App\Models\CustomerAddress::where('customer_id', $customerId)->update(['is_default' => false]);
+        }
+
+        $address = \App\Models\CustomerAddress::updateOrCreate(
+            ['id' => $request->id, 'customer_id' => $customerId],
+            [
+                'street_address' => $request->street_address,
+                'city' => $request->city,
+                'state' => $request->state,
+                'pincode' => $request->pincode,
+                'label' => $request->label,
+                'is_default' => $request->is_default ?? false
+            ]
+        );
+
+        return response()->json(['status' => true, 'message' => 'Address saved successfully', 'address' => $address]);
+    }
+
+    public function deleteAddress($id)
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+
+        \App\Models\CustomerAddress::where('id', $id)->where('customer_id', $customerId)->delete();
+        return response()->json(['status' => true, 'message' => 'Address deleted successfully']);
+    }
+
+    public function setDefaultAddress($id)
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+
+        \App\Models\CustomerAddress::where('customer_id', $customerId)->update(['is_default' => false]);
+        \App\Models\CustomerAddress::where('id', $id)->where('customer_id', $customerId)->update(['is_default' => true]);
+
+        return response()->json(['status' => true, 'message' => 'Default address set successfully']);
     }
 }

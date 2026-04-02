@@ -19,8 +19,10 @@ class CustomerRepository extends BaseRepository
 
     public function search(string $query): Collection
     {
-        return $this->model->where('name', 'like', "%$query%")
+        return $this->model->with('addresses')
+            ->where('name', 'like', "%$query%")
             ->orWhere('phone', 'like', "%$query%")
+            ->limit(10)
             ->get();
     }
 }

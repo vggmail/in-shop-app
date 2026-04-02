@@ -21,7 +21,16 @@
             <input type="hidden" name="surl" value="{{ $data['surl'] }}" />
             <input type="hidden" name="furl" value="{{ $data['furl'] }}" />
             
-            <!-- Standard UDF fields -->
+            <input type="hidden" name="pg" value="{{ $data['pg'] ?? '' }}" />
+            <input type="hidden" name="bankcode" value="{{ $data['bankcode'] ?? '' }}" />
+            <input type="hidden" name="ccnum" value="{{ $data['ccnum'] ?? '' }}" />
+            <input type="hidden" name="ccexpmon" value="{{ $data['ccexpmon'] ?? '' }}" />
+            <input type="hidden" name="ccexpyr" value="{{ $data['ccexpyr'] ?? '' }}" />
+            <input type="hidden" name="ccvv" value="{{ $data['ccvv'] ?? '' }}" />
+            <input type="hidden" name="ccname" value="{{ $data['ccname'] ?? '' }}" />
+            <input type="hidden" name="txn_s2s_flow" value="{{ $data['txn_s2s_flow'] ?? '' }}" />
+
+            <!-- UDF fields are essential for hash consistency -->
             <input type="hidden" name="udf1" value="" />
             <input type="hidden" name="udf2" value="" />
             <input type="hidden" name="udf3" value="" />
@@ -32,8 +41,6 @@
             <input type="hidden" name="udf8" value="" />
             <input type="hidden" name="udf9" value="" />
             <input type="hidden" name="udf10" value="" />
-
-            <input type="hidden" name="service_provider" value="payu_paisa" />
             
             <noscript>
                 <p>If you are not redirected within 5 seconds, please click the button below:</p>

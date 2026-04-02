@@ -36,6 +36,12 @@ class StoreOrderRequest extends FormRequest
             'items.*.total' => 'nullable|numeric|min:0',
             'total_amount' => 'required|numeric|min:0',
             'grand_total' => 'required|numeric|min:0',
+            'street_address' => 'nullable|string|max:255',
+            'city' => 'nullable|string|max:100',
+            'state' => 'nullable|string|max:100',
+            'pincode' => 'nullable|string|max:10',
+            'save_address' => 'nullable|boolean',
+            'address_label' => 'nullable|string|max:50',
         ];
     }
 
