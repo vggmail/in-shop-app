@@ -143,6 +143,7 @@ class PayUController extends Controller
             }
 
             $order->payment_status = 'Paid';
+            $order->status = 'Preparing';
             $order->save();
 
             Payment::updateOrCreate(
@@ -192,6 +193,10 @@ class PayUController extends Controller
         if ($txnid) {
             $orderNumber = explode('T', $txnid)[0];
             $order = Order::where('order_number', $orderNumber)->first();
+            if ($order && $order->status === 'Pending Payment') {
+                $order->status = 'Payment Failed';
+                $order->save();
+            }
             Log::info("PayU: Payment failed for Order #$orderNumber. TxnID: $txnid");
         }
 

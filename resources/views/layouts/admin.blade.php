@@ -235,9 +235,9 @@
                             <div class="list-group list-group-flush shadow-sm rounded-3 overflow-hidden">
                                 <div class="list-group-item border-0 bg-light-primary p-3">
                                     <div class="d-flex align-items-center">
-                                        <div class="bg-success text-white rounded-circle p-2 me-3"><i class="fas fa-shopping-basket"></i></div>
+                                        <div class="bg-${data.latest_status == 'Payment Failed' ? 'danger' : 'success'} text-white rounded-circle p-2 me-3"><i class="fas fa-shopping-basket"></i></div>
                                         <div>
-                                            <div class="fw-bold text-dark">New Order Received!</div>
+                                            <div class="fw-bold text-dark">${data.latest_status == 'Payment Failed' ? 'Payment Failed!' : 'New Order Received!'}</div>
                                             <div class="small text-muted">${data.latest_order}</div>
                                         </div>
                                     </div>
@@ -245,7 +245,7 @@
                                 </div>
                             </div>
                         `);
-                        showToast('success', 'Incoming Order!', 'New order ' + data.latest_order + ' received.');
+                        showToast(data.latest_status == 'Payment Failed' ? 'error' : 'success', data.latest_status == 'Payment Failed' ? 'Order Failed!' : 'Incoming Order!', (data.latest_status == 'Payment Failed' ? 'Payment failed for ' : 'New order ') + data.latest_order);
                         new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(() => {});
                     }
                     lastOrderId = data.latest_id;

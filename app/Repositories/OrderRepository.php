@@ -47,6 +47,7 @@ class OrderRepository extends BaseRepository
                 \Illuminate\Support\Facades\Log::info("OrderRepo: Customer created/found ID: " . $customerId);
             }
 
+            $isOnline = in_array($data["payment_method"], ["PayU", "UPI", "Online"]);
             $order = Order::create([
                 "order_number" => $orderNum,
                 "customer_id" => $customerId,
@@ -60,8 +61,8 @@ class OrderRepository extends BaseRepository
                 "discount_amount" => $data["discount_amount"] ?? 0,
                 "grand_total" => $data["grand_total"],
                 "payment_method" => $data["payment_method"],
-                "payment_status" => $data["payment_status"] ?? ($data["grand_total"] > 0 && $data["payment_method"] != "Pending" ? "Paid" : "Pending"),
-                "status" => "Preparing",
+                "payment_status" => $data["payment_status"] ?? ($data["grand_total"] > 0 && $data["payment_method"] != "Pending" && !$isOnline ? "Paid" : "Pending"),
+                "status" => $isOnline ? "Pending Payment" : "Preparing",
             ]);
             \Illuminate\Support\Facades\Log::info("OrderRepo: Order record created ID: " . $order->id . " Num: " . $orderNum);
 

@@ -115,12 +115,13 @@ class OrderController extends Controller {
     }
 
     public function checkPending() {
-        $count = \App\Models\Order::where('status', '!=', 'Completed')->where('source', 'Online')->count();
-        $latest = \App\Models\Order::where('source', 'Online')->orderBy('id', 'desc')->first();
+        $count = \App\Models\Order::where('status', '!=', 'Completed')->where('status', '!=', 'Pending Payment')->where('source', 'Online')->count();
+        $latest = \App\Models\Order::where('source', 'Online')->where('status', '!=', 'Pending Payment')->orderBy('id', 'desc')->first();
         return response()->json([
             'count' => $count,
             'latest_id' => $latest ? $latest->id : 0,
-            'latest_order' => $latest ? $latest->order_number : null
+            'latest_order' => $latest ? $latest->order_number : null,
+            'latest_status' => $latest ? $latest->status : null
         ]);
     }
 

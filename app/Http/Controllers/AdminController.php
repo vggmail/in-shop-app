@@ -10,13 +10,18 @@ class AdminController extends Controller {
         $range = $request->get('range', '30d');
         $days = ($range === '6m') ? 180 : 30;
 
-        $todaySales = Order::whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])->sum('grand_total');
-        $totalOrders = Order::count();
-        $totalRevenue = Order::sum("grand_total");
+        $todaySales = Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])
+            ->whereBetween('created_at', [now()->startOfDay(), now()->endOfDay()])
+            ->sum('grand_total');
+        $totalOrders = Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])->count();
+        $totalRevenue = Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])->sum("grand_total");
         $totalCustomers = \App\Models\Customer::count();
 
         // Real Top Items by Sales Count
-        $topItems = \App\Models\OrderItem::select('item_id', \DB::raw('count(*) as total'))
+        $topItems = \App\Models\OrderItem::whereHas('order', function($q) {
+                $q->whereNotIn('status', ['Pending Payment', 'Payment Failed']);
+            })
+            ->select('item_id', \DB::raw('count(*) as total'))
             ->where('created_at', '>=', now()->subDays($days))
             ->groupBy('item_id')
             ->orderBy('total', 'desc')
@@ -27,7 +32,8 @@ class AdminController extends Controller {
             ->get();
 
         // Sales Trends based on filter
-        $dailySales = Order::selectRaw("DATE(created_at) as date, SUM(grand_total) as total")
+        $dailySales = Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])
+            ->selectRaw("DATE(created_at) as date, SUM(grand_total) as total")
             ->where('created_at', '>=', now()->subDays($days))
             ->groupBy("date")
             ->orderBy("date", "asc")
