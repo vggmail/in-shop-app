@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('orders', function (Blueprint $table) {
-            $table->string('source')->default('Online')->after('payment_status'); // Online, POS
+            if (!Schema::hasColumn('orders', 'source')) {
+                $table->string('source')->default('Online')->after('payment_status'); // Online, POS
+            }
         });
     }
 

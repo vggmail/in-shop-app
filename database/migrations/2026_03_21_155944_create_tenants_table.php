@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('tenants', function (Blueprint $table) {
-            $table->id();
-            $table->string('subdomain')->unique();
-            $table->string('name')->nullable();
-            $table->string('upi_id')->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('tenants')) {
+            Schema::create('tenants', function (Blueprint $table) {
+                $table->id();
+                $table->string('subdomain')->unique();
+                $table->string('name')->nullable();
+                $table->string('upi_id')->nullable();
+                $table->boolean('is_active')->default(true);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -12,10 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('categories', function (Blueprint $table) {
-            $table->unsignedBigInteger('parent_id')->nullable()->after('id');
-            $table->string('image')->nullable()->after('slug');
-            $table->boolean('is_active')->default(true)->after('image');
-            $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
+            if (!Schema::hasColumn('categories', 'parent_id')) {
+                $table->unsignedBigInteger('parent_id')->nullable()->after('id');
+                $table->foreign('parent_id')->references('id')->on('categories')->onDelete('cascade');
+            }
+            if (!Schema::hasColumn('categories', 'image')) {
+                $table->string('image')->nullable()->after('slug');
+            }
+            if (!Schema::hasColumn('categories', 'is_active')) {
+                $table->boolean('is_active')->default(true)->after('image');
+            }
         });
     }
 

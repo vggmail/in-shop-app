@@ -12,25 +12,25 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('items', function (Blueprint $table) {
-            $table->index('is_available');
+            try { $table->index('is_available'); } catch (\Exception $e) {}
         });
 
         Schema::table('orders', function (Blueprint $table) {
-            $table->index('status');
-            $table->index('payment_status');
-            $table->index('order_type');
-            $table->index('created_at');
+            try { $table->index('status'); } catch (\Exception $e) {}
+            try { $table->index('payment_status'); } catch (\Exception $e) {}
+            try { $table->index('order_type'); } catch (\Exception $e) {}
+            try { $table->index('created_at'); } catch (\Exception $e) {}
         });
 
         Schema::table('categories', function (Blueprint $table) {
             if (Schema::hasColumn('categories', 'parent_id')) {
-                $table->index('parent_id');
+                try { $table->index('parent_id'); } catch (\Exception $e) {}
             }
         });
 
         Schema::table('tenants', function (Blueprint $table) {
-            $table->index('is_active');
-            $table->index('subdomain'); // subdomain is unique but explicit index for prefix search if needed
+            try { $table->index('is_active'); } catch (\Exception $e) {}
+            try { $table->index('subdomain'); } catch (\Exception $e) {}
         });
     }
 

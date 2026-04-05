@@ -11,21 +11,23 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('payment_attempts', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_id')->constrained()->onDelete('cascade');
-            $table->string('txnid')->index();
-            $table->string('mihpayid')->nullable()->index();
-            $table->string('status');
-            $table->decimal('amount', 10, 2);
-            $table->text('hash_string')->nullable();
-            $table->string('calculated_hash')->nullable();
-            $table->string('received_hash')->nullable();
-            $table->json('request_data')->nullable();
-            $table->json('response_data')->nullable();
-            $table->text('error_message')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('payment_attempts')) {
+            Schema::create('payment_attempts', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('order_id')->constrained()->onDelete('cascade');
+                $table->string('txnid')->index();
+                $table->string('mihpayid')->nullable()->index();
+                $table->string('status');
+                $table->decimal('amount', 10, 2);
+                $table->text('hash_string')->nullable();
+                $table->string('calculated_hash')->nullable();
+                $table->string('received_hash')->nullable();
+                $table->json('request_data')->nullable();
+                $table->json('response_data')->nullable();
+                $table->text('error_message')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

@@ -8,13 +8,15 @@ return new class extends \Illuminate\Database\Migrations\Migration
 {
     public function up()
     {
-        Schema::create('order_item_extras', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('order_item_id')->constrained()->onDelete('cascade');
-            $table->foreignId('item_extra_id')->constrained()->onDelete('cascade');
-            $table->decimal('price', 10, 2);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('order_item_extras')) {
+            Schema::create('order_item_extras', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('order_item_id')->constrained()->onDelete('cascade');
+                $table->foreignId('item_extra_id')->constrained()->onDelete('cascade');
+                $table->decimal('price', 10, 2);
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()

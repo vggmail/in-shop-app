@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_addresses', function (Blueprint $table) {
-            $table->id();
-            $table->unsignedBigInteger('customer_id');
-            $table->text('address');
-            $table->string('label')->nullable()->default('Home');
-            $table->boolean('is_default')->default(false);
-            $table->timestamps();
+        if (!Schema::hasTable('customer_addresses')) {
+            Schema::create('customer_addresses', function (Blueprint $table) {
+                $table->id();
+                $table->unsignedBigInteger('customer_id');
+                $table->text('address');
+                $table->string('label')->nullable()->default('Home');
+                $table->boolean('is_default')->default(false);
+                $table->timestamps();
 
-            $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
-        });
+                $table->foreign('customer_id')->references('id')->on('customers')->onDelete('cascade');
+            });
+        }
     }
 
     /**

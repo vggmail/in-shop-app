@@ -30,8 +30,20 @@ Route::get('/fix-storage', function () {
 });
 
 Route::get('/run-migrate', function () {
-    \Illuminate\Support\Facades\Artisan::call('migrate', ["--force" => true]);
-    return 'Migrations executed successfully!';
+    // 1. Explicitly migrate the main/central database (mysql)
+    // This is crucial for updating the 'tenants' table itself.
+    \Illuminate\Support\Facades\Artisan::call('migrate', ["--database" => "mysql", "--force" => true]);
+    $mainOutput = \Illuminate\Support\Facades\Artisan::output();
+
+    // 2. Also migrate the tenant database if we are currently connected to one
+    $tenantOutput = "";
+    if (\Illuminate\Support\Facades\DB::getDefaultConnection() === 'tenant') {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ["--database" => "tenant", "--force" => true]);
+        $tenantOutput = \Illuminate\Support\Facades\Artisan::output();
+    }
+    
+    return "<h3>Main Database Migrations:</h3><pre>{$mainOutput}</pre>" . 
+           ($tenantOutput ? "<h3>Tenant Database Migrations:</h3><pre>{$tenantOutput}</pre>" : "");
 });
 
 Route::get('/optimize', function () {

@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('customers', function (Blueprint $table) {
-            $table->string('pin')->nullable()->after('phone');
-            $table->string('device_token')->nullable()->after('pin');
+            if (!Schema::hasColumn('customers', 'pin')) {
+                $table->string('pin')->nullable()->after('phone');
+            }
+            if (!Schema::hasColumn('customers', 'device_token')) {
+                $table->string('device_token')->nullable()->after('pin');
+            }
         });
     }
 

@@ -12,8 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->boolean('cash_enabled')->default(true);
-            $table->boolean('online_enabled')->default(true);
+            if (!Schema::hasColumn('tenants', 'cash_enabled')) {
+                $table->boolean('cash_enabled')->default(true);
+            }
+            if (!Schema::hasColumn('tenants', 'online_enabled')) {
+                $table->boolean('online_enabled')->default(true);
+            }
         });
     }
 
@@ -23,7 +27,13 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->dropColumn(['cash_enabled', 'online_enabled']);
+            $columnsToDrop = [];
+            if (Schema::hasColumn('tenants', 'cash_enabled')) $columnsToDrop[] = 'cash_enabled';
+            if (Schema::hasColumn('tenants', 'online_enabled')) $columnsToDrop[] = 'online_enabled';
+            
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

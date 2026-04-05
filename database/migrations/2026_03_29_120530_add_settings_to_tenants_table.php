@@ -9,14 +9,30 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->string('logo')->nullable();
-            $table->string('tagline')->nullable();
-            $table->text('address')->nullable();
-            $table->string('city')->nullable();
-            $table->string('state')->nullable();
-            $table->string('pincode')->nullable();
-            $table->string('phone')->nullable();
-            $table->string('gst_number')->nullable();
+            if (!Schema::hasColumn('tenants', 'logo')) {
+                $table->string('logo')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'tagline')) {
+                $table->string('tagline')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'address')) {
+                $table->text('address')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'city')) {
+                $table->string('city')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'state')) {
+                $table->string('state')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'pincode')) {
+                $table->string('pincode')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'phone')) {
+                $table->string('phone')->nullable();
+            }
+            if (!Schema::hasColumn('tenants', 'gst_number')) {
+                $table->string('gst_number')->nullable();
+            }
         });
     }
 

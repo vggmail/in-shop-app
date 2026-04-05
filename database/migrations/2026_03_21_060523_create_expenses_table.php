@@ -8,14 +8,16 @@ return new class extends \Illuminate\Database\Migrations\Migration
 {
     public function up()
     {
-        Schema::create('expenses', function (Blueprint $table) {
-            $table->id();
-            $table->string('category');
-            $table->decimal('amount', 10, 2);
-            $table->date('date');
-            $table->text('description')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('expenses')) {
+            Schema::create('expenses', function (Blueprint $table) {
+                $table->id();
+                $table->string('category');
+                $table->decimal('amount', 10, 2);
+                $table->date('date');
+                $table->text('description')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     public function down()

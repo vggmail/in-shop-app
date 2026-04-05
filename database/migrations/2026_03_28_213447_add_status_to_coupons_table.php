@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupons', function (Blueprint $table) {
-            $table->tinyInteger('status')->default(1)->after('min_bill_amount'); // 1 = Active, 0 = Inactive
+            if (!Schema::hasColumn('coupons', 'status')) {
+                $table->tinyInteger('status')->default(1)->after('min_bill_amount'); // 1 = Active, 0 = Inactive
+            }
         });
     }
 

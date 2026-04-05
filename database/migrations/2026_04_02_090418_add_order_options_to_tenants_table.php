@@ -12,9 +12,15 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->boolean('dine_in_enabled')->default(true);
-            $table->boolean('takeaway_enabled')->default(true);
-            $table->boolean('home_delivery_enabled')->default(true);
+            if (!Schema::hasColumn('tenants', 'dine_in_enabled')) {
+                $table->boolean('dine_in_enabled')->default(true);
+            }
+            if (!Schema::hasColumn('tenants', 'takeaway_enabled')) {
+                $table->boolean('takeaway_enabled')->default(true);
+            }
+            if (!Schema::hasColumn('tenants', 'home_delivery_enabled')) {
+                $table->boolean('home_delivery_enabled')->default(true);
+            }
         });
     }
 
@@ -24,7 +30,14 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('tenants', function (Blueprint $table) {
-            $table->dropColumn(['dine_in_enabled', 'takeaway_enabled', 'home_delivery_enabled']);
+            $columnsToDrop = [];
+            if (Schema::hasColumn('tenants', 'dine_in_enabled')) $columnsToDrop[] = 'dine_in_enabled';
+            if (Schema::hasColumn('tenants', 'takeaway_enabled')) $columnsToDrop[] = 'takeaway_enabled';
+            if (Schema::hasColumn('tenants', 'home_delivery_enabled')) $columnsToDrop[] = 'home_delivery_enabled';
+            
+            if (!empty($columnsToDrop)) {
+                $table->dropColumn($columnsToDrop);
+            }
         });
     }
 };

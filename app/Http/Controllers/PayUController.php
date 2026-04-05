@@ -16,9 +16,9 @@ class PayUController extends Controller
 
         $order = Order::with('customer')->where('order_number', $order_number)->firstOrFail();
 
-        $key = env('PAYU_KEY', 'oesh51');
-        $salt = env('PAYU_SALT', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
-        $baseUrl = env('PAYU_BASE_URL', 'https://test.payu.in');
+        $key = config('services.payu.key', 'oesh51');
+        $salt = config('services.payu.salt', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
+        $baseUrl = config('services.payu.base_url', 'https://test.payu.in/_payment');
 
         // Log environment config (masked)
         Log::info("PayU Config: Key=" . substr($key, 0, 3) . "..." . substr($key, -3) . ", Salt=" . substr($salt, 0, 3) . "..." . substr($salt, -3) . ", BaseURL=" . $baseUrl);
@@ -95,7 +95,7 @@ class PayUController extends Controller
         $data = $request->all();
         Log::info("PayU: Received Success Callback", $data);
 
-        $salt = env('PAYU_SALT', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
+        $salt = config('services.payu.salt', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
 
         if (empty($data) || !isset($data['status'])) {
             Log::warning("PayU: Success callback called with empty data or no status.");

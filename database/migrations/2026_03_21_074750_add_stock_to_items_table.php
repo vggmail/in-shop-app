@@ -9,8 +9,12 @@ return new class extends Migration
     public function up()
     {
         Schema::table('items', function (Blueprint $table) {
-            $table->integer('stock_quantity')->default(100);
-            $table->integer('low_stock_limit')->default(10);
+            if (!Schema::hasColumn('items', 'stock_quantity')) {
+                $table->integer('stock_quantity')->default(100);
+            }
+            if (!Schema::hasColumn('items', 'low_stock_limit')) {
+                $table->integer('low_stock_limit')->default(10);
+            }
         });
     }
 

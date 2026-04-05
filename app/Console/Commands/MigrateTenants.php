@@ -25,6 +25,21 @@ class MigrateTenants extends Command
      */
     public function handle()
     {
+        // 0. Ensure the main/central database is up-to-date first
+        $this->info("Migrating Main/Central database (mysql)...");
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', [
+                '--database' => 'mysql',
+                '--force'    => true
+            ]);
+            $this->line(\Illuminate\Support\Facades\Artisan::output());
+        } catch (\Exception $e) {
+            $this->error("Failed to migrate central database: " . $e->getMessage());
+            if (!$this->confirm('Main migration failed. Do you want to continue with tenant migrations anyway?')) {
+                return;
+            }
+        }
+
         $tenants = \App\Models\Tenant::where('is_active', 1)->get();
 
         if ($tenants->isEmpty()) {

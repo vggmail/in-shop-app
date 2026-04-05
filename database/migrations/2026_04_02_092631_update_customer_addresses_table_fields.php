@@ -12,11 +12,21 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('customer_addresses', function (Blueprint $table) {
-            $table->string('street_address')->after('customer_id');
-            $table->string('city')->after('street_address');
-            $table->string('state')->after('city');
-            $table->string('pincode')->after('state');
-            $table->dropColumn('address');
+            if (!Schema::hasColumn('customer_addresses', 'street_address')) {
+                $table->string('street_address')->after('customer_id');
+            }
+            if (!Schema::hasColumn('customer_addresses', 'city')) {
+                $table->string('city')->after('street_address');
+            }
+            if (!Schema::hasColumn('customer_addresses', 'state')) {
+                $table->string('state')->after('city');
+            }
+            if (!Schema::hasColumn('customer_addresses', 'pincode')) {
+                $table->string('pincode')->after('state');
+            }
+            if (Schema::hasColumn('customer_addresses', 'address')) {
+                $table->dropColumn('address');
+            }
         });
     }
 

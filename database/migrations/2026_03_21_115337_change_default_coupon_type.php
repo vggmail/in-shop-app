@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupons', function (Blueprint $table) {
-            $table->string('coupon_type')->default('Internal')->change();
+            if (Schema::hasColumn('coupons', 'coupon_type')) {
+                $table->string('coupon_type')->default('Internal')->change();
+            }
         });
     }
 
