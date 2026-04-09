@@ -95,7 +95,8 @@
                 <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Reports</span></a>
                 
                 @if(auth()->user()->role_id == 1)
-                <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.*') ? 'active' : '' }}"><i class="fas fa-store"></i> <span>Store Settings</span></a>
+                <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}"><i class="fas fa-store"></i> <span>Store Settings</span></a>
+                <a href="{{ route('settings.payments') }}" class="{{ request()->routeIs('settings.payments') ? 'active' : '' }}"><i class="fas fa-credit-card"></i> <span>Payment Settings</span></a>
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-user-shield"></i> <span>Staff Management</span></a>
                 <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Activity Logs</span></a>
                 @endif

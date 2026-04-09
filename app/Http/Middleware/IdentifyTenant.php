@@ -25,11 +25,13 @@ class IdentifyTenant
             return $next($request);
         }
 
-        if (count($parts) >= 2) {
-            // Check for localhost development (e.g., shop1.localhost)
-            // or production (e.g., shop1.ovinfinity.com)
-            if (end($parts) === 'localhost' || count($parts) > 2) {
-                // If the first part isn't 'www', it's our subdomain
+        if (count($parts) >= 1) {
+            // Handle single-word hosts (e.g., http://retail/) where count is 1
+            if (count($parts) === 1 && $parts[0] !== 'localhost' && $parts[0] !== '127') {
+                $subdomain = $parts[0];
+            } 
+            // Handle multi-part hosts (e.g., retail.domain.com or retail.localhost)
+            else if (count($parts) >= 2) {
                 if ($parts[0] !== 'www') {
                     $subdomain = $parts[0];
                 }

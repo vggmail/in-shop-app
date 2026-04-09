@@ -27,7 +27,10 @@ class HomeController extends Controller {
                 ->get();
         }
 
-        return view("welcome", compact("categories", "items", "coupons", "customer", "recentItems"));
+        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+        $activeGateways = \App\Models\PaymentGateway::where('tenant_id', $tenant->id)->where('is_active', 1)->pluck('gateway_name')->toArray();
+        return view("welcome", compact("categories", "items", "coupons", "customer", "recentItems", "activeGateways"));
+        
     }
 
     public function placeOrder(Request $request, OrderRepository $repo) {
@@ -46,7 +49,12 @@ class HomeController extends Controller {
             $order = $repo->createOrder($data);
             \Illuminate\Support\Facades\Log::info("PlaceOrder: Order created successfully. Order #: " . $order->order_number);
             
-            if ($order->payment_method == 'UPI' || $order->payment_method == 'PayU') {
+            if ($order->payment_method == 'UPI' || $order->payment_method == 'PayU' || $order->payment_method == 'Online') {
+                $payuActive = \App\Models\PaymentGateway::where('gateway_name', 'PayU')->where('is_active', 1)->exists();
+                if (!$payuActive && ($order->payment_method == 'PayU' || $order->payment_method == 'Online')) {
+                    return response()->json(['status' => false, 'message' => 'Online payment is currently unavailable.']);
+                }
+
                 $tenant = app()->bound('tenant') ? app('tenant') : null;
                 
                 // If direct UPI is selected and we have a VPA (upi_id)
@@ -70,11 +78,11 @@ class HomeController extends Controller {
                 }
 
                 // Fallback to PayU for ONLINE or if UPI ID is missing
-                $redirectUrl = route('payu.pay', $order->order_number);
+                $redirectUrl = route('payu.pay', ['order_number' => $order->order_number, 'payment_method' => $order->payment_method]);
                 \Illuminate\Support\Facades\Log::info("PlaceOrder: Redirecting to PayU: " . $redirectUrl);
                 return response()->json([
                     'status' => true,
-                    'is_upi' => false,
+                    'is_upi' => true, // Trigger polling modal for all online payments
                     'order_id' => $order->id,
                     'order_number' => $order->order_number,
                     'redirect_url' => $redirectUrl,

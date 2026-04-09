@@ -22,3 +22,5 @@ Route::get('/clear-cache', function () {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     return 'All cache cleared successfully! You can now use the application.';
 });
+
+Route::post('/payu/webhook', [\App\Http\Controllers\PayUController::class, 'webhook'])->name('payu.webhook');

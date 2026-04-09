@@ -107,6 +107,9 @@ Route::middleware('auth')->prefix('cp')->group(function () {
 
     Route::get('/settings', [\App\Http\Controllers\TenantSettingsController::class, 'index'])->name('settings.index');
     Route::post('/settings', [\App\Http\Controllers\TenantSettingsController::class, 'update'])->name('settings.update');
+
+    Route::get('/settings/payments', [\App\Http\Controllers\PaymentSettingsController::class, 'index'])->name('settings.payments');
+    Route::post('/settings/payments', [\App\Http\Controllers\PaymentSettingsController::class, 'update'])->name('settings.payments.update');
     
     Route::get('/password', [\App\Http\Controllers\AdminProfileController::class, 'editPassword'])->name('admin.password');
 });

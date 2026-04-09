@@ -8,17 +8,49 @@ use App\Models\Payment;
 use App\Models\PaymentAttempt;
 use Illuminate\Support\Facades\Log;
 
+use App\Models\PaymentGateway;
+use App\Models\Tenant;
+
 class PayUController extends Controller
 {
+    private function getSettings()
+    {
+        $tenant = app()->bound('tenant') ? app('tenant') : Tenant::first();
+        $gateway = PaymentGateway::where('tenant_id', $tenant->id)
+            ->where('gateway_name', 'PayU')
+            ->first();
+
+        if ($gateway && $gateway->is_active && !empty($gateway->settings)) {
+            $s = $gateway->settings;
+            return [
+                'key' => $s['key'] ?? config('services.payu.key'),
+                'salt' => $s['salt'] ?? config('services.payu.salt'),
+                'mode' => $s['mode'] ?? 'test',
+                'base_url' => ($s['mode'] ?? 'test') === 'live' 
+                    ? 'https://secure.payu.in/_payment' 
+                    : 'https://test.payu.in/_payment'
+            ];
+        }
+
+        // Fallback to config
+        return [
+            'key' => config('services.payu.key'),
+            'salt' => config('services.payu.salt'),
+            'mode' => 'test',
+            'base_url' => config('services.payu.base_url', 'https://test.payu.in/_payment')
+        ];
+    }
+
     public function pay(Request $request, $order_number)
     {
         Log::info("PayU: Initiating payment for Order #$order_number");
 
         $order = Order::with('customer')->where('order_number', $order_number)->firstOrFail();
 
-        $key = config('services.payu.key', 'oesh51');
-        $salt = config('services.payu.salt', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
-        $baseUrl = config('services.payu.base_url', 'https://test.payu.in/_payment');
+        $settings = $this->getSettings();
+        $key = $settings['key'];
+        $salt = $settings['salt'];
+        $baseUrl = $settings['base_url'];
 
         // Log environment config (masked)
         Log::info("PayU Config: Key=" . substr($key, 0, 3) . "..." . substr($key, -3) . ", Salt=" . substr($salt, 0, 3) . "..." . substr($salt, -3) . ", BaseURL=" . $baseUrl);
@@ -72,6 +104,12 @@ class PayUController extends Controller
             'baseUrl' => $baseUrl
         ];
 
+        // If payment method is UPI, use PayU's UPI Intent flow
+        if (request('payment_method') === 'UPI' || request('payment_method') === 'PayU') {
+            $data['pg'] = 'UPI';
+            $data['bankcode'] = 'UPI';
+        }
+
         Log::info("PayU Outgoing Hash String: " . $hashString);
         Log::info("PayU Generated Hash: " . $hash);
         Log::info("PayU Outgoing Request Data: ", array_merge($data, ['key' => 'HIDDEN', 'hash' => 'HIDDEN']));
@@ -95,7 +133,8 @@ class PayUController extends Controller
         $data = $request->all();
         Log::info("PayU: Received Success Callback", $data);
 
-        $salt = config('services.payu.salt', 'y3BxbGFV22o1Lu16frQ9Bv78BaStu4pA');
+        $settings = $this->getSettings();
+        $salt = $settings['salt'];
 
         if (empty($data) || !isset($data['status'])) {
             Log::warning("PayU: Success callback called with empty data or no status.");
@@ -180,6 +219,79 @@ class PayUController extends Controller
 
         Log::error("PayU: Hash Mismatch or Failed Status. Status: $status, Calculated Hash: $hash, Received Hash: " . ($data['hash'] ?? 'NONE'));
         return redirect()->route('payu.failure', $data)->with('error', 'Payment verification failed.');
+    }
+
+    /**
+     * PayU S2S (Server-to-Server) Webhook / Postback
+     */
+    public function webhook(Request $request)
+    {
+        $data = $request->all();
+        Log::info("PayU S2S: Received Webhook Callback", $data);
+
+        $settings = $this->getSettings();
+        $salt = $settings['salt'];
+
+        if (empty($data) || !isset($data['status'])) {
+            return response('Invalid Data', 400);
+        }
+
+        $status = $data['status'] ?? '';
+        $firstname = $data['firstname'] ?? '';
+        $amount = $data['amount'] ?? '';
+        $txnid = $data['txnid'] ?? '';
+        $productinfo = $data['productinfo'] ?? '';
+        $email = $data['email'] ?? '';
+        $key = $data['key'] ?? '';
+
+        $udf1 = $data['udf1'] ?? '';
+        $udf2 = $data['udf2'] ?? '';
+        $udf3 = $data['udf3'] ?? '';
+        $udf4 = $data['udf4'] ?? '';
+        $udf5 = $data['udf5'] ?? '';
+        $udf6 = $data['udf6'] ?? '';
+        $udf7 = $data['udf7'] ?? '';
+        $udf8 = $data['udf8'] ?? '';
+        $udf9 = $data['udf9'] ?? '';
+        $udf10 = $data['udf10'] ?? '';
+
+        $retHashString = $salt . '|' . $status . '|' . $udf10 . '|' . $udf9 . '|' . $udf8 . '|' . $udf7 . '|' . $udf6 . '|' . $udf5 . '|' . $udf4 . '|' . $udf3 . '|' . $udf2 . '|' . $udf1 . '|' . $email . '|' . $firstname . '|' . $productinfo . '|' . $amount . '|' . $txnid . '|' . $key;
+        $hash = strtolower(hash('sha512', $retHashString));
+
+        if (isset($data['hash']) && (string) $hash === (string) $data['hash'] && ($status == 'success' || $status == 'completed')) {
+            $orderNumber = explode('T', (string) $txnid)[0];
+            $order = Order::where('order_number', $orderNumber)->first();
+
+            if ($order && $order->payment_status !== 'Paid') {
+                $order->payment_status = 'Paid';
+                $order->status = 'Preparing';
+                $order->save();
+
+                Payment::updateOrCreate(
+                    ['order_id' => $order->id],
+                    [
+                        'method' => 'PayU',
+                        'amount' => $amount,
+                        'date' => date('Y-m-d'),
+                        'status' => 'Paid',
+                        'transaction_id' => $data['mihpayid'] ?? $txnid
+                    ]
+                );
+                
+                PaymentAttempt::where('txnid', $txnid)->update([
+                    'status' => 'Success (S2S)',
+                    'mihpayid' => $data['mihpayid'] ?? null,
+                    'received_hash' => $data['hash'] ?? null,
+                    'response_data' => $data
+                ]);
+                
+                Log::info("PayU S2S: Order #$orderNumber marked as Paid via Webhook.");
+            }
+            return response('OK', 200);
+        }
+
+        Log::warning("PayU S2S: Hash Mismatch or Failed Status for Txn: $txnid");
+        return response('Hash Mismatch', 400);
     }
 
     public function failure(Request $request)

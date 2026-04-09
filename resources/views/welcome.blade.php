@@ -329,8 +329,9 @@
                 <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-cash" value="Cash" checked><label class="btn btn-outline-success w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-cash"><i class="fas fa-money-bill-wave me-2"></i> Cash</label></div>
                 @endif
                 
-                @if($tenant_info->online_enabled)
-                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="PayU" {{ !$tenant_info->cash_enabled ? 'checked' : '' }}><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> Online</label></div>
+                @if($tenant_info->online_enabled && (in_array('PayU', $activeGateways) || empty($activeGateways)))
+                <div class="col-6 d-none" id="upi-option"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="UPI" {{ !$tenant_info->cash_enabled ? 'checked' : '' }}><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> UPI</label></div>
+                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-payu" value="PayU"><label class="btn btn-outline-dark w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-payu"><i class="fas fa-credit-card me-2"></i> Online</label></div>
                 @endif
 
                 @if(!$tenant_info->cash_enabled && !$tenant_info->online_enabled)
@@ -351,6 +352,26 @@
             <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
         @endif
     </div></div></div></div>
+
+    <!-- Payment Status Polling Modal -->
+    <div class="modal fade" id="paymentPendingModal" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4">
+                <div class="modal-body p-5 text-center">
+                    <div class="mb-4">
+                        <div class="spinner-grow text-primary" role="status" style="width: 3rem; height: 3rem;">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                    <h4 class="fw-bold mb-2">Waiting for Payment...</h4>
+                    <p class="text-muted mb-4">Please complete the transaction in your UPI app. Do not close this window.</p>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-light rounded-pill fw-bold py-2" onclick="cancelPolling()">Cancel & Return</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -511,7 +532,9 @@
             }, function(res) {
                 if(res.status) { 
                     localStorage.removeItem('cart'); 
-                    if(res.redirect_url) window.location.href = res.redirect_url; 
+                    if(res.redirect_url) {
+                        window.location.href = res.redirect_url;
+                    } 
                     else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; 
                 } else {
                     alert(res.message || "Error placing order");
@@ -638,7 +661,35 @@
 
                 let t = localStorage.getItem('customer_device_token'); 
             @if(!isset($customer)) if(t) $.post("{{ route('customer.autoLogin') }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res){ if(res.status) location.reload(); else localStorage.removeItem('customer_device_token'); }); @endif
+
+            // Device Detection for UPI Intent
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if(isMobile) {
+                $("#upi-option").removeClass('d-none');
+            }
         });
+
+        let pollInterval = null;
+        function startPolling(orderNumber) {
+            if(pollInterval) clearInterval(pollInterval);
+            pollInterval = setInterval(() => {
+                $.get(`{{ url('/order') }}/${orderNumber}/check-status`, function(res) {
+                    if(res.status && res.payment_status === 'Paid') {
+                        clearInterval(pollInterval);
+                        window.location.href = `{{ url('/order') }}/${orderNumber}/success`;
+                    }
+                });
+            }, 3000);
+
+            // Stop polling after 10 minutes (safety)
+            setTimeout(() => { if(pollInterval) clearInterval(pollInterval); }, 600000);
+        }
+
+        function cancelPolling() {
+            if(pollInterval) clearInterval(pollInterval);
+            bootstrap.Modal.getInstance(document.getElementById('paymentPendingModal')).hide();
+            location.reload(); // Refresh to clear state
+        }
     </script>
 </body>
 </html>
