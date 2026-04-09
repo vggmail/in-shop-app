@@ -222,8 +222,16 @@
             <label class="fw-bold small text-uppercase text-muted mb-2">Extra Toppings</label>
             <div id="m-extras-list" class="row g-2"></div>
         </div>
+        <div class="mb-4">
+            <label class="fw-bold small text-uppercase text-muted mb-2">Quantity</label>
+            <div class="d-flex align-items-center bg-light rounded-pill p-1 shadow-sm" style="width: 140px;">
+                <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updateModalQty(-1)"><i class="fas fa-minus small"></i></button>
+                <div class="flex-grow-1 text-center fw-bold fs-5" id="m-qty">1</div>
+                <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updateModalQty(1)"><i class="fas fa-plus small"></i></button>
+            </div>
+        </div>
         <div class="d-grid mt-4">
-            <button class="btn btn-danger rounded-pill fw-bold py-2 px-4" onclick="addToCart()"><i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span></button>
+            <button class="btn btn-danger rounded-pill fw-bold py-2 px-4 shadow-lg" onclick="addToCart()"><i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span></button>
         </div>
     </div></div></div></div>
 
@@ -378,7 +386,10 @@
     <script>
         let cart = JSON.parse(localStorage.getItem('cart') || '[]');
         let currentItem = null;
+        let modalQty = 1;
         const availableItemIds = {!! json_encode($items->pluck('id')->merge($recentItems->pluck('id'))->unique()->values()) !!};
+        const itemStockMap = {!! json_encode($items->pluck('stock_quantity', 'id')->merge($recentItems->pluck('stock_quantity', 'id'))->all()) !!};
+        
         $(document).ready(function() { renderCart(); });
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
@@ -409,6 +420,8 @@
         }
         function openFoodModal(id, name, description, price, variants, extras, image = null, defaultSize = '') {
             currentItem = { id, name, price, variants, extras, defaultSize };
+            modalQty = 1;
+            $("#m-qty").text(modalQty);
             $("#m-food-name").text(name + (defaultSize ? ' - ' + defaultSize : ''));
             $("#m-food-desc").text(description || 'Fresh ingredients & special sauces.');
             $("#m-variants-list, #m-extras-list").empty();
@@ -434,13 +447,22 @@
             }
             new bootstrap.Modal(document.getElementById("foodModal")).show();
         }
+        function updateModalQty(delta) {
+            let maxStock = itemStockMap[currentItem.id] || 0;
+            let newQty = modalQty + delta;
+            if(newQty < 1) return;
+            if(newQty > maxStock) return alert("Only " + maxStock + " units available in stock.");
+            modalQty = newQty;
+            $("#m-qty").text(modalQty);
+            updateMTotal();
+        }
         function updateMTotal() { 
             if(!currentItem) return;
             let t = parseFloat(currentItem.price || 0); 
             let v = parseFloat($("input[name='f_var']:checked").data("price") || 0); 
             let e = 0; 
             $(".m-extra-cb:checked").each(function(){ e += parseFloat($(this).data("price") || 0); }); 
-            $("#m-total").text((t + v + e).toFixed(2)); 
+            $("#m-total").text(((t + v + e) * modalQty).toFixed(2)); 
         }
         $(document).on("change", "#foodModal .btn-check, #foodModal .m-extra-cb", updateMTotal);
         function addToCart() {
@@ -450,7 +472,7 @@
             let vName = v.data("name") || 'Standard';
             if(vName && vName !== 'Standard') { finalName += ' - ' + vName; }
             else if(currentItem.defaultSize) { finalName += ' - ' + currentItem.defaultSize; }
-            cart.push({ item_id: currentItem.id, variant_id: v.val() || null, price: p, qty: 1, name: finalName, variant_name: vName, extras: ex });
+            cart.push({ item_id: currentItem.id, variant_id: v.val() || null, price: p, qty: modalQty, name: finalName, variant_name: vName, extras: ex });
             saveCart(); bootstrap.Modal.getInstance(document.getElementById("foodModal")).hide();
         }
         function renderCart() {
@@ -463,7 +485,22 @@
             cart.forEach((item, i) => { 
                 let isAvailable = availableItemIds.includes(parseInt(item.item_id));
                 if(!isAvailable) hasOutOfStock = true;
-                list.append(`<div class="d-flex justify-content-between mb-2 ${!isAvailable ? 'opacity-50' : ''}"><div><span class="fw-bold">${item.qty}x ${item.name}</span>${!isAvailable ? '<br><small class="text-danger fw-bold">ITEM OUT OF STOCK - REMOVE THIS</small>' : ''}<br><small class="text-muted">${item.variant_name}</small></div><div class="text-end">₹${(item.price * item.qty).toFixed(2)}<br><button class="btn btn-sm text-danger p-0" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button></div></div>`); 
+                list.append(`<div class="d-flex justify-content-between mb-2 ${!isAvailable ? 'opacity-50' : ''}">
+                    <div>
+                        <span class="fw-bold d-block">${item.name}</span>
+                        ${!isAvailable ? '<small class="text-danger fw-bold">ITEM OUT OF STOCK - REMOVE THIS</small><br>' : ''}
+                        <small class="text-muted d-block">${item.variant_name}</small>
+                        <div class="d-flex align-items-center mt-2 bg-white rounded-pill px-2 border shadow-sm" style="width: fit-content;">
+                            <button class="btn btn-sm p-0 text-danger" onclick="updateCartQty(${i}, -1)"><i class="fas fa-minus-circle"></i></button>
+                            <span class="mx-2 fw-bold small">${item.qty}</span>
+                            <button class="btn btn-sm p-0 text-success" onclick="updateCartQty(${i}, 1)"><i class="fas fa-plus-circle"></i></button>
+                        </div>
+                    </div>
+                    <div class="text-end">
+                        <div class="fw-bold">₹${(item.price * item.qty).toFixed(2)}</div>
+                        <button class="btn btn-sm text-danger p-0 mt-1" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button>
+                    </div>
+                </div>`); 
             });
             $("#checkout-total, #checkout-subtotal").text(total.toFixed(2));
 
@@ -474,6 +511,20 @@
             }
         }
         function removeFromCart(i) { cart.splice(i, 1); saveCart(); }
+        function updateCartQty(idx, delta) {
+            let item = cart[idx];
+            let maxStock = itemStockMap[item.item_id] || 0;
+            let newQty = item.qty + delta;
+            
+            if(newQty <= 0) {
+                removeFromCart(idx);
+            } else if(newQty > maxStock) {
+                alert("Only " + maxStock + " units available in stock.");
+            } else {
+                item.qty = newQty;
+                saveCart();
+            }
+        }
         function submitOrder() {
             @if(!isset($customer))
                 let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();

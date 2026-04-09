@@ -217,9 +217,18 @@
                     <div id="m_variants_list" class="d-flex flex-column gap-2"></div>
                 </div>
                 
-                <div id="extrasBox" class="mb-0 d-none">
+                <div id="extrasBox" class="mb-4 d-none">
                     <label class="small fw-bold mb-2 text-muted text-uppercase">Add Extras</label>
                     <div id="m_extras_list" class="row g-2"></div>
+                </div>
+
+                <div class="mb-0">
+                    <label class="small fw-bold mb-2 text-muted text-uppercase">Quantity</label>
+                    <div class="d-flex align-items-center bg-light rounded-pill p-1 shadow-sm" style="width: 140px;">
+                        <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updatePosModalQty(-1)"><i class="fas fa-minus small"></i></button>
+                        <div class="flex-grow-1 text-center fw-bold fs-5" id="pos-m-qty" style="color: #2f3542;">1</div>
+                        <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updatePosModalQty(1)"><i class="fas fa-plus small"></i></button>
+                    </div>
                 </div>
             </div>
             <div class="modal-footer justify-content-between bg-dark text-white border-0 p-3 pt-4">
@@ -238,6 +247,8 @@
 @section("scripts")
 <script>
     let cart = [];
+    let posModalQty = 1;
+    const itemStockMap = {!! json_encode($items->pluck('stock_quantity', 'id')->all()) !!};
     
     // Load Cart from LocalStorage
     $(document).ready(function() {
@@ -273,6 +284,9 @@
         $("#m_default_size").val(defaultSize);
         $("#m_item_description").text(description || "");
         $("#modalItemName").text(name + (defaultSize ? ' - ' + defaultSize : ''));
+        
+        posModalQty = 1;
+        $("#pos-m-qty").text(posModalQty);
         
         if(variants && variants.length > 0) {
             let defLabel = defaultSize || 'Regular';
@@ -311,6 +325,18 @@
         new bootstrap.Modal(document.getElementById("itemModal")).show();
     }
     
+    function updatePosModalQty(delta) {
+        let id = $("#m_item_id").val();
+        let maxStock = itemStockMap[id] || 0;
+        let newQty = posModalQty + delta;
+        if(newQty < 1) return;
+        if(newQty > maxStock) return Swal.fire('Stock Limit', 'Only ' + maxStock + ' units available.', 'warning');
+        
+        posModalQty = newQty;
+        $("#pos-m-qty").text(posModalQty);
+        calcModalPrice();
+    }
+    
     function calcModalPrice() {
         let v_el = $(".m_variant_sel:checked");
         let base = v_el.length ? parseFloat(v_el.data("price")) : parseFloat($("#m_base_price").val());
@@ -318,7 +344,7 @@
         $(".m_extra_cb:checked").each(function(){
             extTotal += parseFloat($(this).data("price"));
         });
-        $("#m_total_price").text((base + extTotal).toFixed(2));
+        $("#m_total_price").text(((base + extTotal) * posModalQty).toFixed(2));
     }
     
     function addConfiguredItem() {
@@ -347,7 +373,7 @@
         cart.push({
             cartId: Date.now(), id: id, name: displayName,
             variant_id: varId, variant_name: varName,
-            price: finalPrice, qty: 1, total: finalPrice,
+            price: finalPrice / posModalQty, qty: posModalQty, total: finalPrice,
             extras: selExtras, extras_text: extNames.join(", ")
         });
         
@@ -357,9 +383,18 @@
     }
     
     function updateCartQty(idx, delta) {
-        cart[idx].qty += delta;
-        if(cart[idx].qty <= 0) cart.splice(idx, 1);
-        else cart[idx].total = cart[idx].qty * cart[idx].price;
+        let item = cart[idx];
+        let maxStock = itemStockMap[item.id] || 0;
+        let newQty = item.qty + delta;
+
+        if(newQty <= 0) {
+            cart.splice(idx, 1);
+        } else if(newQty > maxStock) {
+            Swal.fire('Stock Limit', 'Only ' + maxStock + ' units available.', 'warning');
+        } else {
+            item.qty = newQty;
+            item.total = item.qty * item.price;
+        }
         renderCart();
     }
 
