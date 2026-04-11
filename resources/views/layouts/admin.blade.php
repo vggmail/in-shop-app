@@ -36,17 +36,40 @@
         h5 { font-size: 1rem; }
         
         .sidebar { width: 220px; min-width: 220px; height: 100vh; background-color: var(--primary-dark); color: #cbd5e1; box-shadow: 4px 0 10px rgba(0,0,0,0.05); position: sticky; top: 0; overflow-y: auto; z-index: 1000; transition: all 0.3s; }
+        .sidebar.collapsed { width: 80px; min-width: 80px; }
+        .sidebar.collapsed h5, 
+        .sidebar.collapsed span, 
+        .sidebar.collapsed .sidebar-item-text { 
+            display: none !important; 
+        }
+        .sidebar.collapsed .mt-auto button { 
+            width: 40px !important; 
+            margin: 0 auto; 
+            padding: 10px 0 !important; 
+            text-align: center !important; 
+            display: block !important;
+        }
+        .sidebar.collapsed .mt-auto button span { display: none !important; }
+        .sidebar.collapsed .mt-auto button i { margin: 0 !important; }
+        .sidebar.collapsed a { justify-content: center; padding: 12px; margin: 4px 10px; }
+        .sidebar.collapsed a i { margin: 0; font-size: 1.1rem; width: auto; }
+        .sidebar.collapsed .px-3.py-3.d-flex { justify-content: center !important; }
+        .sidebar.collapsed .px-3.py-3.d-flex .me-2 { margin: 0 !important; }
+        .sidebar.collapsed .mt-auto { padding: 10px !important; }
+
         @media (max-width: 991.98px) {
             .sidebar { position: fixed; left: -220px; width: 220px; }
             .sidebar.active-mobile { left: 0; z-index: 1050; }
-            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; bg: rgba(0,0,0,0.5); z-index: 1040; }
+            .sidebar.collapsed { width: 220px; min-width: 220px; } /* Reset on mobile if manually collapsed on desktop */
+            .sidebar.collapsed h5, .sidebar.collapsed span, .sidebar.collapsed .mt-auto button span { display: inline-block !important; }
+            .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1040; }
             .sidebar-overlay.show { display: block; }
         }
         .sidebar a { color: #94a3b8; text-decoration: none; display: flex; align-items: center; padding: 10px 18px; font-weight: 500; transition: all 0.3s; border-radius: 10px; margin: 4px 15px; font-size: 0.825rem; }
         .sidebar a:hover, .sidebar a.active { background-color: rgba(255,255,255,0.1); color: #fff; transform: translateX(3px); }
         .sidebar a i { width: 20px; font-size: 0.9rem; }
         .sidebar .active { background-color: var(--accent-color) !important; color: white !important; box-shadow: 0 4px 12px rgba(255, 71, 87, 0.2); }
-        .main-content { min-height: 100vh; display: flex; flex-direction: column; }
+        .main-content { min-height: 100vh; display: flex; flex-direction: column; transition: all 0.3s; }
         .top-navbar { background: #fff; padding: 10px 30px; border-bottom: 1px solid #e2e8f0; }
         .content-area { padding: 25px; flex-grow: 1; }
         .card { border: none; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.03); }
@@ -104,15 +127,16 @@
                 <div class="mt-auto p-3">
                     <form action="{{ route('logout') }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-outline-light btn-sm w-100 border-0 text-start px-3 py-2"><i class="fas fa-sign-out-alt me-2"></i> Logout</button>
+                        <button type="submit" class="btn btn-outline-light btn-sm w-100 border-0 text-start px-3 py-2"><i class="fas fa-sign-out-alt me-2"></i> <span>Logout</span></button>
                     </form>
                 </div>
             </div>
             
             <div class="col main-content">
                 <nav class="top-navbar d-flex justify-content-between align-items-center shadow-sm">
-                    <div>
+                    <div class="d-flex align-items-center">
                         <button class="btn btn-link link-dark d-lg-none p-0 me-3 shadow-none" id="sidebar-toggler"><i class="fas fa-bars fs-4"></i></button>
+                        <button class="btn btn-link link-dark d-none d-lg-block p-0 me-3 shadow-none" id="sidebar-toggler-desktop"><i class="fas fa-indent fs-4"></i></button>
                         <h5 class="mb-0 fw-bold text-dark opacity-75">Control Center</h5>
                     </div>
                     <div class="d-flex align-items-center">
@@ -255,9 +279,28 @@
         }
         setInterval(checkNewOrders, 5000); 
         $(document).ready(function() {
+            // Check localStorage for sidebar state
+            if (localStorage.getItem('sidebar-collapsed') === 'true') {
+                $('#admin-sidebar').addClass('collapsed');
+                $('#sidebar-toggler-desktop i').removeClass('fa-indent').addClass('fa-outdent');
+            }
+
             $('#sidebar-toggler, #sidebar-overlay').on('click', function() {
                 $('#admin-sidebar').toggleClass('active-mobile');
                 $('#sidebar-overlay').toggle();
+            });
+
+            $('#sidebar-toggler-desktop').on('click', function() {
+                $('#admin-sidebar').toggleClass('collapsed');
+                let isCollapsed = $('#admin-sidebar').hasClass('collapsed');
+                localStorage.setItem('sidebar-collapsed', isCollapsed);
+                
+                // Toggle icon
+                if (isCollapsed) {
+                    $(this).find('i').removeClass('fa-indent').addClass('fa-outdent');
+                } else {
+                    $(this).find('i').removeClass('fa-outdent').addClass('fa-indent');
+                }
             });
         });
 

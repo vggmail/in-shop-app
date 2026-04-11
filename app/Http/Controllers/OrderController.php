@@ -7,25 +7,51 @@ use App\Repositories\CustomerRepository;
 use App\Models\Payment;
 use App\Http\Requests\StoreOrderRequest;
 
-class OrderController extends Controller {
+class OrderController extends Controller
+{
     protected $repo;
     protected $iRepo;
     protected $cRepo;
-    
-    public function __construct(OrderRepository $repo, ItemRepository $iRepo, CustomerRepository $cRepo) { 
-        $this->repo = $repo; 
-        $this->iRepo = $iRepo; 
-        $this->cRepo = $cRepo; 
+
+    public function __construct(OrderRepository $repo, ItemRepository $iRepo, CustomerRepository $cRepo)
+    {
+        $this->repo = $repo;
+        $this->iRepo = $iRepo;
+        $this->cRepo = $cRepo;
     }
-    
+
     // POS Screen
-    public function create() { 
-        $items = $this->iRepo->getAll(); 
+    public function create()
+    {
+        $items = $this->iRepo->getAll();
         $customers = $this->cRepo->getAll();
-        return view("admin.pos.index", compact("items", "customers")); 
+
+        // Top 16 items by order frequency (recent 90 days), hide out of stock, fallback to newest 16
+        $topItemIds = \App\Models\OrderItem::select('item_id', \Illuminate\Support\Facades\DB::raw('count(*) as order_count'))
+            ->where('created_at', '>=', now()->subDays(90))
+            ->whereNotNull('item_id')
+            ->whereHas('item', function ($q) {
+                $q->where('stock_quantity', '>', 0);
+            })
+            ->groupBy('item_id')
+            ->orderByDesc('order_count')
+            ->limit(16)
+            ->pluck('item_id');
+
+        if ($topItemIds->count() >= 4) {
+            $topItems = $items->whereIn('id', $topItemIds)->sortByDesc(function ($item) use ($topItemIds) {
+                return array_search($item->id, $topItemIds->values()->toArray()) * -1;
+            })->values();
+        } else {
+            // Fallback: take last 16 in-stock items
+            $topItems = $items->where('stock_quantity', '>', 0)->sortByDesc('id')->take(16)->values();
+        }
+
+        return view("admin.pos.index", compact("items", "customers", "topItems"));
     }
-    
-    public function store(StoreOrderRequest $request) {
+
+    public function store(StoreOrderRequest $request)
+    {
         try {
             $data = $request->validated();
             $data['source'] = 'POS';
@@ -41,54 +67,60 @@ class OrderController extends Controller {
             return $this->sendError($e->getMessage(), 422);
         }
     }
-    
-    public function index(Request $request) {
+
+    public function index(Request $request)
+    {
         $query = \App\Models\Order::with(['customer' => fn($q) => $q->withTrashed()])->orderBy('id', 'desc');
 
         if ($request->filled('customer_search')) {
             $search = $request->customer_search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhereHas('customer', function($cq) use ($search) {
-                      $cq->withTrashed()->where('name', 'like', "%{$search}%")
-                         ->orWhere('phone', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('customer', function ($cq) use ($search) {
+                        $cq->withTrashed()->where('name', 'like', "%{$search}%")
+                            ->orWhere('phone', 'like', "%{$search}%");
+                    });
             });
         }
 
         $orders = $query->paginate(15)->appends($request->all());
-        
+
         return view("admin.orders.index", compact("orders"));
     }
-    
-    public function show($id) {
+
+    public function show($id)
+    {
         $order = $this->repo->find($id);
         return view("admin.orders.show", compact("order"));
     }
-    
-    public function printInvoice($id) {
+
+    public function printInvoice($id)
+    {
         $order = $this->repo->find($id);
         return view("admin.orders.invoice", compact("order"));
     }
 
-    public function payments() {
+    public function payments()
+    {
         $payments = Payment::with("order")->orderBy("id", "DESC")->paginate(20);
         $allPayments = Payment::with("order")->orderBy("id", "DESC")->get(); // for summary cards
         return view("admin.payments.index", compact("payments", "allPayments"));
     }
 
-    public function paymentShow($id) {
+    public function paymentShow($id)
+    {
         $payment = Payment::with(['order', 'order.customer'])->findOrFail($id);
         $attempts = \App\Models\PaymentAttempt::where('order_id', $payment->order_id)->orderBy('id', 'DESC')->get();
         return view("admin.payments.show", compact("payment", "attempts"));
     }
 
-    public function exportPayments() {
+    public function exportPayments()
+    {
         $payments = Payment::with("order")->orderBy("id", "DESC")->get();
 
         $filename = "payments_" . date("Y-m-d") . ".csv";
         $headers = [
-            "Content-Type"        => "text/csv",
+            "Content-Type" => "text/csv",
             "Content-Disposition" => "attachment; filename=\"$filename\"",
         ];
 
@@ -109,12 +141,14 @@ class OrderController extends Controller {
 
         return response()->stream($callback, 200, $headers);
     }
-    
-    public function reports() {
+
+    public function reports()
+    {
         return view("admin.reports.index");
     }
 
-    public function checkPending() {
+    public function checkPending()
+    {
         $count = \App\Models\Order::where('status', '!=', 'Completed')->where('status', '!=', 'Pending Payment')->where('source', 'Online')->count();
         $latest = \App\Models\Order::where('source', 'Online')->where('status', '!=', 'Pending Payment')->orderBy('id', 'desc')->first();
         return response()->json([
@@ -125,7 +159,8 @@ class OrderController extends Controller {
         ]);
     }
 
-    public function updateStatus(Request $request, $id) {
+    public function updateStatus(Request $request, $id)
+    {
         $order = \App\Models\Order::findOrFail($id);
         if ($request->has('status')) {
             $order->status = $request->status;
