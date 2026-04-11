@@ -330,6 +330,13 @@
             @endif
         </div>
         <div class="mb-4"><input type="text" id="table_number" class="form-control form-control-lg border-0 bg-light rounded-pill px-4" style="font-size: 14px;" placeholder="Table No (Optional)"></div>
+        @php
+            $paymentOptionsCount = 0;
+            if($tenant_info->cash_enabled) $paymentOptionsCount++;
+            if($tenant_info->online_enabled && (in_array('PayU', $activeGateways) || empty($activeGateways))) $paymentOptionsCount++;
+        @endphp
+
+        @if($paymentOptionsCount > 0)
         <div class="mb-4">
             <label class="small fw-bold text-muted mb-2 text-uppercase" style="font-size: 11px;">Payment Method</label>
             <div class="row g-2">
@@ -339,22 +346,15 @@
                 
                 @if($tenant_info->online_enabled && (in_array('PayU', $activeGateways) || empty($activeGateways)))
                 <div class="col-6 d-none" id="upi-option"><input type="radio" class="btn-check" name="payment_method" id="p-upi" value="UPI" {{ !$tenant_info->cash_enabled ? 'checked' : '' }}><label class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-upi"><i class="fas fa-mobile-alt me-2"></i> UPI</label></div>
-                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-payu" value="PayU"><label class="btn btn-outline-dark w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-payu"><i class="fas fa-credit-card me-2"></i> Online</label></div>
-                @endif
-
-                @if(!$tenant_info->cash_enabled && !$tenant_info->online_enabled)
-                <div class="col-12"><div class="alert alert-danger py-2 small fw-bold">No payment methods available.</div></div>
+                <div class="col-6"><input type="radio" class="btn-check" name="payment_method" id="p-payu" value="PayU" {{ !$tenant_info->cash_enabled ? 'checked' : '' }}><label class="btn btn-outline-dark w-100 py-3 fw-bold rounded-4 shadow-sm" for="p-payu"><i class="fas fa-credit-card me-2"></i> Online</label></div>
                 @endif
             </div>
         </div>
+        @endif
         <div class="px-2 d-flex justify-content-between mb-4 border-top pt-3 align-items-center"><h6 class="fw-bold mb-0">Total Amount</h6><h5 class="fw-bold text-success mb-0">₹<span id="checkout-total">0.00</span></h5><span id="checkout-subtotal" class="d-none">0</span></div>
         @if(!$tenant_info->dine_in_enabled && !$tenant_info->takeaway_enabled && !$tenant_info->home_delivery_enabled)
             <div class="alert alert-warning rounded-4 text-center fw-bold">
                 <i class="fas fa-exclamation-triangle me-2"></i> Ordering is currently disabled for this branch.
-            </div>
-        @elseif(!$tenant_info->cash_enabled && !$tenant_info->online_enabled)
-            <div class="alert alert-danger rounded-4 text-center fw-bold">
-                <i class="fas fa-exclamation-triangle me-2"></i> No payment methods enabled. Please contact support.
             </div>
         @else
             <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
