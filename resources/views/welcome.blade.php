@@ -31,6 +31,8 @@
         .recent-card { width: 120px; background: white; border-radius: 20px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; text-align: center; padding: 12px; cursor: pointer; transition: 0.3s; }
         .recent-card:active { transform: scale(0.95); }
         .recent-card i { background: #fff1f2; color: var(--primary); width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; }
+        .whatsapp-float { position: fixed; bottom: 85px; right: 20px; background: #25d366; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: 0.3s; }
+        .whatsapp-float:hover { transform: scale(1.1); color: white; }
     </style>
 </head>
 <body>
@@ -152,6 +154,11 @@
                                     <span class="text-muted text-decoration-line-through ms-1" style="font-size: 10px;">₹{{ number_format($i->mrp, 2) }}</span>
                                 @endif
                             </div>
+                            @if(!empty($tenant_info->whatsapp_number))
+                                <a href="https://wa.me/?text={{ urlencode('Check out this ' . $i->name . ' at ' . $tenant_info->name . ': ' . url('/')) }}" target="_blank" class="text-success text-decoration-none" onclick="event.stopPropagation();">
+                                    <i class="fab fa-whatsapp"></i>
+                                </a>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -201,7 +208,31 @@
                 </button>
             </div>
             <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" id="login-submit-btn" onclick="processPinLogin()"><i class="fas fa-lock-open me-2"></i> Verify & Login</button>
-            <button class="btn btn-link btn-sm mt-3 text-muted text-decoration-none" onclick="goBackToLoginPhone()">Back</button>
+            <div class="mt-2">
+                <button class="btn btn-link btn-sm text-primary text-decoration-none small" onclick="sendForgotPinOtp()">Forgot PIN?</button>
+            </div>
+            <button class="btn btn-link btn-sm mt-1 text-muted text-decoration-none" onclick="goBackToLoginPhone()">Back</button>
+        </div>
+        <div id="forgot-otp-section" class="d-none text-center">
+            <p class="text-muted small mb-1">Enter 4-digit OTP sent to</p>
+            <h5 class="fw-bold mb-4" id="otp-phone-display"></h5>
+            <div class="mb-3">
+                <input type="password" id="forgot-otp" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
+            </div>
+            <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="verifyForgotOtp()"><i class="fas fa-check-circle me-2"></i> Verify OTP</button>
+            <button class="btn btn-link btn-sm mt-3 text-muted text-decoration-none" onclick="goBackToPinSection()">Back</button>
+        </div>
+        <div id="forgot-reset-section" class="d-none text-center">
+            <h5 class="fw-bold mb-4">Reset Your PIN</h5>
+            <div class="mb-3 text-start">
+                <label class="small fw-bold text-muted d-block mb-2">NEW 4-DIGIT PIN</label>
+                <input type="password" id="new-forgot-pin" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
+            </div>
+            <div class="mb-4 text-start">
+                <label class="small fw-bold text-muted d-block mb-2">CONFIRM NEW PIN</label>
+                <input type="password" id="new-forgot-pin-confirm" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg text-center fw-bold border-0 bg-light rounded-3" style="letter-spacing: 15px; font-size: 24px;" placeholder="****">
+            </div>
+            <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" onclick="resetForgotPin()"><i class="fas fa-save me-2"></i> Save PIN & Login</button>
         </div>
     </div></div></div></div>
 
@@ -243,14 +274,22 @@
         
         @if(!isset($customer))
         <div class="row g-3 mb-4">
-            <div class="col-12"><label class="small fw-bold text-muted mb-1">YOUR NAME</label><input type="text" id="cust_name" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
-            <div class="col-12"><label class="small fw-bold text-muted mb-1">MOBILE NUMBER</label><input type="tel" id="cust_phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg border-0 bg-light rounded-3" value=""></div>
+            <div class="col-12">
+                <label class="small fw-bold text-muted mb-1">YOUR NAME</label>
+                <input type="text" id="cust_name" class="form-control form-control-lg border-0 bg-light rounded-3" value="">
+                <div class="invalid-feedback fw-bold" id="err-name" style="display:none;"></div>
+            </div>
+            <div class="col-12">
+                <label class="small fw-bold text-muted mb-1">MOBILE NUMBER</label>
+                <input type="tel" id="cust_phone" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control form-control-lg border-0 bg-light rounded-3" value="">
+                <div class="invalid-feedback fw-bold" id="err-phone" style="display:none;"></div>
+            </div>
         </div>
         @else
             <div class="mb-4 bg-light p-3 rounded-4 d-flex align-items-center justify-content-between">
                 <div>
                     <h6 class="fw-bold mb-0">{{ $customer->name }}</h6>
-                    <small class="text-muted">{{ $customer->phone }}</small>
+                    <small class="text-muted">{{ str_repeat('*', strlen($customer->phone) - 4) . substr($customer->phone, -4) }}</small>
                 </div>
                 <div class="badge bg-success rounded-pill fw-bold">VERIFIED <i class="fas fa-check-circle"></i></div>
             </div>
@@ -357,6 +396,7 @@
                 <i class="fas fa-exclamation-triangle me-2"></i> Ordering is currently disabled for this branch.
             </div>
         @else
+            <div id="checkout-error-msg" class="alert alert-danger rounded-4 fw-bold small py-2 d-none" role="alert"></div>
             <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
         @endif
     </div></div></div></div>
@@ -380,6 +420,12 @@
             </div>
         </div>
     </div>
+
+    @if(!empty($tenant_info->whatsapp_number))
+        <a href="https://wa.me/{{ $tenant_info->whatsapp_number }}?text=Hi, I have a query regarding your products." class="whatsapp-float shadow-lg" target="_blank">
+            <i class="fab fa-whatsapp"></i>
+        </a>
+    @endif
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -525,10 +571,32 @@
                 saveCart();
             }
         }
+        function clearFormErrors() {
+            ['#cust_name','#cust_phone','#street_address','#city','#pincode','#state'].forEach(function(id) {
+                $(id).removeClass('is-invalid border-danger');
+            });
+            ['#err-name','#err-phone'].forEach(function(id) {
+                $(id).hide().text('');
+            });
+            $('#checkout-error-msg').addClass('d-none').text('');
+        }
+        function showFieldError(inputId, errId, msg) {
+            $(inputId).addClass('is-invalid border-danger');
+            $(errId).text(msg).css('display', 'block');
+            $(inputId)[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        function showCheckoutError(msg) {
+            $('#checkout-error-msg').removeClass('d-none').html('<i class="fas fa-exclamation-circle me-2"></i>' + msg);
+            document.getElementById('checkout-error-msg').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
         function submitOrder() {
+            clearFormErrors();
             @if(!isset($customer))
                 let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();
-                if(!phone || !/^[6-9]\d{9}$/.test(phone)) return alert("Please enter a valid 10-digit mobile number.");
+                if(!phone || !/^[6-9]\d{9}$/.test(phone)) {
+                    showFieldError('#cust_phone', '#err-phone', 'Please enter a valid 10-digit mobile number starting with 6-9.');
+                    return;
+                }
                 
                 // Save checkout preferences before login-reload
                 localStorage.setItem('pending_name', name); 
@@ -555,7 +623,7 @@
                 total: (c.price || 0) * (c.qty || 1), 
                 extras: (c.extras || []).map(e => ({ id: e.id, price: e.price })) 
             }));
-            $("#placeOrderBtn").prop("disabled", true).text("Processing...");
+            $("#placeOrderBtn").prop("disabled", true).html('<i class="fas fa-spinner fa-spin me-2"></i> Processing...');
             
             let s_addr = $("#street_address").val() || '';
             let c_addr = $("#city").val() || '';
@@ -588,14 +656,18 @@
                     } 
                     else window.location.href = "{{ url('/order') }}/" + res.order_number + "/success"; 
                 } else {
-                    alert(res.message || "Error placing order");
-                    $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER");
+                    showCheckoutError(res.message || 'Error placing order. Please try again.');
+                    $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-check-circle me-2"></i> PLACE ORDER');
                 }
             }).fail(function(xhr) {
-                let msg = "Error placing order";
+                let msg = 'Error placing order. Please try again.';
                 if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
-                alert(msg);
-                $("#placeOrderBtn").prop("disabled", false).text("PLACE ORDER");
+                if(xhr.responseJSON && xhr.responseJSON.errors) {
+                    let errs = xhr.responseJSON.errors;
+                    msg = Object.values(errs).flat().join(' ');
+                }
+                showCheckoutError(msg);
+                $("#placeOrderBtn").prop("disabled", false).html('<i class="fas fa-check-circle me-2"></i> PLACE ORDER');
             });
         }
         function checkPhoneExists() {
@@ -670,6 +742,54 @@
                 input.type = 'password';
                 icon.classList.replace('fa-eye-slash', 'fa-eye');
             }
+        }
+
+        // Forgot PIN Logic
+        function sendForgotPinOtp() {
+            let p = $("#login-phone").val().trim();
+            $("#otp-phone-display").text(p);
+            $.post("{{ route('customer.forgot-pin.send-otp') }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
+                if(res.status) {
+                    $("#login-pin-section").addClass("d-none");
+                    $("#forgot-otp-section").removeClass("d-none");
+                } else {
+                    showLoginError(res.message || "Error sending OTP");
+                }
+            });
+        }
+        function verifyForgotOtp() {
+            let p = $("#login-phone").val().trim();
+            let otp = $("#forgot-otp").val().trim();
+            if(otp.length !== 4) return showLoginError("Please enter 4-digit OTP");
+            $.post("{{ route('customer.forgot-pin.verify-otp') }}", { _token: "{{ csrf_token() }}", phone: p, otp: otp }, function(res) {
+                if(res.status) {
+                    $("#forgot-otp-section").addClass("d-none");
+                    $("#forgot-reset-section").removeClass("d-none");
+                } else {
+                    showLoginError(res.message || "Invalid OTP");
+                }
+            });
+        }
+        function resetForgotPin() {
+            let p = $("#login-phone").val().trim();
+            let pin = $("#new-forgot-pin").val().trim();
+            let pinConfirm = $("#new-forgot-pin-confirm").val().trim();
+            let otp = $("#forgot-otp").val().trim();
+            if(pin !== pinConfirm) return showLoginError("PINs do not match!");
+            if(pin.length !== 4) return showLoginError("PIN must be 4 digits!");
+            
+            $.post("{{ route('customer.forgot-pin.reset') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, pin_confirmation: pinConfirm, otp: otp }, function(res) {
+                if(res.status) {
+                    alert('PIN reset successfully!');
+                    processPinLogin(); // Auto login
+                } else {
+                    showLoginError(res.message || "Error resetting PIN");
+                }
+            });
+        }
+        function goBackToPinSection() {
+            $("#forgot-otp-section").addClass("d-none");
+            $("#login-pin-section").removeClass("d-none");
         }
             $(document).ready(function() {
                 @if(session('reorder_cart')) localStorage.setItem('cart', '{!! session('reorder_cart') !!}'); cart = JSON.parse(localStorage.getItem('cart')); renderCart(); @php session()->forget('reorder_cart'); @endphp @endif

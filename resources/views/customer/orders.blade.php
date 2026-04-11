@@ -4,7 +4,9 @@
 
 @section('styles')
 <style>
-    .order-card { border-radius: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; background: white; height: 100%; transition: 0.3s; }
+    .order-card { position: relative; cursor: pointer; border-radius: 20px; border: none; box-shadow: 0 5px 15px rgba(0,0,0,0.05); overflow: hidden; background: white; height: 100%; transition: 0.3s; }
+    .order-card, .order-card * { cursor: pointer; }
+    .order-card a, .order-card button { cursor: pointer; }
     .order-card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
     .status-badge { font-size: 10px; padding: 4px 10px; border-radius: 30px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     .payment-badge { font-size: 10px; padding: 4px 10px; border-radius: 30px; font-weight: 700; margin-left: 5px; }
@@ -53,6 +55,14 @@
     let page = 1;
     let loading = false;
     let hasMore = @if($orders->hasMorePages()) true @else false @endif;
+
+    // Make entire order card clickable (delegated so it works for AJAX-loaded cards too)
+    $(document).on('click', '.order-card', function(e) {
+        // If clicked element is a link or button, let it handle itself
+        if ($(e.target).closest('a, button').length) return;
+        var url = $(this).data('order-url');
+        if (url) window.location.href = url;
+    });
 
     $(window).on('scroll', function() {
         if ($(window).scrollTop() + $(window).height() >= $(document).height() - 400) {

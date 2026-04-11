@@ -68,6 +68,10 @@ Route::get('/customer/profile', [CustomerAuthController::class, 'profile'])->nam
 Route::post('/customer/address/save', [CustomerAuthController::class, 'saveAddress'])->name('customer.address.save');
 Route::delete('/customer/address/{id}', [CustomerAuthController::class, 'deleteAddress'])->name('customer.address.delete');
 Route::post('/customer/address/{id}/default', [CustomerAuthController::class, 'setDefaultAddress'])->name('customer.address.default');
+Route::post('/customer/update-pin', [CustomerAuthController::class, 'updatePin'])->name('customer.update-pin');
+Route::post('/customer/forgot-pin/send-otp', [CustomerAuthController::class, 'sendForgotPinOtp'])->name('customer.forgot-pin.send-otp');
+Route::post('/customer/forgot-pin/verify-otp', [CustomerAuthController::class, 'verifyForgotOtp'])->name('customer.forgot-pin.verify-otp');
+Route::post('/customer/forgot-pin/reset', [CustomerAuthController::class, 'resetForgotPin'])->name('customer.forgot-pin.reset');
 Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 Route::middleware('auth')->prefix('cp')->group(function () {

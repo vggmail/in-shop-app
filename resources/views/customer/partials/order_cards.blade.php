@@ -1,5 +1,5 @@
 @foreach($orders as $order)
-    <div class="card order-card">
+    <div class="card order-card" data-order-url="{{ url('/order/'.$order->order_number.'/success') }}">
         <div class="card-body p-3">
             <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>

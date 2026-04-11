@@ -12,7 +12,7 @@
                 </div>
             </div>
             <h4 class="fw-bold mb-1">{{ $customer->name }}</h4>
-            <p class="text-muted small mb-3"><i class="fas fa-phone-alt me-1"></i> {{ $customer->phone }}</p>
+            <p class="text-muted small mb-3"><i class="fas fa-phone-alt me-1"></i> {{ str_repeat('*', strlen($customer->phone) - 4) . substr($customer->phone, -4) }}</p>
             <hr class="opacity-10">
             <div class="row g-2 text-start">
                 <div class="col-6">
@@ -29,6 +29,10 @@
                 </div>
             </div>
             <div class="mt-4">
+                <button type="button" class="btn btn-dark btn-sm rounded-pill px-4 fw-bold mb-2 shadow-sm" data-bs-toggle="modal" data-bs-target="#changePinModal">
+                    <i class="fas fa-key me-1"></i> Change PIN
+                </button>
+                <br>
                 <a href="{{ route('customer.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold">
                     <i class="fas fa-sign-out-alt me-1"></i> Logout
                 </a>
@@ -172,6 +176,36 @@
         </div>
     </div>
 </div>
+
+<!-- Change PIN Modal -->
+<div class="modal fade" id="changePinModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow rounded-4 p-2">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Change Login PIN</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="changePinForm">
+                    <div id="pin-error" class="alert alert-danger small fw-bold d-none py-2 mb-3 rounded-3 border-0"></div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold text-muted">VERIFY MOBILE NUMBER</label>
+                        <input type="tel" name="phone_verify" id="phone_verify" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control fw-bold fs-4 text-center border-0 bg-light rounded-3" placeholder="Enter phone number" required>
+                    </div>
+                    <div class="mb-3 position-relative">
+                        <label class="form-label small fw-bold text-muted">NEW PIN (4-DIGIT)</label>
+                        <input type="password" name="new_pin" id="new_pin" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control fw-bold fs-4 text-center border-0 bg-light rounded-3" style="letter-spacing: 12px;" required>
+                    </div>
+                    <div class="mb-4 position-relative">
+                        <label class="form-label small fw-bold text-muted">CONFIRM NEW PIN</label>
+                        <input type="password" name="new_pin_confirmation" id="new_pin_confirmation" maxlength="4" oninput="this.value = this.value.replace(/[^0-9]/g, '')" class="form-control fw-bold fs-4 text-center border-0 bg-light rounded-3" style="letter-spacing: 12px;" required>
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="changePinBtn">UPDATE PIN</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
@@ -231,6 +265,35 @@
             });
         }
     }
+
+    $('#changePinForm').on('submit', function(e) {
+        e.preventDefault();
+        const btn = $('#changePinBtn');
+        const err = $('#pin-error');
+        
+        if($('#new_pin').val() !== $('#new_pin_confirmation').val()) {
+            err.text('New and Confirm PIN do not match!').removeClass('d-none');
+            return;
+        }
+
+        btn.prop('disabled', true).text('UPDATING...');
+        err.addClass('d-none');
+
+        $.post("{{ route('customer.update-pin') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
+            if(res.status) {
+                alert('PIN updated successfully!');
+                location.reload();
+            } else {
+                err.text(res.message || 'Error updating PIN').removeClass('d-none');
+                btn.prop('disabled', false).text('UPDATE PIN');
+            }
+        }).fail(function(xhr) {
+            let msg = 'Error updating PIN';
+            if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+            err.text(msg).removeClass('d-none');
+            btn.prop('disabled', false).text('UPDATE PIN');
+        });
+    });
 </script>
 <style>
     .hover-shadow:hover { box-shadow: 0 10px 30px rgba(0,0,0,0.1); transform: translateY(-3px); }

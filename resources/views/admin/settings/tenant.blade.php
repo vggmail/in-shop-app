@@ -97,6 +97,16 @@
                             </div>
                         </div>
                         <div class="col-md-6 mt-4">
+                            <label class="form-label small fw-bold text-muted">WHATSAPP NUMBER (For Customer Support)</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-light border-0 text-success"><i
+                                        class="fab fa-whatsapp"></i></span>
+                                <input type="text" name="whatsapp_number" class="form-control bg-light border-0 rounded-end-3"
+                                    value="{{ old('whatsapp_number', $tenant->whatsapp_number) }}" placeholder="e.g. 919876543210">
+                            </div>
+                            <small class="text-muted d-block mt-1" style="font-size: 11px;">Include country code WITHOUT + (e.g., 91 for India).</small>
+                        </div>
+                        <div class="col-md-6 mt-4">
                             <label class="form-label small fw-bold text-muted">UPI ID / VPA (For Payments)</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light border-0"><i

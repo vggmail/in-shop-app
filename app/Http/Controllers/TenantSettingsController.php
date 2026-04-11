@@ -37,6 +37,7 @@ class TenantSettingsController extends Controller
             'state' => 'nullable|string|max:255',
             'pincode' => 'nullable|string|max:20',
             'phone' => 'nullable|string|max:20',
+            'whatsapp_number' => 'nullable|string|max:20',
             'gst_number' => 'nullable|string|max:50',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'dine_in_enabled' => 'nullable|boolean',
@@ -65,6 +66,7 @@ class TenantSettingsController extends Controller
         $tenantModel->state = $request->state;
         $tenantModel->pincode = $request->pincode;
         $tenantModel->phone = $request->phone;
+        $tenantModel->whatsapp_number = $request->whatsapp_number;
         $tenantModel->gst_number = $request->gst_number;
         $tenantModel->dine_in_enabled = $request->has('dine_in_enabled');
         $tenantModel->takeaway_enabled = $request->has('takeaway_enabled');

@@ -42,7 +42,7 @@
             </div>
             <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-muted">Phone</span>
-                <span class="text-dark fw-bold">{{ $order->customer->phone ?? 'N/A' }}</span>
+                <span class="text-dark fw-bold">{{ $order->customer ? str_repeat('*', strlen($order->customer->phone) - 4) . substr($order->customer->phone, -4) : 'N/A' }}</span>
             </div>
             <div class="d-flex justify-content-between mb-2 small">
                 <span class="text-muted">Type</span>

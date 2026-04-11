@@ -8,6 +8,9 @@ use App\Models\Order;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class CustomerAuthController extends Controller
 {
@@ -158,6 +161,89 @@ class CustomerAuthController extends Controller
     {
         Session::forget('customer_id');
         return redirect()->route('home')->with('success', 'Logged out successfully');
+    }
+
+    public function updatePin(Request $request)
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+
+        $request->validate([
+            'phone_verify' => 'required|string|size:10',
+            'new_pin' => 'required|string|size:4|confirmed',
+        ]);
+
+        $customer = Customer::find($customerId);
+        if ($request->phone_verify !== $customer->phone) {
+            return response()->json(['status' => false, 'message' => 'Mobile number does not match!'], 422);
+        }
+
+        $customer->pin = Hash::make($request->new_pin);
+        $customer->save();
+
+        return response()->json(['status' => true, 'message' => 'PIN updated successfully!']);
+    }
+
+    public function sendForgotPinOtp(Request $request)
+    {
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $customer = Customer::where('phone', $phone)->first();
+        if (!$customer) return response()->json(['status' => false, 'message' => 'Number not registered!'], 404);
+
+        $otp = rand(1000, 9999);
+        Cache::put('otp_' . $phone, $otp, now()->addMinutes(10));
+
+        // Mock WhatsApp Sending - Log it for now
+        Log::info("OTP for $phone: $otp");
+        
+        // For real WhatsApp integration:
+        // $this->sendWhatsAppOtp($phone, $otp);
+
+        return response()->json(['status' => true, 'message' => 'OTP sent successfully!']);
+    }
+
+    public function verifyForgotOtp(Request $request)
+    {
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $cachedOtp = Cache::get('otp_' . $phone);
+
+        if ($cachedOtp && $cachedOtp == $request->otp) {
+            return response()->json(['status' => true]);
+        }
+
+        return response()->json(['status' => false, 'message' => 'Invalid or expired OTP!'], 422);
+    }
+
+    public function resetForgotPin(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required',
+            'otp' => 'required',
+            'pin' => 'required|string|size:4|confirmed'
+        ]);
+
+        $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $cachedOtp = Cache::get('otp_' . $phone);
+
+        if (!$cachedOtp || $cachedOtp != $request->otp) {
+            return response()->json(['status' => false, 'message' => 'OTP expired or invalid!'], 422);
+        }
+
+        $customer = Customer::where('phone', $phone)->firstOrFail();
+        $customer->pin = Hash::make($request->pin);
+        $customer->save();
+
+        Cache::forget('otp_' . $phone);
+
+        return response()->json(['status' => true, 'message' => 'PIN reset successfully!']);
+    }
+
+    private function sendWhatsAppOtp($phone, $otp)
+    {
+        // Add your Meta Cloud API logic here
+        // $token = env('WHATSAPP_TOKEN');
+        // $phoneId = env('WHATSAPP_PHONE_ID');
+        // $url = "https://graph.facebook.com/v17.0/$phoneId/messages";
     }
 
     public function profile()

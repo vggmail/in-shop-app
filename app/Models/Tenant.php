@@ -9,7 +9,7 @@ class Tenant extends Model
 {
     use HasFactory;
     protected $connection = 'mysql';
-    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active', 'logo', 'tagline', 'address', 'city', 'state', 'pincode', 'phone', 'gst_number', 'dine_in_enabled', 'takeaway_enabled', 'home_delivery_enabled', 'cash_enabled', 'online_enabled'];
+    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active', 'logo', 'tagline', 'address', 'city', 'state', 'pincode', 'phone', 'whatsapp_number', 'gst_number', 'dine_in_enabled', 'takeaway_enabled', 'home_delivery_enabled', 'cash_enabled', 'online_enabled'];
 
     protected $casts = [
         'dine_in_enabled' => 'boolean',

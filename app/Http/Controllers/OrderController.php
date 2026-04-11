@@ -91,7 +91,8 @@ class OrderController extends Controller
     public function show($id)
     {
         $order = $this->repo->find($id);
-        return view("admin.orders.show", compact("order"));
+        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+        return view("admin.orders.show", compact("order", "tenant"));
     }
 
     public function printInvoice($id)

@@ -3,8 +3,17 @@
     <div class="card p-4 shadow border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0"><i class="fas fa-receipt text-muted me-2"></i> Order: {{ $order->order_number }}</h2>
-            <a href="{{ route("orders.invoice", $order->id) }}" target="_blank" class="btn btn-dark"><i
-                    class="fas fa-print"></i> Print Receipt</a>
+            <div class="d-flex gap-2">
+                @if($tenant->whatsapp_number && $order->customer)
+                    @php
+                        $message = "Hello " . $order->customer->name . "! Your order #" . $order->order_number . " from " . $tenant->name . " for ₹" . number_format($order->grand_total, 2) . " is now " . $order->status . ".";
+                        $wa_link = "https://wa.me/" . ($order->customer->phone ?? '') . "?text=" . urlencode($message);
+                    @endphp
+                    <a href="{{ $wa_link }}" target="_blank" class="btn btn-success"><i class="fab fa-whatsapp"></i> Send on WhatsApp</a>
+                @endif
+                <a href="{{ route("orders.invoice", $order->id) }}" target="_blank" class="btn btn-dark"><i
+                        class="fas fa-print"></i> Print Receipt</a>
+            </div>
         </div>
 
         <div class="row mb-4 bg-light p-3 rounded">
