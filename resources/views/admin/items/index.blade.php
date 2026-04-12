@@ -395,10 +395,15 @@
         }
 
         function filterMenu(query) {
-            query = query.toLowerCase();
+            query = query.toLowerCase().trim();
+            if (query.length > 0 && query.length < 3) {
+                $('.item-search-node').removeClass('d-none');
+                return;
+            }
+            
             $('.item-search-node').each(function() {
                 let name = $(this).find('.item-search-name').text().toLowerCase();
-                if(name.includes(query)) {
+                if(query === "" || name.includes(query)) {
                     $(this).removeClass('d-none');
                 } else {
                     $(this).addClass('d-none');

@@ -214,9 +214,19 @@ class OrderController extends Controller
         $order = \App\Models\Order::findOrFail($id);
         if ($request->has('status')) {
             $order->status = $request->status;
+            
+            // Only send status updates for Home Delivery
+            if ($order->order_type == 'Home Delivery') {
+                $this->repo->sendOrderStatusEmail($order);
+            }
         }
         if ($request->has('payment_status')) {
             $order->payment_status = $request->payment_status;
+            
+            // If admin marks as Paid, send the email
+            if ($order->payment_status == 'Paid') {
+                $this->repo->sendInvoiceEmail($order);
+            }
         }
         $order->save();
         return back()->with('success', 'Order status updated successfully!');

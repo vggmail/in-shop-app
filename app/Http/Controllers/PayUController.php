@@ -11,8 +11,17 @@ use Illuminate\Support\Facades\Log;
 use App\Models\PaymentGateway;
 use App\Models\Tenant;
 
+use App\Repositories\OrderRepository;
+
 class PayUController extends Controller
 {
+    protected $orderRepo;
+
+    public function __construct(OrderRepository $orderRepo)
+    {
+        $this->orderRepo = $orderRepo;
+    }
+
     private function getSettings()
     {
         $tenant = app()->bound('tenant') ? app('tenant') : Tenant::first();
@@ -32,12 +41,12 @@ class PayUController extends Controller
             ];
         }
 
-        // Fallback to config
+        // Fallback to defaults (always test by default)
         return [
             'key' => config('services.payu.key'),
             'salt' => config('services.payu.salt'),
             'mode' => 'test',
-            'base_url' => config('services.payu.base_url', 'https://test.payu.in/_payment')
+            'base_url' => 'https://test.payu.in/_payment'
         ];
     }
 
@@ -198,6 +207,9 @@ class PayUController extends Controller
 
             Log::info("PayU: Order #$orderNumber marked as Paid. Transaction ID: " . ($data['mihpayid'] ?? $txnid));
             
+            // Send Invoice Email
+            $this->orderRepo->sendInvoiceEmail($order);
+            
             // Log Attempt as Success
             PaymentAttempt::where('txnid', $txnid)->update([
                 'status' => 'Success',
@@ -286,6 +298,9 @@ class PayUController extends Controller
                 ]);
                 
                 Log::info("PayU S2S: Order #$orderNumber marked as Paid via Webhook.");
+                
+                // Send Invoice Email
+                $this->orderRepo->sendInvoiceEmail($order);
             }
             return response('OK', 200);
         }

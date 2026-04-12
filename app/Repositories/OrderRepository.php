@@ -134,15 +134,14 @@ class OrderRepository extends BaseRepository
             DB::commit();
             \Illuminate\Support\Facades\Log::info("OrderRepo: Transaction committed successfully for Order: " . $orderNum);
 
-            // Send Email if applicable
-            try {
-                if ($order->customer && !empty($order->customer->email)) {
-                    $fullOrder = $this->find($order->id);
-                    \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderInvoiceMail($fullOrder));
-                    \Illuminate\Support\Facades\Log::info("OrderRepo: Invoice email sent to " . $order->customer->email);
-                }
-            } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error("OrderRepo Mail Error: " . $e->getMessage());
+            // Send Status Email immediately for Home Delivery (Order Received)
+            if ($order->order_type == 'Home Delivery') {
+                $this->sendOrderStatusEmail($order);
+            }
+
+            // Send Invoice ONLY if Payment is already Paid (CASH/POS)
+            if ($order->payment_status == 'Paid') {
+                $this->sendInvoiceEmail($order);
             }
 
             return $order;
@@ -151,5 +150,47 @@ class OrderRepository extends BaseRepository
             \Illuminate\Support\Facades\Log::error("OrderRepo Exception: " . $e->getMessage());
             throw $e;
         }
+    }
+
+    public function sendInvoiceEmail($order)
+    {
+        try {
+            // Ensure customer info is loaded
+            if (!$order->relationLoaded('customer')) {
+                $order->load(['customer' => fn($q) => $q->withTrashed()]);
+            }
+
+            if ($order->customer && !empty($order->customer->email)) {
+                // Now load full items details for the actual mail body
+                $fullOrder = $this->find($order->id);
+                \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderInvoiceMail($fullOrder));
+                \Illuminate\Support\Facades\Log::info("OrderRepo: Invoice email sent to " . $order->customer->email . " for Order #" . $order->order_number);
+                return true;
+            } else {
+                \Illuminate\Support\Facades\Log::info("OrderRepo: No email address found for customer in Order #" . $order->order_number . ". Skipping email.");
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("OrderRepo Mail Error for Order #" . $order->order_number . ": " . $e->getMessage());
+        }
+        return false;
+    }
+
+    public function sendOrderStatusEmail($order)
+    {
+        try {
+            if (!$order->relationLoaded('customer')) {
+                $order->load(['customer' => fn($q) => $q->withTrashed()]);
+            }
+
+            if ($order->customer && !empty($order->customer->email)) {
+                $order->load('items.item');
+                \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderStatusMail($order));
+                \Illuminate\Support\Facades\Log::info("OrderRepo: Status email sent to " . $order->customer->email . " for Order #" . $order->order_number);
+                return true;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("OrderRepo Status Mail Error: " . $e->getMessage());
+        }
+        return false;
     }
 }

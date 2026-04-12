@@ -168,11 +168,16 @@
     }
 
     function filterCustomers(query) {
-        query = query.toLowerCase();
+        query = query.toLowerCase().trim();
+        if (query.length > 0 && query.length < 3) {
+            $('.customer-search-node').removeClass('d-none');
+            return;
+        }
+
         $('.customer-search-node').each(function() {
             let name = $(this).find('.customer-search-name').text().toLowerCase();
             let phone = $(this).find('.customer-search-phone').text().toLowerCase();
-            if(name.includes(query) || phone.includes(query)) {
+            if(query === "" || name.includes(query) || phone.includes(query)) {
                 $(this).removeClass('d-none');
             } else {
                 $(this).addClass('d-none');
