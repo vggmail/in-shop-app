@@ -133,6 +133,18 @@ class OrderRepository extends BaseRepository
 
             DB::commit();
             \Illuminate\Support\Facades\Log::info("OrderRepo: Transaction committed successfully for Order: " . $orderNum);
+
+            // Send Email if applicable
+            try {
+                if ($order->customer && !empty($order->customer->email)) {
+                    $fullOrder = $this->find($order->id);
+                    \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderInvoiceMail($fullOrder));
+                    \Illuminate\Support\Facades\Log::info("OrderRepo: Invoice email sent to " . $order->customer->email);
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("OrderRepo Mail Error: " . $e->getMessage());
+            }
+
             return $order;
         } catch (\Exception $e) {
             DB::rollBack();

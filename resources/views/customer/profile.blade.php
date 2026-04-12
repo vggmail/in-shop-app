@@ -12,8 +12,13 @@
                 </div>
             </div>
             <h4 class="fw-bold mb-1">{{ $customer->name }}</h4>
-            <p class="text-muted small mb-3"><i class="fas fa-phone-alt me-1"></i> {{ str_repeat('*', strlen($customer->phone) - 4) . substr($customer->phone, -4) }}</p>
-            <hr class="opacity-10">
+            <div class="mb-3">
+                <p class="text-muted small mb-1"><i class="fas fa-phone-alt me-1 text-primary"></i> {{ str_repeat('*', strlen($customer->phone) - 4) . substr($customer->phone, -4) }}</p>
+                <p class="text-muted small mb-0"><i class="fas fa-envelope me-1 text-primary"></i> {{ $customer->email ?: 'Email not added' }}</p>
+            </div>
+            <button class="btn btn-outline-primary btn-sm rounded-pill px-3 fw-bold mb-4" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                <i class="fas fa-edit me-1"></i> Edit Profile
+            </button>
             <div class="row g-2 text-start">
                 <div class="col-6">
                     <div class="p-2 bg-light rounded-3 text-center">
@@ -33,9 +38,12 @@
                     <i class="fas fa-key me-1"></i> Change PIN
                 </button>
                 <br>
-                <a href="{{ route('customer.logout') }}" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold">
-                    <i class="fas fa-sign-out-alt me-1"></i> Logout
-                </a>
+                <form action="{{ route('customer.logout') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -177,6 +185,32 @@
     </div>
 </div>
 
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4 p-2">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Edit Profile Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="editProfileForm">
+                    <div id="profile-error" class="alert alert-danger small fw-bold d-none py-2 mb-3 rounded-3 border-0"></div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">FULL NAME</label>
+                        <input type="text" name="name" id="profile_name" class="form-control border-0 bg-light rounded-pill px-4 py-2" value="{{ $customer->name }}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">EMAIL ADDRESS (OPTIONAL)</label>
+                        <input type="email" name="email" id="profile_email" class="form-control border-0 bg-light rounded-pill px-4 py-2" value="{{ $customer->email }}" placeholder="Enter your email">
+                    </div>
+                    <button type="submit" class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="saveProfileBtn">SAVE CHANGES</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Change PIN Modal -->
 <div class="modal fade" id="changePinModal" tabindex="-1" role="dialog">
     <div class="modal-dialog modal-dialog-centered" role="document">
@@ -265,6 +299,29 @@
             });
         }
     }
+
+    $('#editProfileForm').on('submit', function(e) {
+        e.preventDefault();
+        const btn = $('#saveProfileBtn');
+        const err = $('#profile-error');
+        
+        btn.prop('disabled', true).text('SAVING...');
+        err.addClass('d-none');
+
+        $.post("{{ route('customer.update-profile') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
+            if(res.status) {
+                location.reload();
+            } else {
+                err.text(res.message || 'Error updating profile').removeClass('d-none');
+                btn.prop('disabled', false).text('SAVE CHANGES');
+            }
+        }).fail(function(xhr) {
+            let msg = 'Error updating profile';
+            if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
+            err.text(msg).removeClass('d-none');
+            btn.prop('disabled', false).text('SAVE CHANGES');
+        });
+    });
 
     $('#changePinForm').on('submit', function(e) {
         e.preventDefault();

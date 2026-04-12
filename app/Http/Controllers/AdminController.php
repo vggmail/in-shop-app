@@ -7,6 +7,58 @@ use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller {
     public function dashboard(Request $request) {
+        $tab = $request->query('tab', 'analytics');
+
+        if ($tab === 'analytics') {
+            $range = $request->get('range', '30');
+            $days = (int)$range;
+
+            $startDate = now()->subDays($days)->startOfDay();
+                
+            // Core Metrics
+            $grossSales = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])
+                ->where('created_at', '>=', $startDate)->sum('grand_total');
+            $totalExpenses = \App\Models\Expense::where('date', '>=', $startDate)->sum('amount');
+            $netProfit = $grossSales - $totalExpenses;
+            $orderCount = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])
+                ->where('created_at', '>=', $startDate)->count();
+
+            // Time-series for Line Chart
+            $chartDates = [];
+            $salesData = [];
+            $expensesData = [];
+            
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $dateStr = now()->subDays($i)->format('Y-m-d');
+                $chartDates[] = now()->subDays($i)->format('d M');
+                
+                $salesData[] = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed'])
+                    ->whereDate('created_at', $dateStr)->sum('grand_total');
+                $expensesData[] = \App\Models\Expense::whereDate('date', $dateStr)->sum('amount');
+            }
+
+            // Top Items for Doughnut Chart
+            $topItemsQuery = \Illuminate\Support\Facades\DB::table('order_items')
+                ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                ->join('items', 'order_items.item_id', '=', 'items.id')
+                ->whereNotIn('orders.status', ['Pending Payment', 'Payment Failed'])
+                ->where('orders.created_at', '>=', $startDate)
+                ->select(\Illuminate\Support\Facades\DB::raw('items.name, sum(order_items.quantity) as total_qty'))
+                ->groupBy('items.id', 'items.name')
+                ->orderByDesc('total_qty')
+                ->limit(5)
+                ->get();
+                
+            $topItemLabels = $topItemsQuery->pluck('name')->toArray();
+            $topItemData = $topItemsQuery->pluck('total_qty')->toArray();
+
+            return view("admin.dashboard_analytics", compact(
+                'range', 'grossSales', 'totalExpenses', 'netProfit', 'orderCount', 
+                'chartDates', 'salesData', 'expensesData', 'topItemLabels', 'topItemData', 'tab'
+            ));
+        }
+
+        // Classic Dashboard Logic
         $range = $request->get('range', '30d');
         $days = ($range === '6m') ? 180 : 30;
 
@@ -39,7 +91,7 @@ class AdminController extends Controller {
             ->orderBy("date", "asc")
             ->get();
             
-        return view("admin.dashboard", compact("todaySales", "totalOrders", "totalRevenue", "totalCustomers", "topItems", "dailySales", "range"));
+        return view("admin.dashboard", compact("todaySales", "totalOrders", "totalRevenue", "totalCustomers", "topItems", "dailySales", "range", "tab"));
     }
 
     public function logs() {

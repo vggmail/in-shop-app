@@ -38,6 +38,7 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
             \App\Http\Middleware\IdentifyTenant::class,
             \App\Http\Middleware\BlockBots::class,
+            \App\Http\Middleware\HoneyPotMiddleware::class,
         ],
 
         'api' => [

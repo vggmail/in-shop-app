@@ -41,7 +41,13 @@
 </div>
 
 <div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 no-print gap-3 gap-md-0">
-    <h2><i class="fas fa-chart-pie text-primary"></i> Analytical Reports</h2>
+    <div class="d-flex align-items-center">
+        <h2 class="mb-0 me-3"><i class="fas fa-chart-pie text-primary"></i> Analytical Reports</h2>
+        <div class="btn-group shadow-sm rounded-pill overflow-hidden bg-white p-1">
+            <a href="{{ route('reports.index', ['tab' => 'classic']) }}" class="btn rounded-pill px-4 {{ $tab === 'classic' || !isset($tab) ? 'btn-primary text-white pointer-events-none' : 'btn-white text-muted' }}">Standard View</a>
+            <a href="{{ route('reports.index', ['tab' => 'analytics']) }}" class="btn rounded-pill px-4 {{ isset($tab) && $tab === 'analytics' ? 'btn-primary text-white pointer-events-none' : 'btn-white text-muted' }}">Advanced Analytics ✨</a>
+        </div>
+    </div>
     <div class="d-flex gap-2">
         <input type="date" id="report_date" class="form-control w-auto" value="{{ date("Y-m-d") }}">
         <button class="btn btn-dark text-nowrap" onclick="window.print()"><i class="fas fa-print me-1"></i> Print</button>

@@ -40,14 +40,19 @@ class DatabaseSeeder extends Seeder
         $adminRole = Role::firstOrCreate(['name' => 'Admin']);
         $cashierRole = Role::firstOrCreate(['name' => 'Cashier']);
 
-        if (User::count() === 0) {
-            User::create([
-                'name' => 'Admin User',
-                'email' => 'admin@admin.com',
-                'phone' => '1234567890',
-                'role_id' => $adminRole->id,
-                'password' => bcrypt('password'),
-            ]);
+        // Only seed Super Admin and Central Admin User in the main database
+        if (\Illuminate\Support\Facades\DB::getDefaultConnection() === 'mysql') {
+            $saRole = Role::firstOrCreate(['name' => 'Super Admin']);
+
+            if (User::count() === 0) {
+                User::create([
+                    'name' => 'Main Admin',
+                    'email' => 'admin@admin.com',
+                    'phone' => '1234567890',
+                    'role_id' => $saRole->id,
+                    'password' => bcrypt('password'),
+                ]);
+            }
         }
 
     }

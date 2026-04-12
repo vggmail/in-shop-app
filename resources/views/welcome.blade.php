@@ -33,6 +33,29 @@
         .recent-card i { background: #fff1f2; color: var(--primary); width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; }
         .whatsapp-float { position: fixed; bottom: 155px; right: 20px; background: #25d366; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: 0.3s; }
         .whatsapp-float:hover { transform: scale(1.1); color: white; }
+
+        /* Premium Food Modal Styles */
+        .modal-food-img { height: 250px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin-top: -10px; }
+        .m-title { font-weight: 800; letter-spacing: -1px; font-size: 1.5rem; }
+        .m-desc-box { background: #fdf2f2; border-left: 4px solid var(--primary); padding: 15px; border-radius: 15px; }
+        .m-desc { color: #666; font-size: 13px; margin-bottom: 0; font-weight: 500; }
+        .modal-section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #adb5bd; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        
+        .variant-btn, .extra-btn { transition: all 0.2s ease; border: 1.5px solid #eee !important; background: white !important; color: #444 !important; font-weight: 600 !important; font-size: 14px !important; }
+        .btn-check:checked + .variant-btn { border-color: var(--dark) !important; background: var(--dark) !important; color: white !important; box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important; transform: translateY(-2px); }
+        .btn-check:checked + .extra-btn { border-color: var(--primary) !important; background: var(--primary) !important; color: white !important; box-shadow: 0 5px 15px rgba(255, 71, 87, 0.2) !important; transform: translateY(-2px); }
+        
+        .qty-box { background: #f8f9fa; border-radius: 50px; padding: 5px; box-shadow: inset 0 2px 5px rgba(0,0,0,0.05); width: 150px; }
+        .qty-btn { width: 40px; height: 40px; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; background: white !important; border: 1px solid #eee !important; color: var(--dark) !important; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: 0.2s; }
+        .qty-btn:active { transform: scale(0.9); }
+        
+        .add-to-cart-btn { background: var(--primary); border: none; padding: 16px; border-radius: 20px !important; font-weight: 800 !important; letter-spacing: 0.5px; transition: 0.3s; box-shadow: 0 10px 25px rgba(255, 71, 87, 0.3) !important; }
+        .add-to-cart-btn:hover { background: #ff3848; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(255, 71, 87, 0.4) !important; }
+        .add-to-cart-btn:active { transform: translateY(-1px); }
+
+        .place-order-btn { background: #2ed573; border: none; padding: 16px; border-radius: 20px !important; font-weight: 800 !important; letter-spacing: 0.5px; transition: 0.3s; box-shadow: 0 10px 25px rgba(46, 213, 115, 0.3) !important; color: white !important; }
+        .place-order-btn:hover { background: #26af5c; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(46, 213, 115, 0.4) !important; }
+        .place-order-btn:active { transform: translateY(-1px); }
     </style>
 </head>
 <body>
@@ -91,10 +114,10 @@
             <label class="small fw-bold text-muted text-uppercase mb-2" style="letter-spacing: 1px;">Ready for seconds?</label>
             <div class="d-flex overflow-auto gap-3 pb-2 no-scrollbar">
                 @foreach($recentItems as $ri)
-                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', '{{ addslashes($ri->description) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->image }}', '{{ addslashes($ri->default_size) }}')">
+                <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', '{{ addslashes($ri->description) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->feature_image }}', '{{ addslashes($ri->default_size) }}')">
                     <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
-                        @if($ri->image)
-                            <img src="{{ asset('storage/'.$ri->image) }}" class="w-100 h-100 object-fit-cover">
+                        @if($ri->image || $ri->feature_image)
+                            <img src="{{ asset('storage/'.$ri->feature_thumb) }}" class="w-100 h-100 object-fit-cover">
                         @else
                             <i class="fas fa-history text-primary"></i>
                         @endif
@@ -130,10 +153,10 @@
         <div class="row g-3 mt-2" id="menu-grid">
             @foreach($items as $i)
             <div class="col-6 col-md-4 col-lg-3 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
-                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->image }}', '{{ addslashes($i->default_size) }}')">
+                <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->feature_image }}', '{{ addslashes($i->default_size) }}')">
                     <div class="food-img position-relative overflow-hidden">
-                        @if($i->image)
-                            <img src="{{ asset('storage/'.$i->image) }}" class="w-100 h-100 object-fit-cover">
+                        @if($i->image || $i->feature_image)
+                            <img src="{{ asset('storage/'.$i->feature_thumb) }}" class="w-100 h-100 object-fit-cover">
                         @else
                             <i class="fas fa-hamburger fa-2x"></i>
                         @endif
@@ -180,6 +203,7 @@
     <div class="modal fade" id="loginModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content shadow-lg"><div class="modal-body p-4">
         <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
         <h5 class="fw-bold mb-4">Customer Login</h5>
+        <div style="display:none !important;"><input type="text" id="hp_login" name="honey_pot_field" tabindex="-1" autocomplete="off"></div>
         <div id="login-error-tag" class="alert alert-danger py-2 small fw-bold d-none mb-3 border-0 rounded-3"></div>
         <div id="login-phone-section">
             <label class="small fw-bold text-muted mb-2" style="font-size: 11px;">MOBILE NUMBER</label>
@@ -209,7 +233,15 @@
             </div>
             <button class="btn btn-primary w-100 rounded-pill fw-bold py-2" id="login-submit-btn" onclick="processPinLogin()"><i class="fas fa-lock-open me-2"></i> Verify & Login</button>
             <div class="mt-2">
-                <button class="btn btn-link btn-sm text-primary text-decoration-none small" onclick="sendForgotPinOtp()">Forgot PIN?</button>
+                @php
+                    $wa_number = $tenant_info->whatsapp_number ?? $tenant_info->phone ?? '';
+                    $wa_msg = "Hello, I forgot my PIN for " . ($tenant_info->name ?? 'the shop') . ". My registered phone number is: ";
+                @endphp
+                @if($wa_number)
+                    <a id="wa-forgot-link" href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $wa_number) }}?text={{ urlencode($wa_msg) }}" target="_blank" class="btn btn-link btn-sm text-success text-decoration-none small fw-bold">
+                        <i class="fab fa-whatsapp me-1"></i> Forgot PIN? Contact Support
+                    </a>
+                @endif
             </div>
             <button class="btn btn-link btn-sm mt-1 text-muted text-decoration-none" onclick="goBackToLoginPhone()">Back</button>
         </div>
@@ -237,39 +269,42 @@
     </div></div></div></div>
 
     <!-- Food Modal -->
-    <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4">
-        <div id="m-image-box" class="mb-3 rounded-4 overflow-hidden shadow-sm d-none" style="height: 180px;">
+    <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4 text-center">
+        <div id="m-image-box" class="mb-4 modal-food-img overflow-hidden d-none">
             <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
         </div>
-        <h4 class="fw-800 mb-1" id="m-food-name" style="letter-spacing: -0.5px;">Food Name</h4>
-        <div class="bg-light p-3 rounded-4 mb-4 border-start border-primary border-4">
-            <p class="text-muted small mb-0 fw-bold" id="m-food-desc" style="line-height: 1.5; font-size: 12px;"></p>
+        <h3 class="m-title mb-2" id="m-food-name">Food Name</h3>
+        <div class="m-desc-box mb-4 mx-2">
+            <p class="m-desc" id="m-food-desc"></p>
         </div>
-        <div id="m-variants-box" class="mb-4 d-none">
-            <label class="fw-bold small text-uppercase text-muted mb-2">Select Variant</label>
-            <div id="m-variants-list" class="d-grid gap-2"></div>
+        
+        <div id="m-variants-box" class="mb-4 d-none text-start">
+            <label class="modal-section-label">Select Variant</label>
+            <div id="m-variants-list" class="d-flex flex-nowrap overflow-auto gap-2 pb-2 no-scrollbar"></div>
         </div>
-        <div id="m-extras-box" class="mb-4 d-none">
-            <label class="fw-bold small text-uppercase text-muted mb-2">Extra Toppings</label>
-            <div id="m-extras-list" class="row g-2"></div>
+        
+        <div id="m-extras-box" class="mb-4 d-none text-start">
+            <label class="modal-section-label">Extra Toppings</label>
+            <div id="m-extras-list" class="d-flex flex-nowrap overflow-auto gap-2 pb-2 no-scrollbar"></div>
         </div>
-        <div class="mb-4">
-            <label class="fw-bold small text-uppercase text-muted mb-2">Quantity</label>
-            <div class="d-flex align-items-center bg-light rounded-pill p-1 shadow-sm" style="width: 140px;">
-                <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updateModalQty(-1)"><i class="fas fa-minus small"></i></button>
-                <div class="flex-grow-1 text-center fw-bold fs-5" id="m-qty">1</div>
-                <button class="btn btn-dark rounded-circle d-flex align-items-center justify-content-center" style="width: 35px; height: 35px;" onclick="updateModalQty(1)"><i class="fas fa-plus small"></i></button>
+        
+        <div class="d-flex align-items-center gap-3 mt-4">
+            <div class="d-flex align-items-center bg-white rounded-pill px-3 py-1 border shadow-sm" style="width: fit-content; height: 50px;">
+                <button class="btn btn-link p-0 text-danger" onclick="updateModalQty(-1)" style="font-size: 24px; line-height: 1;"><i class="fas fa-minus-circle"></i></button>
+                <span class="mx-3 fw-800 fs-4" id="m-qty">1</span>
+                <button class="btn btn-link p-0 text-success" onclick="updateModalQty(1)" style="font-size: 24px; line-height: 1;"><i class="fas fa-plus-circle"></i></button>
             </div>
+            
+            <button class="btn btn-danger add-to-cart-btn flex-grow-1" onclick="addToCart()"><i class="fas fa-cart-plus me-2"></i> Add - ₹<span id="m-total">0.00</span></button>
         </div>
-        <div class="d-grid mt-4">
-            <button class="btn btn-danger rounded-pill fw-bold py-2 px-4 shadow-lg" onclick="addToCart()"><i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span></button>
-        </div>
+    </div></div></div></div>
     </div></div></div></div>
 
     <!-- Checkout Modal -->
     <div class="modal fade" id="checkoutModal"><div class="modal-dialog modal-dialog-centered modal-lg"><div class="modal-content"><div class="modal-body p-4">
         <button type="button" class="btn-close float-end" data-bs-dismiss="modal"></button>
         <h4 class="fw-bold mb-4"><i class="fas fa-shopping-basket text-danger me-2"></i> Finalize Order</h4>
+        <div style="display:none !important;"><input type="text" id="hp_checkout" name="honey_pot_field" tabindex="-1" autocomplete="off"></div>
         <div id="checkout-list" class="mb-4 bg-light p-3 rounded-4" style="max-height: 250px; overflow-y: auto;"></div>
         
         @if(!isset($customer))
@@ -397,7 +432,7 @@
             </div>
         @else
             <div id="checkout-error-msg" class="alert alert-danger rounded-4 fw-bold small py-2 d-none" role="alert"></div>
-            <button class="btn btn-dark w-100 rounded-pill py-3 fw-bold shadow-lg" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
+            <button class="btn place-order-btn w-100" id="placeOrderBtn" onclick="submitOrder()"><i class="fas fa-check-circle me-2"></i> PLACE ORDER</button>
         @endif
     </div></div></div></div>
 
@@ -480,15 +515,15 @@
             if(variants.length) { 
                 $("#m-variants-box").removeClass("d-none"); 
                 let defLabel = defaultSize || 'Standard';
-                $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="${defLabel}" checked><label class="btn btn-outline-dark rounded-pill py-2" for="v_def">${defLabel}</label>`); 
-                variants.forEach(v => { $("#m-variants-list").append(`<input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn btn-outline-dark rounded-pill py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label>`); }); 
+                $("#m-variants-list").append(`<div class="flex-shrink-0"><input type="radio" class="btn-check" name="f_var" id="v_def" value="" data-price="0" data-name="${defLabel}" checked><label class="btn variant-btn rounded-pill px-4 py-2" for="v_def">${defLabel}</label></div>`); 
+                variants.forEach(v => { $("#m-variants-list").append(`<div class="flex-shrink-0"><input type="radio" class="btn-check" name="f_var" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}"><label class="btn variant-btn rounded-pill px-4 py-2" for="v_${v.id}">${v.name} (+₹${v.price})</label></div>`); }); 
             } else { $("#m-variants-box").addClass("d-none"); }
-            if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="col-6"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn btn-outline-secondary rounded-pill w-100 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
+            if(extras.length) { $("#m-extras-box").removeClass("d-none"); extras.forEach(e => { $("#m-extras-list").append(`<div class="flex-shrink-0"><input type="checkbox" class="btn-check m-extra-cb" id="e_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}"><label class="btn extra-btn rounded-pill px-4 py-2" for="e_${e.id}">${e.name} (+₹${e.price})</label></div>`); }); } else { $("#m-extras-box").addClass("d-none"); }
             let isAvailable = availableItemIds.includes(parseInt(id));
             if(!isAvailable) {
-                $("#foodModal button.btn-danger").prop("disabled", true).text("SOLD OUT");
+                $("#foodModal button.add-to-cart-btn").prop("disabled", true).text("SOLD OUT");
             } else {
-                $("#foodModal button.btn-danger").prop("disabled", false).html('<i class="fas fa-plus-circle me-2"></i> Add to Cart - ₹<span id="m-total">0.00</span>');
+                $("#foodModal button.add-to-cart-btn").prop("disabled", false).html('<i class="fas fa-cart-plus me-2"></i> Add - ₹<span id="m-total">0.00</span>');
                 updateMTotal();
             }
             new bootstrap.Modal(document.getElementById("foodModal")).show();
@@ -531,29 +566,33 @@
             cart.forEach((item, i) => { 
                 let isAvailable = availableItemIds.includes(parseInt(item.item_id));
                 if(!isAvailable) hasOutOfStock = true;
-                list.append(`<div class="d-flex justify-content-between mb-2 ${!isAvailable ? 'opacity-50' : ''}">
-                    <div>
-                        <span class="fw-bold d-block">${item.name}</span>
-                        ${!isAvailable ? '<small class="text-danger fw-bold">ITEM OUT OF STOCK - REMOVE THIS</small><br>' : ''}
-                        <small class="text-muted d-block">${item.variant_name}</small>
-                        <div class="d-flex align-items-center mt-2 bg-white rounded-pill px-2 border shadow-sm" style="width: fit-content;">
-                            <button class="btn btn-sm p-0 text-danger" onclick="updateCartQty(${i}, -1)"><i class="fas fa-minus-circle"></i></button>
-                            <span class="mx-2 fw-bold small">${item.qty}</span>
-                            <button class="btn btn-sm p-0 text-success" onclick="updateCartQty(${i}, 1)"><i class="fas fa-plus-circle"></i></button>
+                list.append(`<div class="py-2 border-bottom ${!isAvailable ? 'opacity-50' : ''}">
+                    <div class="d-flex justify-content-between align-items-start mb-1">
+                        <div style="max-width: 70%;">
+                            <span class="fw-bold small d-block">${item.name}</span>
+                            <span class="text-muted" style="font-size: 10px;">${item.variant_name}</span>
+                        </div>
+                        <div class="text-end">
+                            <span class="fw-bold small">₹${(item.price * item.qty).toFixed(2)}</span>
                         </div>
                     </div>
-                    <div class="text-end">
-                        <div class="fw-bold">₹${(item.price * item.qty).toFixed(2)}</div>
-                        <button class="btn btn-sm text-danger p-0 mt-1" onclick="removeFromCart(${i})"><i class="fas fa-trash-alt"></i></button>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center bg-light rounded-pill px-2 border" style="width: fit-content;">
+                            <button class="btn btn-sm p-0 text-danger" onclick="updateCartQty(${i}, -1)" style="font-size: 14px;"><i class="fas fa-minus-circle"></i></button>
+                            <span class="mx-2 fw-bold" style="font-size: 12px;">${item.qty}</span>
+                            <button class="btn btn-sm p-0 text-success" onclick="updateCartQty(${i}, 1)" style="font-size: 14px;"><i class="fas fa-plus-circle"></i></button>
+                        </div>
+                        <button class="btn btn-link text-danger p-0 text-decoration-none" onclick="removeFromCart(${i})" style="font-size: 12px;"><i class="fas fa-trash-alt"></i></button>
                     </div>
+                    ${!isAvailable ? '<div class="text-danger fw-bold mt-1" style="font-size: 9px;">OUT OF STOCK - REMOVE</div>' : ''}
                 </div>`); 
             });
             $("#checkout-total, #checkout-subtotal").text(total.toFixed(2));
 
             if(hasOutOfStock) {
-                $("#placeOrderBtn").prop("disabled", true).addClass("btn-secondary").removeClass("btn-dark").html('<i class="fas fa-exclamation-triangle me-2"></i> REMOVE OUT OF STOCK ITEMS');
+                $("#placeOrderBtn").prop("disabled", true).addClass("btn-secondary").removeClass("place-order-btn").html('<i class="fas fa-exclamation-triangle me-2"></i> REMOVE OUT OF STOCK ITEMS');
             } else {
-                $("#placeOrderBtn").prop("disabled", false).addClass("btn-dark").removeClass("btn-secondary").html('<i class="fas fa-check-circle me-2"></i> PLACE ORDER');
+                $("#placeOrderBtn").prop("disabled", false).addClass("place-order-btn").removeClass("btn-secondary").html('<i class="fas fa-check-circle me-2"></i> PLACE ORDER');
             }
         }
         function removeFromCart(i) { cart.splice(i, 1); saveCart(); }
@@ -592,7 +631,14 @@
         function submitOrder() {
             clearFormErrors();
             @if(!isset($customer))
-                let phone = $("#cust_phone").val().trim(); let name = $("#cust_name").val().trim();
+                let phone = $("#cust_phone").val().trim(); 
+                let name = $("#cust_name").val().trim();
+
+                if(!name) {
+                    showFieldError('#cust_name', '#err-name', 'Please enter your beautiful name.');
+                    return;
+                }
+
                 if(!phone || !/^[6-9]\d{9}$/.test(phone)) {
                     showFieldError('#cust_phone', '#err-phone', 'Please enter a valid 10-digit mobile number starting with 6-9.');
                     return;
@@ -633,6 +679,7 @@
 
             $.post("{{ route('home.store') }}", { 
                 _token: "{{ csrf_token() }}", 
+                honey_pot_field: $("#hp_checkout").val(),
                 customer_name: $("#cust_name").val(), 
                 customer_phone: $("#cust_phone").val(), 
                 order_type: $("input[name='order_type']:checked").val() || "Takeaway", 
@@ -672,12 +719,17 @@
         }
         function checkPhoneExists() {
             let p = $("#login-phone").val().trim(); if(!/^[6-9]\d{9}$/.test(p)) return showLoginError("Please enter a valid 10-digit mobile number.");
-            $.post("{{ route('customer.checkPhone') }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
+            $.post("{{ route('customer.checkPhone') }}", { _token: "{{ csrf_token() }}", phone: p, honey_pot_field: $("#hp_login").val() }, function(res) {
                 if(res.status) { 
                     $("#login-phone-section").addClass("d-none"); 
                     $("#login-pin-section").removeClass("d-none"); 
                     $("#pin-modal-title").text(res.exists ? "Enter PIN" : "Setup Secure PIN"); 
                     $("#pin-modal-subtitle").text(p);
+                    
+                    // Update WhatsApp Link with phone number
+                    let waMsg = "Hello, I forgot my PIN for {{ $tenant_info->name ?? 'the shop' }}. My registered phone number is: " + p;
+                    $("#wa-forgot-link").attr("href", "https://wa.me/{{ $wa_number }}?text=" + encodeURIComponent(waMsg));
+
                     if(!res.exists) {
                         $("#confirm-pin-box").removeClass("d-none");
                         $("#setup-name-box").removeClass("d-none");
@@ -703,7 +755,7 @@
                 if(pin !== pinConfirm) return showLoginError("PINs do not match!");
             }
 
-            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: name }, function(res) {
+            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: name, honey_pot_field: $("#hp_login").val() }, function(res) {
                 if(res.status) { if(res.device_token) localStorage.setItem('customer_device_token', res.device_token); location.reload(); } else showLoginError(res.message || "Invalid PIN");
             }).fail(function(xhr) {
                 let msg = "Invalid PIN!";
@@ -712,12 +764,15 @@
                 $("#login-pin, #login-pin-confirm").val(""); // Clear on fail
             });
         }
-        $(document).on("keyup", "#login-pin, #login-pin-confirm", function() {
+        $(document).on("keyup", "#login-pin, #login-pin-confirm, #forgot-otp, #new-forgot-pin, #new-forgot-pin-confirm", function() {
             if($(this).val().length === 4) {
-                if(!$("#confirm-pin-box").hasClass("d-none")) {
-                    if($("#login-pin").val().length === 4 && $("#login-pin-confirm").val().length === 4) processPinLogin();
-                } else {
-                    processPinLogin();
+                $(this).blur();
+                if($(this).attr('id') === 'login-pin' || $(this).attr('id') === 'login-pin-confirm') {
+                    if(!$("#confirm-pin-box").hasClass("d-none")) {
+                        if($("#login-pin").val().length === 4 && $("#login-pin-confirm").val().length === 4) processPinLogin();
+                    } else {
+                        processPinLogin();
+                    }
                 }
             }
         });
@@ -792,13 +847,19 @@
             $("#login-pin-section").removeClass("d-none");
         }
             $(document).ready(function() {
-                @if(session('reorder_cart')) localStorage.setItem('cart', '{!! session('reorder_cart') !!}'); cart = JSON.parse(localStorage.getItem('cart')); renderCart(); @php session()->forget('reorder_cart'); @endphp @endif
+                @if(session('reorder_cart')) 
+                    localStorage.setItem('cart', @json(session('reorder_cart'))); 
+                    cart = JSON.parse(localStorage.getItem('cart')); 
+                    renderCart(); 
+                    @php session()->forget('reorder_cart'); @endphp 
+                @endif
                 
                 // Continue checkout after login if flag is set
                 if(localStorage.getItem('checkout_after_login') === 'true') {
                     localStorage.removeItem('checkout_after_login');
                     @if(isset($customer))
                         // Restore pending checkout preferences
+                        let pType = localStorage.getItem('pending_order_type');
                         let pStreet = localStorage.getItem('pending_street');
                         let pCity = localStorage.getItem('pending_city');
                         let pState = localStorage.getItem('pending_state');
@@ -825,8 +886,11 @@
                         localStorage.removeItem('pending_pincode');
                         localStorage.removeItem('pending_table_number');
                         localStorage.removeItem('pending_payment_method');
+                        // Open the modal first so user sees progress
+                        let coModal = new bootstrap.Modal(document.getElementById("checkoutModal"));
+                        coModal.show();
 
-                        setTimeout(() => { submitOrder(); }, 500);
+                        setTimeout(() => { submitOrder(); }, 800);
                     @endif
                 }
 

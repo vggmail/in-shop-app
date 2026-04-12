@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class CustomerAuthController extends Controller
 {
@@ -35,6 +36,13 @@ class CustomerAuthController extends Controller
         ]);
 
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $throttleKey = 'customer-login:' . $phone;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return response()->json(['status' => false, 'message' => "Too many failed attempts. Please try again in $seconds seconds."], 429);
+        }
+
         $customer = Customer::withTrashed()->where('phone', $phone)->first();
 
         // Restore if previously soft-deleted
@@ -45,6 +53,7 @@ class CustomerAuthController extends Controller
         if ($customer && $customer->pin) {
             // Existing Customer - Verify PIN
             if (!Hash::check($request->pin, $customer->pin)) {
+                RateLimiter::hit($throttleKey, 60); // 1 minute lockout after 5 fails
                 return response()->json(['status' => false, 'message' => 'Invalid PIN!'], 401);
             }
         } else {
@@ -58,6 +67,8 @@ class CustomerAuthController extends Controller
             $customer->device_token = Str::random(60);
             $customer->save();
         }
+
+        RateLimiter::clear($throttleKey);
 
         // Generate/Return Device Token
         if (!$customer->device_token) {
@@ -187,8 +198,17 @@ class CustomerAuthController extends Controller
     public function sendForgotPinOtp(Request $request)
     {
         $phone = preg_replace('/[^0-9]/', '', $request->phone);
+        $throttleKey = 'otp-send:' . $phone;
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 3)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            return response()->json(['status' => false, 'message' => "Too many OTP requests. Please wait $seconds seconds before trying again."], 429);
+        }
+
         $customer = Customer::where('phone', $phone)->first();
         if (!$customer) return response()->json(['status' => false, 'message' => 'Number not registered!'], 404);
+
+        RateLimiter::hit($throttleKey, 300); // 5 minutes throttle for 3 attempts
 
         $otp = rand(1000, 9999);
         Cache::put('otp_' . $phone, $otp, now()->addMinutes(10));
@@ -306,5 +326,23 @@ class CustomerAuthController extends Controller
         \App\Models\CustomerAddress::where('id', $id)->where('customer_id', $customerId)->update(['is_default' => true]);
 
         return response()->json(['status' => true, 'message' => 'Default address set successfully']);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $customerId = Session::get('customer_id');
+        if (!$customerId) return response()->json(['status' => false, 'message' => 'Unauthorized'], 401);
+
+        $request->validate([
+            'name' => 'required|string|max:100',
+            'email' => 'nullable|email|max:150',
+        ]);
+
+        $customer = Customer::find($customerId);
+        $customer->name = $request->name;
+        $customer->email = $request->email;
+        $customer->save();
+
+        return response()->json(['status' => true, 'message' => 'Profile updated successfully!']);
     }
 }

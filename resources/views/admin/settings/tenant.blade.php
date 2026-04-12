@@ -79,8 +79,13 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">STATE</label>
-                            <input type="text" name="state" class="form-control bg-light border-0 rounded-3"
-                                value="{{ old('state', $tenant->state) }}">
+                            <select name="state" class="form-select bg-light border-0 rounded-3">
+                                <option value="">Select State</option>
+                                @php $states = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi"]; @endphp
+                                @foreach($states as $s)
+                                    <option value="{{ $s }}" {{ old('state', $tenant->state) == $s ? 'selected' : '' }}>{{ $s }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">PINCODE / ZIP</label>

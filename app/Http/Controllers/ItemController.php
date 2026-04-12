@@ -5,7 +5,10 @@ use App\Repositories\ItemRepository;
 use App\Models\Category;
 use App\Models\Item;
 
+use App\Traits\ImageHandler;
+
 class ItemController extends Controller {
+    use ImageHandler;
     protected $repo;
     public function __construct(ItemRepository $repo) { $this->repo = $repo; }
     
@@ -24,9 +27,11 @@ class ItemController extends Controller {
             'image' => 'nullable|image|max:2048'
         ]);
         
-        $data = $request->all();
+        $data = $request->except('image');
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('items', 'public');
+            list($imagePath, $thumbPath) = $this->processItemImage($request->file('image'));
+            $data['image'] = $imagePath;
+            $data['thumbnail'] = $thumbPath;
         }
         $this->repo->create($data);
         return redirect()->back()->with("success", "Item added successfully");
@@ -41,10 +46,18 @@ class ItemController extends Controller {
             'image' => 'nullable|image|max:2048'
         ]);
 
-        $data = $request->all();
+        $data = $request->except('image');
+        $item = Item::findOrFail($id);
+
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('items', 'public');
+            list($imagePath, $thumbPath) = $this->processItemImage($request->file('image'), 'items', $item->image);
+            // Also delete old thumbnail if exists
+            if($item->thumbnail) \Illuminate\Support\Facades\Storage::disk('public')->delete($item->thumbnail);
+            
+            $data['image'] = $imagePath;
+            $data['thumbnail'] = $thumbPath;
         }
+        
         $this->repo->update($id, $data);
         return redirect()->back()->with("success", "Item updated successfully");
     }
@@ -55,12 +68,12 @@ class ItemController extends Controller {
     }
 
     public function sampleCsv() {
-        $headers = ['category_name', 'name', 'description', 'default_size', 'price', 'mrp', 'stock_quantity', 'low_stock_limit', 'is_available'];
+        $headers = ['category_name', 'name', 'description', 'default_size', 'price', 'mrp', 'stock_quantity', 'low_stock_limit', 'is_available', 'variants', 'extras'];
         $callback = function() use ($headers) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $headers);
-            fputcsv($file, ['Burgers', 'Cheese Burger', 'Delicious burger with extra cheese', 'Regular', '99.00', '120.00', '50', '10', '1']);
-            fputcsv($file, ['Drinks', 'Cola', 'Cold bubbly drink', '500ml', '45.00', '50.00', '100', '20', '1']);
+            fputcsv($file, ['Burgers', 'Premium Cheese Burger', 'Delicious burger with extra cheese', 'Regular', '99.00', '120.00', '50', '10', '1', 'Large:50|Double Patty:90', 'Extra Cheese:20|Bacon:40']);
+            fputcsv($file, ['Drinks', 'Cola', 'Cold bubbly drink', '500ml', '45.00', '50.00', '100', '20', '1', '', '']);
             fclose($file);
         };
         return response()->stream($callback, 200, [
@@ -102,6 +115,36 @@ class ItemController extends Controller {
                 ['name' => trim($category_name)],
                 ['slug' => \Illuminate\Support\Str::slug(trim($category_name))]
             );
+
+            // Process Variants
+            $variants = [];
+            if (!empty($data['variants'])) {
+                $vPairs = explode('|', $data['variants']);
+                foreach ($vPairs as $vPair) {
+                    $parts = explode(':', $vPair);
+                    if (count($parts) >= 1 && trim($parts[0]) !== '') {
+                        $variants[] = [
+                            'name' => trim($parts[0]),
+                            'price' => isset($parts[1]) ? (float)trim($parts[1]) : 0
+                        ];
+                    }
+                }
+            }
+
+            // Process Extras
+            $extras = [];
+            if (!empty($data['extras'])) {
+                $ePairs = explode('|', $data['extras']);
+                foreach ($ePairs as $ePair) {
+                    $parts = explode(':', $ePair);
+                    if (count($parts) >= 1 && trim($parts[0]) !== '') {
+                        $extras[] = [
+                            'name' => trim($parts[0]),
+                            'price' => isset($parts[1]) ? (float)trim($parts[1]) : 0
+                        ];
+                    }
+                }
+            }
             
             $this->repo->create([
                 'category_id' => $category->id,
@@ -113,6 +156,8 @@ class ItemController extends Controller {
                 'stock_quantity' => $data['stock_quantity'] ?? 0,
                 'low_stock_limit' => $data['low_stock_limit'] ?? 10,
                 'is_available' => $data['is_available'] ?? 1,
+                'variants' => $variants,
+                'extras' => $extras,
             ]);
             $rowCount++;
         }

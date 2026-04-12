@@ -9,7 +9,7 @@ class TenantSettingsController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify store settings.");
         }
         $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
@@ -21,7 +21,7 @@ class TenantSettingsController extends Controller
 
     public function update(Request $request)
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify store settings.");
         }
         $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
@@ -50,13 +50,8 @@ class TenantSettingsController extends Controller
         $tenantModel = Tenant::find($tenant->id);
 
         if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if (!file_exists(public_path('uploads/logos'))) {
-                mkdir(public_path('uploads/logos'), 0777, true);
-            }
-            $file->move(public_path('uploads/logos'), $filename);
-            $tenantModel->logo = '/uploads/logos/' . $filename;
+            $path = $request->file('logo')->store('logos', 'public');
+            $tenantModel->logo = '/storage/' . $path;
         }
 
         $tenantModel->name = $request->name;

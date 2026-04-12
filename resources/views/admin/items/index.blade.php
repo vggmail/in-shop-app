@@ -1,33 +1,37 @@
 @extends("layouts.admin")
 @section("content")
-    <div class="d-flex flex-column flex-md-row justify-content-between mb-4 mt-2 gap-3 gap-md-0">
-        <div>
-            <h2 class="mb-0 fw-bold"><i class="fas fa-hamburger text-danger me-2"></i> Menu Master</h2>
-            <p class="text-muted small">Manage sizes, variations, and extra toppings.</p>
+    <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between mb-4 mt-2 gap-3">
+        <!-- Left: Title -->
+        <div class="flex-shrink-0">
+            <h2 class="mb-0 fw-bold fs-4"><i class="fas fa-hamburger text-danger me-2"></i> Menu Master</h2>
         </div>
-        <div class="d-flex flex-wrap gap-2 align-items-center">
-            <div class="btn-group shadow-sm border rounded-pill overflow-hidden bg-white p-1 me-2"
-                style="background: #f8fafc;">
-                <button class="btn btn-sm btn-light border-0 px-3 active-view" id="btnGrid" onclick="setViewMode('grid')"><i
-                        class="fas fa-th-large"></i></button>
-                <button class="btn btn-sm btn-light border-0 px-3" id="btnList" onclick="setViewMode('list')"><i
-                        class="fas fa-list"></i></button>
+
+        <!-- Center: Search & View (Centered) -->
+        <div class="d-flex flex-grow-1 align-items-center justify-content-center gap-2 w-100">
+            <div class="input-group rounded-pill overflow-hidden shadow-sm border bg-white" style="max-width: 280px;">
+                <span class="input-group-text border-0 bg-transparent ps-3"><i class="fas fa-search text-muted"></i></span>
+                <input type="text" id="itemSearch" class="form-control border-0 px-1" style="font-size: 14px; box-shadow: none;" placeholder="Search menu..." onkeyup="filterMenu(this.value)">
             </div>
-            <button class="btn btn-outline-success px-4 rounded-pill shadow-sm flex-grow-1 flex-md-grow-0"
-                data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk
-                Upload</button>
-            <button class="btn btn-primary px-4 rounded-pill shadow-sm flex-grow-1 flex-md-grow-0" data-bs-toggle="modal"
-                data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
+            <div class="btn-group shadow-sm border rounded-pill overflow-hidden bg-white p-1" style="background: #f8fafc; height: 42px;">
+                <button class="btn btn-sm btn-light border-0 px-3 active-view" id="btnList" onclick="setViewMode('list')"><i class="fas fa-list"></i></button>
+                <button class="btn btn-sm btn-light border-0 px-3" id="btnGrid" onclick="setViewMode('grid')"><i class="fas fa-th-large"></i></button>
+            </div>
+        </div>
+
+        <!-- Right: Action Buttons -->
+        <div class="d-flex gap-2 flex-shrink-0">
+            <button class="btn btn-outline-success px-3 rounded-pill shadow-sm" style="height: 42px;" data-bs-toggle="modal" data-bs-target="#bulkUploadModal"><i class="fas fa-file-excel small me-2"></i> Bulk</button>
+            <button class="btn btn-primary px-3 rounded-pill shadow-sm" style="height: 42px;" data-bs-toggle="modal" data-bs-target="#addItemModal"><i class="fas fa-plus small me-2"></i> New Item</button>
         </div>
     </div>
 
-    <div class="row" id="gridView">
+    <div class="row d-none" id="gridView">
         @foreach($items as $i)
-            <div class="col-md-3 mb-4">
+            <div class="col-md-3 mb-4 item-search-node">
                 <div class="card border-0 shadow-sm rounded-4 overflow-hidden h-100 item-hover">
                     <div class="position-relative bg-light text-center rounded-top-4 overflow-hidden" style="height: 180px;">
-                        @if($i->image)
-                            <img src="{{ asset('storage/' . $i->image) }}" class="w-100 h-100 object-fit-cover"
+                        @if($i->feature_thumb)
+                            <img src="{{ asset('storage/' . $i->feature_thumb) }}" class="w-100 h-100 object-fit-cover"
                                 alt="{{ $i->name }}">
                         @else
                             <div class="d-flex align-items-center justify-content-center h-100 text-muted">
@@ -39,7 +43,7 @@
                             style="top:10px; right:10px;">{{ $i->stock_quantity }} in stock</span>
                     </div>
                     <div class="card-body p-4">
-                        <h5 class="fw-bold mb-1 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-1 d-flex justify-content-between align-items-center item-search-name">
                             {{ $i->name }}
                             <div class="text-end">
                                 <span class="text-primary small fw-bold">&#8377;{{ number_format($i->price, 2) }}</span>
@@ -86,7 +90,7 @@
         @endforeach
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 d-none mb-4" id="listView">
+    <div class="card border-0 shadow-sm rounded-4 mb-4" id="listView">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover align-middle mb-0">
@@ -102,19 +106,19 @@
                     </thead>
                     <tbody>
                         @foreach($items as $i)
-                            <tr>
+                            <tr class="item-search-node">
                                 <td class="ps-4">
                                     <div class="d-flex align-items-center">
                                         <div class="bg-light rounded-3 me-3 d-flex align-items-center justify-content-center"
                                             style="width: 48px; height: 48px; min-width: 48px; overflow: hidden;">
-                                            @if($i->image)
-                                                <img src="{{ asset('storage/' . $i->image) }}" class="w-100 h-100 object-fit-cover">
+                                            @if($i->feature_thumb)
+                                                <img src="{{ asset('storage/' . $i->feature_thumb) }}" class="w-100 h-100 object-fit-cover">
                                             @else
                                                 <i class="fas fa-utensils text-muted small"></i>
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="fw-bold text-dark">{{ $i->name }}</div>
+                                            <div class="fw-bold text-dark item-search-name">{{ $i->name }}</div>
                                             <div class="small text-muted">{{ $i->variants->count() }} Variants ·
                                                 {{ $i->extras->count() }} Extras
                                             </div>
@@ -190,8 +194,11 @@
                                 class="small text-primary fw-bold text-decoration-none"><i class="fas fa-download me-1"></i>
                                 Download Sample CSV</a>
                         </div>
-                        <p class="small text-muted mb-0"><b>CSV Format:</b> category_name, name, description, default_size,
-                            price, mrp, stock_quantity, low_stock_limit, is_available</p>
+                        <div class="alert alert-info py-2 small mb-0 border-0 rounded-3">
+                            <b>CSV Format Fields:</b><br>
+                            <code>category_name, name, description, default_size, price, mrp, stock_quantity, low_stock_limit, is_available, variants, extras</code><br>
+                            <span class="text-muted d-block mt-1" style="font-size: 10px;"><b>Pro Tip:</b> For Variants and Extras, use format <code>Name:Price|Name2:Price2</code> (e.g., <code>Large:50|Double Cheese:100</code>). Let the price be 0 if free.</span>
+                        </div>
                     </div>
                     <div class="modal-footer border-0 pb-4 pt-0 px-4">
                         <button type="submit" class="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-lg"><i
@@ -213,6 +220,15 @@
                             class="btn-close" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body p-4">
+                        @if($errors->any())
+                            <div class="alert alert-danger py-2 small mb-4 border-0 rounded-3 shadow-sm">
+                                <ul class="mb-0">
+                                    @foreach($errors->all() as $error)
+                                        <li>{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
                         <div class="row g-3 mb-4">
                             <div class="col-md-4">
                                 <label class="small fw-bold text-muted text-uppercase mb-1">Item Name</label>
@@ -264,8 +280,9 @@
                                         <img src="" id="img_preview_tag" class="w-100 h-100 object-fit-cover">
                                     </div>
                                     <input type="file" name="image" id="f_image"
-                                        class="form-control bg-transparent border-0" accept="image/*">
+                                        class="form-control bg-transparent border-0" accept="image/*" onchange="checkImageSize(this)">
                                 </div>
+                                <div id="image-size-error" class="text-danger fw-bold mt-1 d-none" style="font-size: 11px;"><i class="fas fa-exclamation-circle me-1"></i> File is too large! Maximum allowed is 2MB.</div>
                                 <small class="text-muted" style="font-size: 10px;">Best size: 500x500px square (1:1 ratio).
                                     Max 2MB. PNG/JPG/WebP. Leave empty to keep existing.</small>
                             </div>
@@ -293,7 +310,7 @@
                         </div>
                     </div>
                     <div class="modal-footer border-0 pb-4 pt-0 px-4">
-                        <button type="submit" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow-lg"><i
+                        <button type="submit" id="btnItemSave" class="btn btn-dark w-100 py-3 rounded-pill fw-bold shadow-lg"><i
                                 class="fas fa-save me-2"></i> Save Product Settings</button>
                     </div>
                 </form>
@@ -377,9 +394,54 @@
             }
         }
 
+        function filterMenu(query) {
+            query = query.toLowerCase();
+            $('.item-search-node').each(function() {
+                let name = $(this).find('.item-search-name').text().toLowerCase();
+                if(name.includes(query)) {
+                    $(this).removeClass('d-none');
+                } else {
+                    $(this).addClass('d-none');
+                }
+            });
+        }
+
+        function checkImageSize(input) {
+            const file = input.files[0];
+            const errorDiv = $('#image-size-error');
+            const preview = $('#image_preview');
+            const previewTag = $('#img_preview_tag');
+            const saveBtn = $('#btnItemSave');
+
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { 
+                    errorDiv.removeClass('d-none');
+                    // input.value = ""; // Don't clear to let user see it's wrong, but block save
+                    saveBtn.prop('disabled', true).addClass('opacity-50');
+                    preview.addClass('d-none');
+                } else {
+                    errorDiv.addClass('d-none');
+                    saveBtn.prop('disabled', false).removeClass('opacity-50');
+                    let reader = new FileReader();
+                    reader.onload = function (e) {
+                        preview.removeClass('d-none');
+                        previewTag.attr('src', e.target.result);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            } else {
+                errorDiv.addClass('d-none');
+                saveBtn.prop('disabled', false).removeClass('opacity-50');
+            }
+        }
+
         $(document).ready(function () {
-            let mode = localStorage.getItem('menu_view_mode') || 'grid';
+            let mode = localStorage.getItem('menu_view_mode') || 'list';
             setViewMode(mode);
+
+            @if($errors->any())
+                new bootstrap.Modal(document.getElementById('itemModal')).show();
+            @endif
         });
     </script>
 @endsection

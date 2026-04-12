@@ -117,11 +117,14 @@
                 <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}"><i class="fas fa-credit-card"></i> <span>Payments</span></a>
                 <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Reports</span></a>
                 
-                @if(auth()->user()->role_id == 1)
+                @if(auth()->user()->isAdmin())
                 <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}"><i class="fas fa-store"></i> <span>Store Settings</span></a>
                 <a href="{{ route('settings.payments') }}" class="{{ request()->routeIs('settings.payments') ? 'active' : '' }}"><i class="fas fa-credit-card"></i> <span>Payment Settings</span></a>
                 <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-user-shield"></i> <span>Staff Management</span></a>
                 <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Activity Logs</span></a>
+                @if(auth()->user()->isSuperAdmin())
+                <a href="{{ route('super-admin.tenants.index') }}" class="{{ request()->routeIs('super-admin.tenants.*') ? 'active' : '' }}"><i class="fas fa-users-cog"></i> <span>Tenants</span></a>
+                @endif
                 @endif
                 
                 <div class="mt-auto p-3">
@@ -185,6 +188,23 @@
                 </nav>
                 
                 <div class="content-area">
+                    @if(isset($tenant_info) && $tenant_info->expires_at)
+                    @php
+                        $daysLeft = now()->diffInDays($tenant_info->expires_at, false);
+                    @endphp
+                    @if($daysLeft >= 0 && $daysLeft <= 15)
+                    <div class="alert alert-warning border-0 rounded-4 shadow-sm mb-4 d-flex align-items-center p-4">
+                        <div class="bg-warning bg-opacity-10 p-3 rounded-circle me-3">
+                            <i class="fas fa-exclamation-triangle text-warning fa-lg"></i>
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">Subscription Expiring Soon!</h6>
+                            <p class="mb-0 text-muted small">Your store subscription will expire in <strong>{{ $daysLeft == 0 ? 'today' : ($daysLeft == 1 ? '1 day' : $daysLeft . ' days') }}</strong> (on {{ $tenant_info->expires_at->format('d M Y') }}). Please contact support to renew your plan.</p>
+                        </div>
+                    </div>
+                    @endif
+                    @endif
+
                     <x-flash-messages />
                     @yield("content")
                 </div>

@@ -51,6 +51,11 @@ class IdentifyTenant
             abort(404, "Shop '$subdomain' not found or inactive.");
         }
 
+        // Check for expiry
+        if ($tenant->expires_at && $tenant->expires_at->isPast()) {
+            abort(403, "Your subscription for '$subdomain' has expired. Please contact the administrator.");
+        }
+
         // Configure the 'tenant' connection dynamically: prefix + subdomain
         $prefix = config('database.tenant_prefix', '');
         $dbName = $prefix . $subdomain;

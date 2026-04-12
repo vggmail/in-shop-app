@@ -31,4 +31,22 @@ class CustomerController extends Controller {
         $q = $request->query('q', '');
         return response()->json($this->repo->search($q));
     }
+
+    public function resetPin($id) {
+        $customer = \App\Models\Customer::findOrFail($id);
+        $customer->pin = null;
+        $customer->save();
+
+        // Log the activity
+        \App\Models\ActivityLog::create([
+            'user_id' => auth()->id(),
+            'action' => 'PIN Reset',
+            'model_type' => 'Customer',
+            'model_id' => $customer->id,
+            'details' => json_encode(['customer_name' => $customer->name, 'customer_phone' => $customer->phone]),
+            'ip_address' => request()->ip()
+        ]);
+
+        return redirect()->back()->with("success", "Customer PIN has been reset. They can set a new one on next login.");
+    }
 }

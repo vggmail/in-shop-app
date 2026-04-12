@@ -15,11 +15,25 @@ class UserAdminController extends Controller {
     }
 
     public function index() {
-        $users = $this->repo->getAllWithRoles();
-        $roles = Role::all();
+        $user = auth()->user();
+        $isSuper = $user->isSuperAdmin();
+
+        $usersQuery = User::with('role');
+        if (!$isSuper) {
+            $usersQuery->whereHas('role', function($q) {
+                $q->where('name', '!=', 'Super Admin');
+            });
+        }
+        $users = $usersQuery->get();
+
+        $rolesQuery = Role::query();
+        if (!$isSuper) {
+            $rolesQuery->where('name', '!=', 'Super Admin');
+        }
+        $roles = $rolesQuery->get();
+
         return view("admin.users.index", compact("users", "roles"));
     }
-
     public function store(Request $request) {
         $request->validate([
             'name' => 'required|string|max:255',
@@ -27,6 +41,11 @@ class UserAdminController extends Controller {
             'password' => 'required|string|min:8',
             'role_id' => 'required|exists:roles,id'
         ]);
+
+        $selectedRole = Role::find($request->role_id);
+        if ($selectedRole->name === 'Super Admin' && !auth()->user()->isSuperAdmin()) {
+            abort(403, "You are not authorized to create a Super Admin.");
+        }
 
         $user = User::withTrashed()->where("email", $request->email)->first();
         
@@ -59,13 +78,22 @@ class UserAdminController extends Controller {
     }
 
     public function update(Request $request, $id) {
+        $user = User::findOrFail($id);
+
+        if ($user->isSuperAdmin() && !auth()->user()->isSuperAdmin()) {
+            abort(403, "You cannot modify a Super Admin account.");
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'role_id' => 'required|exists:roles,id'
         ]);
 
-        $user = User::findOrFail($id);
+        $selectedRole = Role::find($request->role_id);
+        if ($selectedRole->name === 'Super Admin' && !auth()->user()->isSuperAdmin()) {
+            abort(403, "You cannot promote a user to Super Admin.");
+        }
         $user->name = $request->name;
         $user->email = $request->email;
         if($request->password) {
@@ -79,6 +107,12 @@ class UserAdminController extends Controller {
     }
 
     public function destroy($id) {
+        $user = User::findOrFail($id);
+        
+        if ($user->isSuperAdmin() && !auth()->user()->isSuperAdmin()) {
+            abort(403, "You cannot delete a Super Admin account.");
+        }
+
         $isSelf = ($id == auth()->id());
         
         User::destroy($id);

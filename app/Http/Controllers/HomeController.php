@@ -8,7 +8,7 @@ use App\Repositories\OrderRepository;
 class HomeController extends Controller {
     public function index() {
         $categories = Category::all();
-        $items = Item::with(["category", "variants", "extras"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
+        $items = Item::with(["category", "variants", "extras", "images"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
         $coupons = \App\Models\Coupon::where('show_on_home', 1)->where('coupon_type', '!=', 'Internal')->get();
         
         $customer = \App\Models\Customer::with('addresses')->find(session('customer_id'));

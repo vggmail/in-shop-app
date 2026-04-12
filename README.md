@@ -55,5 +55,37 @@ Fast Food Hub is a modern, high-performance web application designed for restaur
    php artisan serve
    ```
 
+6. **Create Storage Link** (Crucial for Images)
+   ```bash
+   php artisan storage:link
+   ```
+
+## 🌐 Production Requirements & Server Setup
+
+To ensure the best performance and security in a production environment, please verified the following:
+
+### 1. PHP Configuration
+- **GD Library**: Required for high-quality thumbnail generation. Ensure `extension=gd` is enabled in your `php.ini`.
+- **WebP Support**: Ensure your GD installation supports WebP for optimized image delivery.
+- **Upload Limits**: Adjust `post_max_size` and `upload_max_filesize` (recommended 10M+) in `php.ini` for item image uploads.
+
+### 2. File Permissions
+Ensure the following directories are writable by the web server (e.g., `www-data`):
+- `storage`
+- `bootstrap/cache`
+
+### 3. Optimization Commands
+Run these commands when deploying updates:
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+### 4. Security Notes
+- **Honey Pot**: The system uses a hidden honey pot field to block bots. Do not remove the `honey_pot_field` inputs from forms.
+- **Multi-Tenant Security**: Admins are restricted from viewing or modifying Super Admin accounts for infrastructure safety.
+
+
 ## 📄 License
 This project is open-source and available under the MIT License.

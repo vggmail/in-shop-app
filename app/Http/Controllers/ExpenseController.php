@@ -7,9 +7,16 @@ class ExpenseController extends Controller {
     protected $repo;
     public function __construct(ExpenseRepository $repo) { $this->repo = $repo; }
     
-    public function index() { 
-        $expenses = $this->repo->getAll(); 
-        return view("admin.expenses.index", compact("expenses")); 
+    public function index(Request $request) { 
+        $tab = $request->query('tab', 'active');
+        
+        if ($tab === 'archived') {
+            $expenses = \App\Models\Expense::onlyTrashed()->orderBy('deleted_at', 'DESC')->get();
+        } else {
+            $expenses = $this->repo->getAll(); 
+        }
+
+        return view("admin.expenses.index", compact("expenses", "tab")); 
     }
     
     public function store(Request $request) {
@@ -25,5 +32,11 @@ class ExpenseController extends Controller {
     public function destroy($id) {
         $this->repo->delete($id);
         return redirect()->back()->with("success", "Expense deleted successfully");
+    }
+
+    public function restore($id) {
+        $expense = \App\Models\Expense::onlyTrashed()->findOrFail($id);
+        $expense->restore();
+        return redirect()->back()->with("success", "Expense restored successfully!");
     }
 }

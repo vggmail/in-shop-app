@@ -69,10 +69,11 @@ Route::post('/customer/address/save', [CustomerAuthController::class, 'saveAddre
 Route::delete('/customer/address/{id}', [CustomerAuthController::class, 'deleteAddress'])->name('customer.address.delete');
 Route::post('/customer/address/{id}/default', [CustomerAuthController::class, 'setDefaultAddress'])->name('customer.address.default');
 Route::post('/customer/update-pin', [CustomerAuthController::class, 'updatePin'])->name('customer.update-pin');
+Route::post('/customer/update-profile', [CustomerAuthController::class, 'updateProfile'])->name('customer.update-profile');
 Route::post('/customer/forgot-pin/send-otp', [CustomerAuthController::class, 'sendForgotPinOtp'])->name('customer.forgot-pin.send-otp');
 Route::post('/customer/forgot-pin/verify-otp', [CustomerAuthController::class, 'verifyForgotOtp'])->name('customer.forgot-pin.verify-otp');
 Route::post('/customer/forgot-pin/reset', [CustomerAuthController::class, 'resetForgotPin'])->name('customer.forgot-pin.reset');
-Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+Route::post('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -81,10 +82,12 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('items/sample-csv', [ItemController::class, 'sampleCsv'])->name('items.sampleCsv');
     
     Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
+    Route::post('customers/{id}/reset-pin', [CustomerController::class, 'resetPin'])->name('customers.reset-pin');
     Route::resource('items', ItemController::class)->except(['create', 'show', 'edit']);
     Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('customers', CustomerController::class)->except(['create', 'show', 'edit']);
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
+    Route::post('expenses/{id}/restore', [ExpenseController::class, 'restore'])->name('expenses.restore');
     
     Route::resource('coupons', CouponController::class)->except(['create', 'show', 'edit']);
     Route::post('coupons/check', [CouponController::class, 'check'])->name('coupons.check');
@@ -116,6 +119,18 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::post('/settings/payments', [\App\Http\Controllers\PaymentSettingsController::class, 'update'])->name('settings.payments.update');
     
     Route::get('/password', [\App\Http\Controllers\AdminProfileController::class, 'editPassword'])->name('admin.password');
+
+    // Super Admin - Tenant Management
+    Route::prefix('super-admin')->group(function() {
+        Route::get('/tenants', [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('super-admin.tenants.index');
+        Route::get('/tenants/create', [\App\Http\Controllers\SuperAdminController::class, 'create'])->name('super-admin.tenants.create');
+        Route::post('/tenants', [\App\Http\Controllers\SuperAdminController::class, 'store'])->name('super-admin.tenants.store');
+        Route::get('/tenants/{id}/edit', [\App\Http\Controllers\SuperAdminController::class, 'edit'])->name('super-admin.tenants.edit');
+        Route::put('/tenants/{id}', [\App\Http\Controllers\SuperAdminController::class, 'update'])->name('super-admin.tenants.update');
+        Route::post('/tenants/{id}/toggle', [\App\Http\Controllers\SuperAdminController::class, 'toggleStatus'])->name('super-admin.tenants.toggle');
+        Route::delete('/tenants/{id}', [\App\Http\Controllers\SuperAdminController::class, 'destroy'])->name('super-admin.tenants.destroy');
+        Route::post('/tenants/{id}/restore', [\App\Http\Controllers\SuperAdminController::class, 'restore'])->name('super-admin.tenants.restore');
+    });
 });
 
 require __DIR__.'/auth.php';
