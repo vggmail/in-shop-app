@@ -31,7 +31,7 @@
         .recent-card { width: 120px; background: white; border-radius: 20px; flex-shrink: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.03); border: 1px solid #eee; text-align: center; padding: 12px; cursor: pointer; transition: 0.3s; }
         .recent-card:active { transform: scale(0.95); }
         .recent-card i { background: #fff1f2; color: var(--primary); width: 45px; height: 45px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; font-size: 18px; }
-        .whatsapp-float { position: fixed; bottom: 85px; right: 20px; background: #25d366; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: 0.3s; }
+        .whatsapp-float { position: fixed; bottom: 155px; right: 20px; background: #25d366; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); z-index: 1000; text-decoration: none; transition: 0.3s; }
         .whatsapp-float:hover { transform: scale(1.1); color: white; }
     </style>
 </head>
