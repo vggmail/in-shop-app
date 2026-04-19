@@ -76,6 +76,16 @@
                                 <div class="small text-muted ms-4">Details will include the subdomain URL, email, and password.</div>
                             </div>
                         </div>
+                        
+                        <div class="mb-4">
+                            <div class="form-check form-switch bg-light p-3 rounded-3 border">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" name="disable_home_page" id="disableHomePage" value="1">
+                                <label class="form-check-label fw-bold small text-dark" for="disableHomePage">
+                                    Disable Storefront (Admin Only)
+                                </label>
+                                <div class="small text-muted ms-4">If enabled, the front-end shopping site will be disabled, allowing only backend admin access based on client requirements.</div>
+                            </div>
+                        </div>
 
                         @if($errors->has('general'))
                         <div class="alert alert-danger rounded-3 fw-bold small">

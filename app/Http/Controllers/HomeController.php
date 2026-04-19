@@ -7,6 +7,11 @@ use App\Repositories\OrderRepository;
 
 class HomeController extends Controller {
     public function index() {
+        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+        if ($tenant && $tenant->disable_home_page) {
+            return redirect('/cp/dashboard');
+        }
+
         $categories = Category::all();
         $items = Item::with(["category", "variants", "extras", "images"])->where("is_available", 1)->where("stock_quantity", ">", 0)->get();
         $coupons = \App\Models\Coupon::where('show_on_home', 1)->where('coupon_type', '!=', 'Internal')->get();
@@ -27,7 +32,6 @@ class HomeController extends Controller {
                 ->get();
         }
 
-        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
         $activeGateways = \App\Models\PaymentGateway::where('tenant_id', $tenant->id)->where('is_active', 1)->pluck('gateway_name')->toArray();
         return view("welcome", compact("categories", "items", "coupons", "customer", "recentItems", "activeGateways"));
         
@@ -36,6 +40,12 @@ class HomeController extends Controller {
     public function placeOrder(Request $request, OrderRepository $repo) {
         try {
             \Illuminate\Support\Facades\Log::info("PlaceOrder: Received request", $request->all());
+            
+            $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+            if ($tenant && $tenant->disable_home_page) {
+                return response()->json(['status' => false, 'message' => 'Storefront ordering is currently disabled. Please contact the administrator.']);
+            }
+            
             $data = $request->all();
             if(isset($data['items']) && is_string($data['items'])) {
                 $data['items'] = json_decode($data['items'], true);

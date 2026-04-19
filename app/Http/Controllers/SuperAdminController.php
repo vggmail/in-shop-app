@@ -57,6 +57,7 @@ class SuperAdminController extends Controller
             'name' => $request->name,
             'subdomain' => $subdomain,
             'is_active' => true,
+            'disable_home_page' => $request->has('disable_home_page'),
             'expires_at' => $request->expires_at,
         ]);
 
@@ -150,6 +151,7 @@ class SuperAdminController extends Controller
 
         $data = $request->only('name', 'subdomain', 'expires_at');
         $data['is_active'] = $request->has('is_active');
+        $data['disable_home_page'] = $request->has('disable_home_page');
         
         $tenant->update($data);
 

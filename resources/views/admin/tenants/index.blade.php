@@ -66,9 +66,13 @@
                             </td>
                             <td class="text-center">
                                 @if($t->is_active)
-                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-2 rounded-pill">Active</span>
+                                    <span class="badge bg-success-subtle text-success border border-success border-opacity-25 px-3 py-2 rounded-pill mb-1">Active</span>
                                 @else
-                                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill">Inactive</span>
+                                    <span class="badge bg-danger-subtle text-danger border border-danger border-opacity-25 px-3 py-2 rounded-pill mb-1">Inactive</span>
+                                @endif
+                                
+                                @if($t->disable_home_page)
+                                    <div class="mt-1"><span class="badge bg-warning-subtle text-dark border border-warning border-opacity-25 px-2 py-1 rounded-pill" style="font-size: 0.65rem;">Storefront Disabled</span></div>
                                 @endif
                             </td>
                             <td>

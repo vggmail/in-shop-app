@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>In-Shop — Product Features Overview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --brand: #4F46E5;
+      --brand-light: #818CF8;
+      --accent: #F59E0B;
+      --green: #10B981;
+      --red: #EF4444;
+      --bg: #F8FAFC;
+      --card: #ffffff;
+      --text: #1E293B;
+      --muted: #64748B;
+      --border: #E2E8F0;
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      background: linear-gradient(135deg, #312E81 0%, #4F46E5 50%, #7C3AED 100%);
+      color: #fff;
+      padding: 72px 40px 60px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .hero-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 50px;
+      margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 52px);
+      font-weight: 800;
+      letter-spacing: -1px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .hero h1 span { color: #FCD34D; }
+    .hero p {
+      font-size: 18px;
+      opacity: 0.85;
+      max-width: 640px;
+      margin: 0 auto 32px;
+      font-weight: 400;
+      position: relative;
+    }
+    .hero-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .hero-stat {
+      text-align: center;
+    }
+    .hero-stat .num {
+      font-size: 28px;
+      font-weight: 800;
+      color: #FCD34D;
+      display: block;
+    }
+    .hero-stat .lbl {
+      font-size: 12px;
+      opacity: 0.75;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    /* ─── LAYOUT ─── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+    .section { padding: 64px 0; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--brand);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 8px;
+    }
+    .section-heading {
+      font-size: clamp(22px, 3vw, 34px);
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    .section-sub {
+      font-size: 16px;
+      color: var(--muted);
+      max-width: 600px;
+      margin-bottom: 48px;
+    }
+
+    /* ─── GRID ─── */
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 24px; }
+
+    /* ─── FEATURE CARD ─── */
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .card:hover { box-shadow: 0 8px 30px rgba(79,70,229,0.08); transform: translateY(-2px); }
+    .card-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 18px;
+    }
+    .card h3 {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* icon bg colours */
+    .icon-purple { background: #EDE9FE; color: #7C3AED; }
+    .icon-blue   { background: #DBEAFE; color: #2563EB; }
+    .icon-green  { background: #D1FAE5; color: #059669; }
+    .icon-amber  { background: #FEF3C7; color: #D97706; }
+    .icon-red    { background: #FEE2E2; color: #DC2626; }
+    .icon-pink   { background: #FCE7F3; color: #DB2777; }
+    .icon-teal   { background: #CCFBF1; color: #0D9488; }
+    .icon-indigo { background: #E0E7FF; color: #4338CA; }
+    .icon-rose   { background: #FFE4E6; color: #E11D48; }
+    .icon-sky    { background: #E0F2FE; color: #0284C7; }
+    .icon-lime   { background: #ECFCCB; color: #65A30D; }
+    .icon-orange { background: #FFEDD5; color: #EA580C; }
+    .icon-cyan   { background: #CFFAFE; color: #0891B2; }
+
+    /* ─── FEATURE LIST ─── */
+    .feature-list { list-style: none; padding: 0; }
+    .feature-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 14px;
+    }
+    .feature-list li:last-child { border: none; }
+    .feature-list .check {
+      width: 20px; height: 20px; min-width: 20px;
+      border-radius: 50%;
+      background: #D1FAE5;
+      color: #059669;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 10px;
+      font-weight: 900;
+      margin-top: 2px;
+    }
+
+    /* ─── MODULE BLOCK ─── */
+    .module-block {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+    .module-header {
+      padding: 20px 28px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .module-header h3 { font-size: 18px; font-weight: 700; margin: 0; }
+    .module-header span { font-size: 13px; color: var(--muted); }
+    .module-body { padding: 24px 28px; }
+
+    /* ─── ROLES TABLE ─── */
+    .roles-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    .roles-table th {
+      background: #F1F5F9;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--muted);
+    }
+    .roles-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .roles-table tr:last-child td { border: none; }
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 50px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .badge-purple { background: #EDE9FE; color: #7C3AED; }
+    .badge-blue   { background: #DBEAFE; color: #1D4ED8; }
+    .badge-green  { background: #D1FAE5; color: #059669; }
+    .badge-amber  { background: #FEF3C7; color: #92400E; }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0;
+    }
+
+    /* ─── TAG ─── */
+    .tag {
+      display: inline-block;
+      background: #EDE9FE;
+      color: #5B21B6;
+      font-size: 11px;
+      font-weight: 600;
+      border-radius: 6px;
+      padding: 2px 8px;
+      margin: 2px 2px 2px 0;
+    }
+    .tag.green { background: #D1FAE5; color: #065F46; }
+    .tag.amber { background: #FEF3C7; color: #92400E; }
+    .tag.blue  { background: #DBEAFE; color: #1E40AF; }
+    .tag.red   { background: #FEE2E2; color: #991B1B; }
+
+    /* ─── FOOTER ─── */
+    .footer {
+      background: #1E293B;
+      color: #94A3B8;
+      text-align: center;
+      padding: 40px 24px;
+      font-size: 13px;
+    }
+    .footer strong { color: #fff; }
+
+    /* ─── PRINT ─── */
+    @media print {
+      body { background: #fff; }
+      .card:hover { box-shadow: none; transform: none; }
+      .section { padding: 32px 0; }
+    }
+    @media (max-width: 600px) {
+      .hero { padding: 48px 20px; }
+      .hero-stats { gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════ HERO ══════════════ -->
+<div class="hero">
+  <div class="hero-badge">Product Overview</div>
+  <h1>In-Shop — <span>Smart POS</span> &<br/>Online Ordering System</h1>
+  <p>A complete digital solution for restaurants, cafes & fast-food outlets — combining a powerful back-office with a beautiful customer storefront.</p>
+  <div class="hero-stats">
+    <div class="hero-stat"><span class="num">3</span><span class="lbl">Order Types</span></div>
+    <div class="hero-stat"><span class="num">2</span><span class="lbl">Payment Methods</span></div>
+    <div class="hero-stat"><span class="num">Real‑Time</span><span class="lbl">POS & Alerts</span></div>
+  </div>
+</div>
+
+<!-- ══════════════ OVERVIEW ══════════════ -->
+<div class="section">
+  <div class="container">
+    <p class="section-title">What Is It?</p>
+    <h2 class="section-heading">Everything your outlet needs — in one platform</h2>
+    <p class="section-sub">In-Shop is a web-based platform built for food & beverage businesses. It allows store owners to manage their menu, take orders at the counter (POS), accept online orders from customers, track payments, and analyse sales — all from a single admin panel.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon icon-purple">🛒</div>
+        <h3>Customer Storefront</h3>
+        <p>A beautiful, mobile-friendly online menu where customers can browse, customise, and place orders independently — Dine-In, Takeaway, or Home Delivery.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-blue">🖥️</div>
+        <h3>Admin POS & Dashboard</h3>
+        <p>A full-featured back-office for your staff: take walk-in orders instantly, manage your menu, track customers, view reports, and receive real-time online order alerts.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ CUSTOMER STOREFRONT ══════════════ -->
+<div class="section">
+  <div class="container">
+    <p class="section-title">Module 1</p>
+    <h2 class="section-heading">Customer Storefront</h2>
+    <p class="section-sub">Everything customers interact with — from browsing the menu to completing payment and tracking their order.</p>
+
+    <div class="grid-2">
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-purple" style="margin:0;">🍔</div>
+          <div><h3>Live Menu & Ordering</h3><span>Public-facing product catalogue</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Categorised menu with images, descriptions, and prices</div></li>
+            <li><span class="check">✓</span><div>Item <strong>Variants</strong> (e.g. Small / Medium / Large) with individual pricing</div></li>
+            <li><span class="check">✓</span><div>Item <strong>Extras / Add-ons</strong> (e.g. Extra Cheese, Bacon) with pricing</div></li>
+            <li><span class="check">✓</span><div>Quantity selector (+/−) per item in cart</div></li>
+            <li><span class="check">✓</span><div>Out-of-stock items automatically hidden; cart validates stock before checkout</div></li>
+            <li><span class="check">✓</span><div>Persistent cart stored in browser — survives page refresh</div></li>
+            <li><span class="check">✓</span><div>Order type selection: <span class="tag">Dine-In</span> <span class="tag blue">Takeaway</span> <span class="tag green">Home Delivery</span></div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-green" style="margin:0;">👤</div>
+          <div><h3>Customer Login & Profile</h3><span>Phone number + PIN based authentication</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Login with <strong>mobile number + 4-digit PIN</strong> (no passwords to remember)</div></li>
+            <li><span class="check">✓</span><div>New customers self-register by setting a PIN on first visit</div></li>
+            <li><span class="check">✓</span><div>Auto-login via device token for returning visitors</div></li>
+            <li><span class="check">✓</span><div><strong>Forgot PIN</strong> — OTP sent via WhatsApp to reset PIN securely</div></li>
+            <li><span class="check">✓</span><div><strong>Change PIN</strong> — from the profile page with phone verification</div></li>
+            <li><span class="check">✓</span><div>View & edit profile (name, email)</div></li>
+            <li><span class="check">✓</span><div>Manage multiple saved delivery addresses with a default flag</div></li>
+            <li><span class="check">✓</span><div>Rate-limited to block brute-force PIN attempts</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-amber" style="margin:0;">📦</div>
+          <div><h3>Order History & Re-Order</h3><span>Customer self-service order tracking</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>View all past orders with full item, variant, and extras breakdown</div></li>
+            <li><span class="check">✓</span><div><strong>One-click Re-Order</strong> — pre-fills cart with a previous order's items</div></li>
+            <li><span class="check">✓</span><div>Live order status updates (Preparing → Ready → Delivered)</div></li>
+            <li><span class="check">✓</span><div>Email notification on order placement and when payment is confirmed</div></li>
+            <li><span class="check">✓</span><div>Email invoice dispatched automatically after payment is marked Paid</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-red" style="margin:0;">💳</div>
+          <div><h3>Checkout & Payment</h3><span>Flexible, secure payment options</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div><strong>Cash on Delivery / Counter</strong> — pay at pickup or delivery</div></li>
+            <li><span class="check">✓</span><div><strong>Online Payment via PayU</strong> — UPI, Cards, Net Banking</div></li>
+            <li><span class="check">✓</span><div>UPI Intent deep-link for seamless mobile UPI flow</div></li>
+            <li><span class="check">✓</span><div>Server-to-server (S2S) webhook ensures payment status is captured even if the browser closes</div></li>
+            <li><span class="check">✓</span><div>SHA-512 hash verification for tamper-proof transaction security</div></li>
+            <li><span class="check">✓</span><div>Home delivery requires address selection at checkout</div></li>
+            <li><span class="check">✓</span><div>Discount coupon applied at checkout with real-time validation</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-pink" style="margin:0;">🎟️</div>
+          <div><h3>Coupon & Discount Engine</h3><span>Flexible promotions for customers</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Flat amount or percentage discounts</div></li>
+            <li><span class="check">✓</span><div>Set minimum bill amount required to apply coupon</div></li>
+            <li><span class="check">✓</span><div>Expiry date per coupon</div></li>
+            <li><span class="check">✓</span><div><strong>Public coupons</strong> shown on the homepage with "Copy to Apply" button</div></li>
+            <li><span class="check">✓</span><div><strong>Internal/Private coupons</strong> — not shown to customers, used manually at POS</div></li>
+            <li><span class="check">✓</span><div>Real-time coupon validation before order placement</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-teal" style="margin:0;">🚚</div>
+          <div><h3>Home Delivery Support</h3><span>End-to-end delivery workflow</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Customers save multiple addresses (Home, Office, etc.) with a default</div></li>
+            <li><span class="check">✓</span><div>Delivery address captured and stored with order</div></li>
+            <li><span class="check">✓</span><div>Admin can view full delivery address on order details</div></li>
+            <li><span class="check">✓</span><div>Separate <strong>delivery invoice</strong> format generated for home delivery orders</div></li>
+            <li><span class="check">✓</span><div>Status emails (e.g. "Out for Delivery") sent automatically when admin updates order status</div></li>
+            <li><span class="check">✓</span><div>WhatsApp receipt sharing — admin can share order summary to customer WhatsApp in one click</div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ ADMIN PANEL ══════════════ -->
+<div class="section" style="background: #F1F5F9;">
+  <div class="container">
+    <p class="section-title">Module 2</p>
+    <h2 class="section-heading">Admin Panel</h2>
+    <p class="section-sub">A comprehensive back-office for store managers and staff to run daily operations efficiently.</p>
+
+    <div class="grid-2">
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-indigo" style="margin:0;">📊</div>
+          <div><h3>Dashboard & Analytics</h3><span>Data-driven business insights</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Today's Sales, Total Orders, Total Revenue, and Total Customers at a glance</div></li>
+            <li><span class="check">✓</span><div>Sales trend line chart — filter by last 30 days or 6 months</div></li>
+            <li><span class="check">✓</span><div>Top 5 best-selling items (doughnut chart)</div></li>
+            <li><span class="check">✓</span><div><strong>Analytics Tab:</strong> Gross Sales, Total Expenses, Net Profit, Order Count for any date range</div></li>
+            <li><span class="check">✓</span><div>Time-series line chart showing Sales vs Expenses side by side</div></li>
+            <li><span class="check">✓</span><div>Excludes failed/pending payment orders from revenue calculations</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-blue" style="margin:0;">🖥️</div>
+          <div><h3>Point of Sale (POS)</h3><span>In-store order management</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Full-screen POS with smart item grid — shows 16 most ordered items automatically</div></li>
+            <li><span class="check">✓</span><div>Select customer, items, variants, extras, and quantities</div></li>
+            <li><span class="check">✓</span><div>Apply coupons at POS for walk-in discounts</div></li>
+            <li><span class="check">✓</span><div>Choose order type: Dine-In, Takeaway, or Delivery</div></li>
+            <li><span class="check">✓</span><div>Cash or online payment selection</div></li>
+            <li><span class="check">✓</span><div>Instant order confirmation with order number generation</div></li>
+            <li><span class="check">✓</span><div>Print invoice immediately after order placement</div></li>
+            <li><span class="check">✓</span><div>Real-time <strong>bell alert + toast notification</strong> when a new online order arrives</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-green" style="margin:0;">📋</div>
+          <div><h3>Menu & Item Management</h3><span>Full product catalogue control</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Add, edit, delete menu items with name, description, price, and MRP</div></li>
+            <li><span class="check">✓</span><div>Upload item images — system auto-generates optimised thumbnails (WebP)</div></li>
+            <li><span class="check">✓</span><div>Assign categories and sub-categories</div></li>
+            <li><span class="check">✓</span><div>Define variants (sizes) and extras (add-ons) per item</div></li>
+            <li><span class="check">✓</span><div>Set stock quantity and low-stock threshold with availability toggle</div></li>
+            <li><span class="check">✓</span><div><strong>Bulk Item Upload</strong> — import hundreds of items from a CSV file in one click</div></li>
+            <li><span class="check">✓</span><div>Download sample CSV template to guide data entry</div></li>
+            <li><span class="check">✓</span><div>Soft-delete (archive) items — deleted items shown as "unavailable" rather than breaking old orders</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-amber" style="margin:0;">🛍️</div>
+          <div><h3>Order Management</h3><span>Full order lifecycle control</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>View all orders (POS & Online) in a unified list with search by order number, customer name, or phone</div></li>
+            <li><span class="check">✓</span><div>Order detail view — all items, variants, extras, delivery address, and payment info</div></li>
+            <li><span class="check">✓</span><div>Update order status: <span class="tag">Pending</span> <span class="tag blue">Preparing</span> <span class="tag green">Ready</span> <span class="tag">Delivered</span></div></li>
+            <li><span class="check">✓</span><div>Update payment status (Cash orders): mark as Paid triggers automatic invoice email</div></li>
+            <li><span class="check">✓</span><div><strong>Print Invoice</strong> — formatted half-A4 invoice for counter or delivery</div></li>
+            <li><span class="check">✓</span><div>Share order receipt to customer WhatsApp with one click</div></li>
+            <li><span class="check">✓</span><div>Payment attempt logs — full audit of every checkout attempt with transaction IDs</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-sky" style="margin:0;">👥</div>
+          <div><h3>CRM — Customer Management</h3><span>Track and manage your loyal customers</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>View all registered customers — total orders and total spending per customer</div></li>
+            <li><span class="check">✓</span><div>Live search by customer name or phone number</div></li>
+            <li><span class="check">✓</span><div>Toggle between Grid view and List view</div></li>
+            <li><span class="check">✓</span><div>Jump directly from a customer card to their full order history</div></li>
+            <li><span class="check">✓</span><div>Admin can <strong>reset a customer's PIN</strong> for account recovery</div></li>
+            <li><span class="check">✓</span><div>Soft-delete customers — data retained; customer can re-register with the same number</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-rose" style="margin:0;">💰</div>
+          <div><h3>Payments & Expenses</h3><span>Financial overview and cost tracking</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Payments dashboard — total collected, pending, and failed amounts summarised</div></li>
+            <li><span class="check">✓</span><div>Detailed payment view: method, amount, status, PayU transaction ID</div></li>
+            <li><span class="check">✓</span><div><strong>Export payments to CSV</strong> for accounting or reconciliation</div></li>
+            <li><span class="check">✓</span><div>Expense tracking — log daily costs (ingredients, rent, utilities, etc.) with a date and amount</div></li>
+            <li><span class="check">✓</span><div>Archive and restore expenses with soft-delete support</div></li>
+            <li><span class="check">✓</span><div>Expenses feed into the Net Profit calculation in the Analytics dashboard</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-lime" style="margin:0;">📈</div>
+          <div><h3>Reports</h3><span>Business performance analysis</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Classic report view with filterable date ranges</div></li>
+            <li><span class="check">✓</span><div>Analytics report — Gross Sales, Expenses, Net Profit summary cards</div></li>
+            <li><span class="check">✓</span><div>Day-by-day sales vs expenses comparison chart</div></li>
+            <li><span class="check">✓</span><div>Top 5 items by quantity sold (doughnut chart)</div></li>
+            <li><span class="check">✓</span><div>Filter by custom date range (7, 14, 30, 60, 90, 180 days)</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-orange" style="margin:0;">⚙️</div>
+          <div><h3>Store Settings</h3><span>Fully customisable per store</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Store name, tagline, logo (512 × 512 recommended)</div></li>
+            <li><span class="check">✓</span><div>Full address: street, city, state, pincode</div></li>
+            <li><span class="check">✓</span><div>Phone number and WhatsApp number for customer support</div></li>
+            <li><span class="check">✓</span><div>GST number for tax invoicing</div></li>
+            <li><span class="check">✓</span><div>Enable / disable order types: <strong>Dine-In, Takeaway, Home Delivery</strong></div></li>
+            <li><span class="check">✓</span><div>Enable / disable payment methods: <strong>Cash, Online (UPI/Gateway)</strong></div></li>
+            <li><span class="check">✓</span><div>Payment gateway configuration (PayU Key + Salt, Test/Live mode)</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-cyan" style="margin:0;">🔐</div>
+          <div><h3>Activity Logs & Security</h3><span>Full audit trail</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Every staff action logged with timestamp, user, action type, and IP address</div></li>
+            <li><span class="check">✓</span><div>Paginated log viewer in the admin panel</div></li>
+            <li><span class="check">✓</span><div>Honeypot fields on all public forms to filter bot submissions</div></li>
+            <li><span class="check">✓</span><div>POS form data not stored in browser history</div></li>
+            <li><span class="check">✓</span><div>Role-based access — Staff cannot access Super Admin features</div></li>
+            <li><span class="check">✓</span><div>Payment hash verification prevents transaction tampering</div></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="module-block">
+        <div class="module-header">
+          <div class="card-icon icon-purple" style="margin:0;">👫</div>
+          <div><h3>User Management</h3><span>Staff access control</span></div>
+        </div>
+        <div class="module-body">
+          <ul class="feature-list">
+            <li><span class="check">✓</span><div>Create staff accounts with name, email, and password</div></li>
+            <li><span class="check">✓</span><div>Role-based permissions: Admin vs Staff</div></li>
+            <li><span class="check">✓</span><div>Admin can change own password via the profile page</div></li>
+            <li><span class="check">✓</span><div>Collapsible sidebar with state persistence (remembers if sidebar was open or closed)</div></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ ROLES ══════════════ -->
+<div class="section" style="background: #F1F5F9;">
+  <div class="container">
+    <p class="section-title">User Roles</p>
+    <h2 class="section-heading">Who Can Do What?</h2>
+    <p class="section-sub">The platform has three distinct user types, each with clearly defined access levels.</p>
+
+    <div class="module-block">
+      <div class="module-body" style="padding: 0;">
+        <table class="roles-table">
+          <thead>
+            <tr>
+              <th style="padding-left: 28px;">Role</th>
+              <th>Access Level</th>
+              <th>Key Capabilities</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="padding-left: 28px;"><span class="badge badge-blue">🔑 Admin</span></td>
+              <td>Full store access</td>
+              <td>All features: POS, orders, menu, customers, payments, expenses, reports, settings, user management, activity logs.</td>
+            </tr>
+            <tr>
+              <td style="padding-left: 28px;"><span class="badge badge-green">👤 Staff</span></td>
+              <td>Operational access</td>
+              <td>POS, orders, and menu viewing. Cannot access settings, reports, or payment configuration.</td>
+            </tr>
+            <tr>
+              <td style="padding-left: 28px;"><span class="badge badge-amber">🛒 Customer</span></td>
+              <td>Storefront only</td>
+              <td>Browse menu, place orders, track orders, manage profile & addresses, view order history.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ NOTIFICATIONS ══════════════ -->
+<div class="section">
+  <div class="container">
+    <p class="section-title">Communications</p>
+    <h2 class="section-heading">Automated Notifications</h2>
+    <p class="section-sub">The system sends automated communications to keep customers informed and reduce manual follow-up.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon icon-green">📧</div>
+        <h3>Order Confirmation Email</h3>
+        <p>Sent automatically to the customer's email address the moment a home delivery order is placed — includes order number and items summary.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-blue">🧾</div>
+        <h3>Invoice Email</h3>
+        <p>A full invoice is emailed to the customer as soon as their payment is marked as <strong>Paid</strong> — whether via online payment gateway or manual admin update.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-amber">🔔</div>
+        <h3>Order Status Email</h3>
+        <p>When admin updates a home delivery order's status (e.g. "Out for Delivery"), the customer receives an automatic status notification email.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-purple">🔔</div>
+        <h3>New Order Alert (POS)</h3>
+        <p>Admin/staff receives a real-time <strong>bell sound + toast notification</strong> in the browser when a new online order arrives — no page refresh needed.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-teal">💬</div>
+        <h3>WhatsApp Receipt</h3>
+        <p>Admin can share the complete order summary to the customer's WhatsApp in one click directly from the order detail page.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-red">🔑</div>
+        <h3>OTP for Forgot PIN</h3>
+        <p>When a customer uses "Forgot PIN", a one-time password is sent to their registered WhatsApp number to verify identity before allowing a PIN reset.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ TECH ══════════════ -->
+<div class="section" style="background: #F1F5F9;">
+  <div class="container">
+    <p class="section-title">Technical</p>
+    <h2 class="section-heading">Technology & Infrastructure</h2>
+    <p class="section-sub">Built on proven, enterprise-grade technologies for reliability, performance, and security.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-icon icon-red">⚡</div>
+        <h3>Laravel Framework</h3>
+        <p>Built on Laravel 10+ (PHP 8.1+) — one of the most trusted and secure web frameworks with a rich ecosystem, ORM, and built-in security features.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-blue">🗄️</div>
+        <h3>MySQL Database</h3>
+        <p>Uses MySQL / MariaDB — industry-standard relational database with high performance and reliability.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-amber">📱</div>
+        <h3>Mobile-Responsive UI</h3>
+        <p>Bootstrap 5 + custom CSS ensures the storefront and admin panel look great on phones, tablets, and desktops alike.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-green">🖼️</div>
+        <h3>Optimised Image Handling</h3>
+        <p>Uploaded item images are automatically resized and converted to WebP thumbnails using PHP GD — fast loading without manual effort.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-purple">🔒</div>
+        <h3>Security First</h3>
+        <p>CSRF protection, SHA-512 payment hashing, PIN bcrypt hashing, honeypot bot protection, and rate-limited login attempts.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-indigo">🔍</div>
+        <h3>SEO Optimised Storefront</h3>
+        <p>Proper meta tags, Schema.org structured data, semantic HTML, and optimised page titles for strong Google search ranking.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="divider"/>
+
+<!-- ══════════════ SUMMARY ══════════════ -->
+<div class="section">
+  <div class="container" style="text-align:center;">
+    <p class="section-title" style="text-align:center;">Summary</p>
+    <h2 class="section-heading" style="text-align:center;">Everything in One System</h2>
+    <p class="section-sub" style="margin: 0 auto 48px; text-align:center;">In-Shop removes the need for multiple disconnected tools. From menu management to payment reconciliation — it's all here.</p>
+
+    <div class="grid-3">
+      <div class="card" style="text-align:left;">
+        <strong style="display:block;margin-bottom:12px;font-size:15px;">✅ For Customers</strong>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><div>Order from anywhere on mobile</div></li>
+          <li><span class="check">✓</span><div>Save addresses, re-order easily</div></li>
+          <li><span class="check">✓</span><div>Secure PIN login, no app needed</div></li>
+          <li><span class="check">✓</span><div>Pay online or with cash</div></li>
+          <li><span class="check">✓</span><div>Get invoices & updates by email</div></li>
+        </ul>
+      </div>
+      <div class="card" style="text-align:left;">
+        <strong style="display:block;margin-bottom:12px;font-size:15px;">✅ For Store Owners / Admins</strong>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><div>Real-time POS for walk-in orders</div></li>
+          <li><span class="check">✓</span><div>Manage menu, stock & pricing easily</div></li>
+          <li><span class="check">✓</span><div>Track sales, expenses & profits</div></li>
+          <li><span class="check">✓</span><div>Print invoices & share via WhatsApp</div></li>
+          <li><span class="check">✓</span><div>Monitor all staff actions via audit log</div></li>
+        </ul>
+      </div>
+      <div class="card" style="text-align:left;">
+        <strong style="display:block;margin-bottom:12px;font-size:15px;">✅ For Platform Operators</strong>
+        <ul class="feature-list">
+          <li><span class="check">✓</span><div>Provision new stores in under a minute</div></li>
+          <li><span class="check">✓</span><div>Each store is fully isolated & independent</div></li>
+          <li><span class="check">✓</span><div>Subscription expiry control per store</div></li>
+          <li><span class="check">✓</span><div>Welcome email auto-sent to new clients</div></li>
+          <li><span class="check">✓</span><div>Archive/restore tenants without data loss</div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<div class="footer">
+  <p><strong>In-Shop — Smart POS & Online Ordering System</strong></p>
+  <p style="margin-top:8px;">This document is confidential and prepared for client review purposes. &copy; 2026 All rights reserved.</p>
+</div>
+
+</body>
+</html>

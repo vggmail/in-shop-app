@@ -50,11 +50,20 @@
 
                         <div class="mb-4">
                             <label class="small fw-bold text-muted mb-2">STORE STATUS</label>
-                            <div class="form-check form-switch bg-light p-3 rounded-3 border">
+                            <div class="form-check form-switch bg-light p-3 rounded-3 border mb-3">
                                 <input class="form-check-input ms-0 me-2" type="checkbox" name="is_active" id="isActive" value="1" {{ $tenant->is_active ? 'checked' : '' }}>
                                 <label class="form-check-label fw-bold small text-dark" for="isActive">
                                     Active - Store is accessible to customers
                                 </label>
+                            </div>
+                            
+                            <label class="small fw-bold text-muted mb-2">STOREFRONT ACCESS</label>
+                            <div class="form-check form-switch bg-light p-3 rounded-3 border">
+                                <input class="form-check-input ms-0 me-2" type="checkbox" name="disable_home_page" id="disableHomePage" value="1" {{ $tenant->disable_home_page ? 'checked' : '' }}>
+                                <label class="form-check-label fw-bold small text-dark" for="disableHomePage">
+                                    Disable Storefront (Admin Only)
+                                </label>
+                                <div class="small text-muted ms-4">If enabled, the front-end shopping site will be disabled, allowing only backend admin access.</div>
                             </div>
                         </div>
 
