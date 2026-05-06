@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>In-Shop — Product Features Overview</title>
+  <title>Features & Benefits | In-Shop - Cloud Based Order Management & Restaurant POS</title>
+  <meta name="description" content="Discover the powerful features of In-Shop, the premium online ordering system for restaurants in India. Includes QR code menu ordering, takeaway management, and cloud kitchen solutions." />
+  <meta name="keywords" content="restaurant ordering system, food ordering software, restaurant POS system, QR code menu ordering, self ordering system for restaurant, cloud kitchen order system, food delivery management software" />
+  <link rel="icon" type="image/png" href="favicon.png">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -69,6 +72,38 @@
       margin: 0 auto 32px;
       font-weight: 400;
       position: relative;
+    }
+    .hero .btn-group {
+      margin-top: 32px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      position: relative;
+    }
+    .btn-hero {
+      display: inline-block;
+      padding: 14px 28px;
+      border-radius: 12px;
+      font-weight: 700;
+      text-decoration: none;
+      font-size: 15px;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background: #FCD34D;
+      color: #1E1B4B;
+    }
+    .btn-primary:hover {
+      background: #fff;
+      transform: translateY(-2px);
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+    .btn-secondary:hover {
+      background: rgba(255,255,255,0.2);
     }
     .hero-stats {
       display: flex;
@@ -175,7 +210,7 @@
       font-size: 14px;
     }
     .feature-list li:last-child { border: none; }
-    .feature-list .check {
+    .feature-list li .check {
       width: 20px; height: 20px; min-width: 20px;
       border-radius: 50%;
       background: #D1FAE5;
@@ -184,6 +219,40 @@
       font-size: 10px;
       font-weight: 900;
       margin-top: 2px;
+    }
+
+    /* --- Read More Style --- */
+    .feature-content {
+      position: relative;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      transition: all 0.3s ease;
+    }
+    .feature-content.expanded {
+      -webkit-line-clamp: unset;
+      display: block;
+    }
+    .read-more-btn {
+      display: inline-block;
+      color: #312E81;
+      font-size: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 1px solid #E2E8F0;
+      padding: 3px 10px;
+      border-radius: 6px;
+      background: #f8fafc;
+      transition: all 0.2s;
+    }
+    .read-more-btn:hover {
+      background: #EDE9FE;
+      color: #4F46E5;
+      border-color: #C4B5FD;
     }
 
     /* ─── MODULE BLOCK ─── */
@@ -285,9 +354,15 @@
 <!-- ══════════════ HERO ══════════════ -->
 <div class="hero">
   <div class="hero-badge">Product Overview</div>
-  <h1>In-Shop — <span>Smart POS</span> &<br/>Online Ordering System</h1>
-  <p>A complete digital solution for restaurants, cafes & fast-food outlets — combining a powerful back-office with a beautiful customer storefront.</p>
-  <div class="hero-stats">
+  <h1>In-Shop — <span>Restaurant Ordering System</span> &<br/>Self Ordering Solution</h1>
+  <p>The best <strong>online ordering system for restaurants in India</strong>. A complete <strong>food ordering software</strong> for cafes, fast-food outlets, and <strong>cloud kitchen order systems</strong>.</p>
+  
+  <div class="btn-group">
+    <a href="in-shop-packages.html" class="btn-hero btn-primary">View Pricing Plans</a>
+    <a href="https://retail.ovinfinity.com/" target="_blank" class="btn-hero btn-secondary">Try Live Demo</a>
+  </div>
+
+  <div class="hero-stats" style="margin-top: 48px;">
     <div class="hero-stat"><span class="num">3</span><span class="lbl">Order Types</span></div>
     <div class="hero-stat"><span class="num">2</span><span class="lbl">Payment Methods</span></div>
     <div class="hero-stat"><span class="num">Real‑Time</span><span class="lbl">POS & Alerts</span></div>
@@ -754,14 +829,41 @@
   </div>
 </div>
 
+<!-- ══════════════ CORE CAPABILITIES ══════════════ -->
+<div class="section" style="background: #fff; padding-bottom: 20px;">
+  <div class="container">
+    <p class="section-title">Industries Served</p>
+    <h2 class="section-heading">Versatile Order Management System</h2>
+    <p class="section-sub">From <strong>kiosk ordering systems for fast food</strong> to <strong>wholesale order management software in India</strong>, In-Shop scales with your business needs.</p>
+    
+    <div class="grid-3" style="margin-top: 32px;">
+      <div class="card">
+        <div class="card-icon icon-orange">🖥️</div>
+        <h3>Self-Service & Kiosks</h3>
+        <p>Advanced <strong>self service kiosk software</strong> and <strong>customer ordering kiosks</strong>. Perfect for <strong>digital ordering kiosks</strong> and <strong>touch screen ordering systems</strong> in malls and cafes.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-cyan">🛒</div>
+        <h3>Retail & Wholesale</h3>
+        <p>A robust <strong>retail order management system</strong>. Manage bulk orders with our <strong>wholesale order management software</strong> and <strong>B2B order management system</strong>.</p>
+      </div>
+      <div class="card">
+        <div class="card-icon icon-indigo">📱</div>
+        <h3>Modern SaaS Tech</h3>
+        <p>A true <strong>cloud based order management</strong> platform. In-Shop is a <strong>SaaS ordering system</strong> offering <strong>multi channel order management</strong> and <strong>real-time order tracking</strong>.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <hr class="divider"/>
 
 <!-- ══════════════ SUMMARY ══════════════ -->
 <div class="section">
   <div class="container" style="text-align:center;">
     <p class="section-title" style="text-align:center;">Summary</p>
-    <h2 class="section-heading" style="text-align:center;">Everything in One System</h2>
-    <p class="section-sub" style="margin: 0 auto 48px; text-align:center;">In-Shop removes the need for multiple disconnected tools. From menu management to payment reconciliation — it's all here.</p>
+    <h2 class="section-heading" style="text-align:center;">Best Order Management System for Small Business</h2>
+    <p class="section-sub" style="margin: 0 auto 48px; text-align:center;">In-Shop is the leading <strong>online ordering system for restaurants in India</strong>, featuring <strong>QR code menu ordering</strong> and advanced POS capabilities.</p>
 
     <div class="grid-3">
       <div class="card" style="text-align:left;">
@@ -803,6 +905,51 @@
   <p><strong>In-Shop — Smart POS & Online Ordering System</strong></p>
   <p style="margin-top:8px;">This document is confidential and prepared for client review purposes. &copy; 2026 All rights reserved.</p>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const listItems = document.querySelectorAll('.feature-list li');
+    
+    listItems.forEach(li => {
+      const contentDiv = li.querySelector('div');
+      if (!contentDiv) return;
+
+      // Apply truncation class initially to measure
+      contentDiv.classList.add('feature-content');
+      
+      // Check if content overflows 3 lines
+      if (contentDiv.scrollHeight > contentDiv.offsetHeight + 2) {
+        // Create a wrapper for content and button to keep alignment
+        const wrapper = document.createElement('div');
+        wrapper.style.flex = "1";
+        wrapper.style.minWidth = "0"; // Crucial for flex truncation
+        
+        li.insertBefore(wrapper, contentDiv);
+        wrapper.appendChild(contentDiv);
+        
+        const btn = document.createElement('div');
+        btn.className = 'read-more-btn';
+        btn.innerText = 'Read More';
+        
+        btn.addEventListener('click', function() {
+          if (contentDiv.classList.contains('expanded')) {
+            contentDiv.classList.remove('expanded');
+            btn.innerText = 'Read More';
+          } else {
+            contentDiv.classList.add('expanded');
+            btn.innerText = 'Show Less';
+          }
+        });
+        
+        wrapper.appendChild(btn);
+      } else {
+        // No overflow, remove the class for normal display
+        contentDiv.classList.remove('feature-content');
+      }
+    });
+  });
+  });
+</script>
 
 </body>
 </html>

@@ -58,25 +58,25 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Gross Sales</small>
-            <h3 class="fw-bold mb-0 text-success">&#8377;{{ number_format(\App\Models\Order::sum("grand_total"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-success">&#8377;{{ number_format($grossSalesTotal, 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Total Expenses</small>
-            <h3 class="fw-bold mb-0 text-danger">&#8377;{{ number_format(\App\Models\Expense::sum("amount"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-danger">&#8377;{{ number_format($totalExpensesTotal, 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Net Profit</small>
-            <h3 class="fw-bold mb-0 text-primary">&#8377;{{ number_format(\App\Models\Order::sum("grand_total") - \App\Models\Expense::sum("amount"), 2) }}</h3>
+            <h3 class="fw-bold mb-0 text-primary">&#8377;{{ number_format($netProfitTotal, 2) }}</h3>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-3">
             <small class="text-muted fw-bold text-uppercase">Order Count</small>
-            <h3 class="fw-bold mb-0 text-dark">{{ \App\Models\Order::count() }}</h3>
+            <h3 class="fw-bold mb-0 text-dark">{{ number_format($orderCountTotal) }}</h3>
         </div>
     </div>
 </div>
@@ -96,7 +96,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(\App\Models\Order::latest()->take(10)->get() as $o)
+                @foreach($recentOrders as $o)
                 <tr>
                     <td>{{ $o->created_at->format("d M, Y") }}</td>
                     <td>{{ $o->order_number }}</td>
@@ -125,7 +125,7 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach(\App\Models\Expense::latest()->take(10)->get() as $e)
+                @foreach($recentExpenses as $e)
                 <tr>
                     <td>{{ date("d M, Y", strtotime($e->date)) }}</td>
                     <td><span class="badge bg-light text-danger">{{ $e->category }}</span></td>

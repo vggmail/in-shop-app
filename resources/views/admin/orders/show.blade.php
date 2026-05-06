@@ -1,5 +1,26 @@
 @extends("layouts.admin")
 @section("content")
+
+{{-- Flash messages --}}
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-3" role="alert">
+        <i class="fas fa-check-circle me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+@if(session('warning'))
+    <div class="alert alert-warning alert-dismissible fade show shadow-sm border-0 mb-3" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>{{ session('warning') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0 mb-3" role="alert">
+        <i class="fas fa-times-circle me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+@endif
+
     <div class="card p-4 shadow border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="mb-0"><i class="fas fa-receipt text-muted me-2"></i> Order: {{ $order->order_number }}</h2>
@@ -13,8 +34,21 @@
                 @endif
                 <a href="{{ route("orders.invoice", $order->id) }}" target="_blank" class="btn btn-dark"><i
                         class="fas fa-print"></i> Print Receipt</a>
+
+                @if(!in_array($order->status, ['Cancelled', 'Completed']))
+                    <button type="button" class="btn btn-danger"
+                            data-bs-toggle="modal" data-bs-target="#cancelOrderModal">
+                        <i class="fas fa-times-circle"></i> Cancel Order
+                    </button>
+                @else
+                    <span class="badge bg-{{ $order->status === 'Cancelled' ? 'danger' : 'success' }} py-2 px-3 fs-6">
+                        <i class="fas fa-{{ $order->status === 'Cancelled' ? 'ban' : 'check-circle' }}"></i>
+                        {{ $order->status }}
+                    </span>
+                @endif
             </div>
         </div>
+
 
         <div class="row mb-4 bg-light p-3 rounded">
             <div class="col-md-4 border-end">
@@ -44,6 +78,7 @@
                         <option value="Preparing" {{ $order->status == 'Preparing' ? 'selected' : '' }}>Preparing</option>
                         <option value="Ready" {{ $order->status == 'Ready' ? 'selected' : '' }}>Ready</option>
                         <option value="Completed" {{ $order->status == 'Completed' ? 'selected' : '' }}>Completed</option>
+                        <option value="Cancelled" {{ $order->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                     </select>
                 </form>
                 </p>
@@ -58,11 +93,23 @@
                     class="d-inline-flex align-items-center mt-2">
                     @csrf
                     <select name="payment_status"
-                        class="form-select form-select-sm {{ $order->payment_status == 'Paid' ? 'bg-success' : 'bg-danger' }} text-white fw-bold"
+                        class="form-select form-select-sm {{ $order->payment_status == 'Paid' ? 'bg-success' : ($order->payment_status == 'Refunded' ? 'bg-warning' : 'bg-danger') }} text-white fw-bold"
                         onchange="this.form.submit()">
                         <option value="Paid" {{ $order->payment_status == 'Paid' ? 'selected' : '' }}>Paid</option>
                         <option value="Pending" {{ $order->payment_status == 'Pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="Refunded" {{ $order->payment_status == 'Refunded' ? 'selected' : '' }}>Refunded</option>
                     </select>
+                    @php $refundedPayment = $order->payments()->where('status','Refunded')->first(); @endphp
+                    @if($refundedPayment)
+                        <div class="mt-2 p-2 bg-warning bg-opacity-10 border border-warning rounded small">
+                            <i class="fas fa-undo-alt text-warning"></i>
+                            <strong>Refund ₹{{ number_format($refundedPayment->refund_amount ?? $refundedPayment->amount, 2) }}</strong>
+                            — Status: <span class="badge bg-warning text-dark">{{ $refundedPayment->refund_status ?? 'Initiated' }}</span>
+                            @if($refundedPayment->refund_id)
+                                <br><span class="text-muted">Refund ID: {{ $refundedPayment->refund_id }}</span>
+                            @endif
+                        </div>
+                    @endif
                 </form>
                 </p>
             </div>
@@ -128,4 +175,46 @@
             </tfoot>
         </table>
     </div>
+
+{{-- Cancel Order Confirmation Modal --}}
+<div class="modal fade" id="cancelOrderModal" tabindex="-1" aria-labelledby="cancelOrderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="cancelOrderModalLabel">
+                    <i class="fas fa-exclamation-triangle me-2"></i>Cancel Order #{{ $order->order_number }}
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-2">Are you sure you want to <strong>cancel</strong> this order?</p>
+                @php
+                    $onlinePayment = $order->payments()->where('method','PayU')->where('status','Paid')->first();
+                @endphp
+                @if($onlinePayment)
+                    <div class="alert alert-info border-0 shadow-sm mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        This order was paid online via <strong>PayU</strong> (₹{{ number_format($onlinePayment->amount, 2) }}).
+                        A <strong>refund will be automatically initiated</strong> to the customer's original payment method.
+                    </div>
+                @else
+                    <div class="alert alert-warning border-0 shadow-sm mb-0">
+                        <i class="fas fa-info-circle me-1"></i>
+                        This order has no online payment. Only the order status will be updated to <strong>Cancelled</strong>.
+                    </div>
+                @endif
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Keep Order</button>
+                <form action="{{ route('orders.cancelOrder', $order->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-ban me-1"></i>
+                        {{ $onlinePayment ?? false ? 'Cancel & Refund' : 'Cancel Order' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection

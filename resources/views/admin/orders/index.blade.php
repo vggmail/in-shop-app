@@ -62,13 +62,14 @@
                                 <form action="{{ route('orders.updateStatus', $o->id) }}" method="POST">
                                     @csrf
                                     <select name="status"
-                                        class="form-select form-select-sm fw-bold {{ $o->status == 'Preparing' ? 'bg-warning text-dark' : ($o->status == 'Ready' ? 'bg-info text-white' : 'bg-success text-white') }}"
+                                        class="form-select form-select-sm fw-bold {{ $o->status == 'Preparing' ? 'bg-warning text-dark' : ($o->status == 'Ready' ? 'bg-info text-white' : ($o->status == 'Cancelled' ? 'bg-danger text-white' : 'bg-success text-white')) }}"
                                         onchange="this.form.submit()">
                                         <option value="Preparing" {{ $o->status == 'Preparing' ? 'selected' : '' }}>Preparing
                                         </option>
                                         <option value="Ready" {{ $o->status == 'Ready' ? 'selected' : '' }}>Ready</option>
                                         <option value="Completed" {{ $o->status == 'Completed' ? 'selected' : '' }}>Completed
                                         </option>
+                                        <option value="Cancelled" {{ $o->status == 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
                                     </select>
                                 </form>
                             </td>
@@ -76,11 +77,12 @@
                                 <form action="{{ route('orders.updateStatus', $o->id) }}" method="POST">
                                     @csrf
                                     <select name="payment_status"
-                                        class="form-select form-select-sm fw-bold mt-1 {{ $o->payment_status == 'Pending' ? 'bg-danger text-white' : 'bg-success text-white' }}"
+                                        class="form-select form-select-sm fw-bold mt-1 {{ $o->payment_status == 'Pending' ? 'bg-danger text-white' : ($o->payment_status == 'Refunded' ? 'bg-warning text-dark' : 'bg-success text-white') }}"
                                         onchange="this.form.submit()">
                                         <option value="Pending" {{ $o->payment_status == 'Pending' ? 'selected' : '' }}>
                                             {{ $o->payment_method }} - Pending</option>
                                         <option value="Paid" {{ $o->payment_status == 'Paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="Refunded" {{ $o->payment_status == 'Refunded' ? 'selected' : '' }}>Refunded</option>
                                     </select>
                                 </form>
                             </td>
@@ -91,6 +93,13 @@
                                         class="fas fa-eye"></i> View</a>
                                 <a target="_blank" href="{{ route('orders.invoice', $o->id) }}"
                                     class="btn btn-sm btn-outline-info"><i class="fas fa-print"></i> Receipt</a>
+                                @if(!in_array($o->status, ['Cancelled','Completed']))
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#cancelModal{{ $o->id }}">
+                                        <i class="fas fa-ban"></i> Cancel
+                                    </button>
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -101,4 +110,80 @@
             {{ $orders->links("pagination::bootstrap-5") }}
         </div>
     </div>
+
+{{-- Flash messages --}}
+@if(session('success'))
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show align-items-center text-bg-success border-0 shadow" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="fas fa-check-circle me-2"></i>{{ session('success') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+@endif
+@if(session('warning'))
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show align-items-center text-bg-warning border-0 shadow" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="fas fa-exclamation-triangle me-2"></i>{{ session('warning') }}</div>
+                <button type="button" class="btn-close me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+@endif
+@if(session('error'))
+    <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+        <div class="toast show align-items-center text-bg-danger border-0 shadow" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><i class="fas fa-times-circle me-2"></i>{{ session('error') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
+        </div>
+    </div>
+@endif
+
+{{-- Per-order Cancel Modals --}}
+@foreach($orders as $o)
+    @if(!in_array($o->status, ['Cancelled','Completed']))
+    <div class="modal fade" id="cancelModal{{ $o->id }}" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title"><i class="fas fa-exclamation-triangle me-2"></i>Cancel {{ $o->order_number }}</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-2">Cancel this order for
+                        <strong>{{ $o->customer->name ?? 'Guest' }}</strong>
+                        worth <strong>₹{{ number_format($o->grand_total, 2) }}</strong>?
+                    </p>
+                    @php $op = $o->payments()->where('method','PayU')->where('status','Paid')->first(); @endphp
+                    @if($op)
+                        <div class="alert alert-info border-0 mb-0 small">
+                            <i class="fas fa-undo-alt me-1"></i>
+                            Paid via <strong>PayU</strong> — refund of <strong>₹{{ number_format($op->amount, 2) }}</strong> will be auto-initiated.
+                        </div>
+                    @else
+                        <div class="alert alert-warning border-0 mb-0 small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            No online payment found. Only order status will be set to <strong>Cancelled</strong>.
+                        </div>
+                    @endif
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" data-bs-dismiss="modal">Keep Order</button>
+                    <form action="{{ route('orders.cancelOrder', $o->id) }}" method="POST" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-ban me-1"></i>
+                            {{ isset($op) && $op ? 'Cancel & Refund' : 'Cancel Order' }}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+@endforeach
 @endsection

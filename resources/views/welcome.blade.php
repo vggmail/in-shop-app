@@ -7,6 +7,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <meta name="theme-color" content="#ff4757">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
     
     <style>
         :root { --primary: #ff4757; --dark: #2f3542; --light: #f1f2f6; --accent: #ff6b81; }
@@ -56,9 +59,83 @@
         .place-order-btn { background: #2ed573; border: none; padding: 16px; border-radius: 20px !important; font-weight: 800 !important; letter-spacing: 0.5px; transition: 0.3s; box-shadow: 0 10px 25px rgba(46, 213, 115, 0.3) !important; color: white !important; }
         .place-order-btn:hover { background: #26af5c; transform: translateY(-3px); box-shadow: 0 15px 30px rgba(46, 213, 115, 0.4) !important; }
         .place-order-btn:active { transform: translateY(-1px); }
+
+        /* ─── TOP INSTALL BANNER ─── */
+        .install-banner {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #111827;
+            color: white;
+            padding: 12px 16px;
+            z-index: 1060;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            transform: translateY(-100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .install-banner.show {
+            transform: translateY(0);
+        }
+        .banner-content {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+        }
+        .banner-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+        }
+        .banner-text {
+            font-size: 13px;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+        .banner-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-banner-install {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .btn-banner-close {
+            background: transparent;
+            color: rgba(255,255,255,0.5);
+            border: none;
+            font-size: 18px;
+            padding: 0;
+            cursor: pointer;
+        }
+        body.banner-active {
+            padding-top: 56px;
+        }
     </style>
 </head>
 <body>
+    <!-- Custom Top Install Banner -->
+    <div id="installBanner" class="install-banner">
+        <div class="banner-content">
+            <img src="{{ asset('in_shop_app_icon.png') }}" alt="Icon" class="banner-icon">
+            <div class="banner-text">Install In-Shop App for better experience</div>
+        </div>
+        <div class="banner-actions">
+            <button id="btnBannerInstall" class="btn-banner-install">Install</button>
+            <button id="btnBannerClose" class="btn-banner-close">&times;</button>
+        </div>
+    </div>
 
     <div class="hero">
         @php
@@ -799,6 +876,72 @@
             }
         }
 
+        // ─── PWA INSTALLATION LOGIC ───
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            const installBanner = document.getElementById('installBanner');
+            const navInstallBtn = document.getElementById('navInstallBtn');
+            
+            if (navInstallBtn) navInstallBtn.classList.remove('d-none');
+
+            setTimeout(() => {
+                if (installBanner && !localStorage.getItem('pwa_banner_dismissed')) {
+                    installBanner.classList.add('show');
+                    document.body.classList.add('banner-active');
+                }
+            }, 2000);
+        });
+
+        const triggerInstall = async () => {
+            const installBanner = document.getElementById('installBanner');
+            const navInstallBtn = document.getElementById('navInstallBtn');
+            
+            if (deferredPrompt) {
+                if (installBanner) installBanner.classList.remove('show');
+                document.body.classList.remove('banner-active');
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted' && navInstallBtn) {
+                    navInstallBtn.classList.add('d-none');
+                }
+                deferredPrompt = null;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const btnBannerInstall = document.getElementById('btnBannerInstall');
+            const btnBannerClose = document.getElementById('btnBannerClose');
+            const navInstallBtn = document.getElementById('navInstallBtn');
+            const installBanner = document.getElementById('installBanner');
+
+            if (btnBannerInstall) btnBannerInstall.addEventListener('click', triggerInstall);
+            if (navInstallBtn) navInstallBtn.addEventListener('click', triggerInstall);
+
+            if (btnBannerClose) {
+                btnBannerClose.addEventListener('click', () => {
+                    if (installBanner) installBanner.classList.remove('show');
+                    document.body.classList.remove('banner-active');
+                    localStorage.setItem('pwa_banner_dismissed', 'true');
+                });
+            }
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{{ asset('sw.js') }}")
+                    .then(reg => console.log('SW Registered'))
+                    .catch(err => console.log('SW Registration Failed', err));
+            });
+        }
+    </script>
+
+
+
+    <script>
         // Forgot PIN Logic
         function sendForgotPinOtp() {
             let p = $("#login-phone").val().trim();

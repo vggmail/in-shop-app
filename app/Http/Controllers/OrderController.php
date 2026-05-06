@@ -28,6 +28,9 @@ class OrderController extends Controller
 
         // Top 16 items by order frequency (recent 90 days), hide out of stock, fallback to newest 16
         $topItemIds = \App\Models\OrderItem::select('item_id', \Illuminate\Support\Facades\DB::raw('count(*) as order_count'))
+            ->whereHas('order', function($q) {
+                $q->whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled']);
+            })
             ->where('created_at', '>=', now()->subDays(90))
             ->whereNotNull('item_id')
             ->whereHas('item', function ($q) {
@@ -156,10 +159,12 @@ class OrderController extends Controller
             $startDate = now()->subDays((int)$range)->startOfDay();
             
             // Core Metrics
-            $grossSales = \App\Models\Order::where('created_at', '>=', $startDate)->sum('grand_total');
+            $grossSales = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])
+                ->where('created_at', '>=', $startDate)->sum('grand_total');
             $totalExpenses = \App\Models\Expense::where('date', '>=', $startDate)->sum('amount');
             $netProfit = $grossSales - $totalExpenses;
-            $orderCount = \App\Models\Order::where('created_at', '>=', $startDate)->count();
+            $orderCount = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])
+                ->where('created_at', '>=', $startDate)->count();
 
             // Time-series for Line Chart
             $chartDates = [];
@@ -170,7 +175,8 @@ class OrderController extends Controller
                 $dateStr = now()->subDays($i)->format('Y-m-d');
                 $chartDates[] = now()->subDays($i)->format('d M');
                 
-                $salesData[] = \App\Models\Order::whereDate('created_at', $dateStr)->sum('grand_total');
+                $salesData[] = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])
+                    ->whereDate('created_at', $dateStr)->sum('grand_total');
                 $expensesData[] = \App\Models\Expense::whereDate('date', $dateStr)->sum('amount');
             }
 
@@ -178,6 +184,7 @@ class OrderController extends Controller
             $topItemsQuery = \Illuminate\Support\Facades\DB::table('order_items')
                 ->join('orders', 'order_items.order_id', '=', 'orders.id')
                 ->join('items', 'order_items.item_id', '=', 'items.id')
+                ->whereNotIn('orders.status', ['Pending Payment', 'Payment Failed', 'Cancelled'])
                 ->where('orders.created_at', '>=', $startDate)
                 ->select(\Illuminate\Support\Facades\DB::raw('items.name, sum(order_items.quantity) as total_qty'))
                 ->groupBy('items.id', 'items.name')
@@ -194,7 +201,20 @@ class OrderController extends Controller
             ));
         }
 
-        return view("admin.reports.index", compact('tab'));
+        // Classic Dashboard Metrics
+        $grossSalesTotal = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])->sum("grand_total");
+        $totalExpensesTotal = \App\Models\Expense::sum("amount");
+        $netProfitTotal = $grossSalesTotal - $totalExpensesTotal;
+        $orderCountTotal = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])->count();
+        
+        $recentOrders = \App\Models\Order::whereNotIn('status', ['Pending Payment', 'Payment Failed', 'Cancelled'])
+            ->latest()->take(10)->get();
+        $recentExpenses = \App\Models\Expense::latest()->take(10)->get();
+
+        return view("admin.reports.index", compact(
+            'tab', 'grossSalesTotal', 'totalExpensesTotal', 'netProfitTotal', 
+            'orderCountTotal', 'recentOrders', 'recentExpenses'
+        ));
     }
 
     public function checkPending()
@@ -230,5 +250,119 @@ class OrderController extends Controller
         }
         $order->save();
         return back()->with('success', 'Order status updated successfully!');
+    }
+
+    public function cancelOrder(Request $request, $id)
+    {
+        $order = \App\Models\Order::with('payments')->findOrFail($id);
+
+        // Prevent cancelling already-cancelled/completed orders
+        if (in_array($order->status, ['Cancelled', 'Completed'])) {
+            return back()->with('error', 'This order cannot be cancelled (status: ' . $order->status . ').');
+        }
+
+        $order->status = 'Cancelled';
+        $order->save();
+
+        $refundResult = null;
+
+        // Auto-refund only for online PayU payments that were successfully paid
+        $payment = $order->payments()->where('method', 'PayU')->where('status', 'Paid')->first();
+
+        if ($payment && $payment->transaction_id) {
+            $refundResult = $this->initiatePayURefund($order, $payment);
+        }
+
+        if ($refundResult && isset($refundResult['status']) && $refundResult['status'] === true) {
+            return back()->with('success', 'Order cancelled and refund of ₹' . number_format($payment->amount, 2) . ' initiated successfully. Refund ID: ' . ($refundResult['refund_id'] ?? 'N/A'));
+        }
+
+        if ($payment && $payment->transaction_id && !$refundResult) {
+            return back()->with('warning', 'Order cancelled, but the refund could not be processed automatically. Please refund manually via PayU dashboard.');
+        }
+
+        return back()->with('success', 'Order has been cancelled successfully.');
+    }
+
+    /**
+     * Initiate a PayU refund for a paid online order.
+     */
+    private function initiatePayURefund(\App\Models\Order $order, \App\Models\Payment $payment): array
+    {
+        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+        $gateway = \App\Models\PaymentGateway::where('tenant_id', $tenant->id)
+            ->where('gateway_name', 'PayU')
+            ->first();
+
+        $key  = $gateway->settings['key']  ?? config('services.payu.key');
+        $salt = $gateway->settings['salt'] ?? config('services.payu.salt');
+        $mode = $gateway->settings['mode'] ?? 'test';
+
+        $baseUrl = $mode === 'live'
+            ? 'https://info.payu.in/merchant/postservice.php?form=2'
+            : 'https://test.payu.in/merchant/postservice.php?form=2';
+
+        $mihpayid     = $payment->transaction_id;
+        $refundAmount = number_format($payment->amount, 2, '.', '');
+        $tokenId      = uniqid('refund_', true);
+
+        // PayU refund hash: key|command|var1|salt
+        $command    = 'cancel_refund_transaction';
+        $hashString = $key . '|' . $command . '|' . $mihpayid . '|' . $salt;
+        $hash       = strtolower(hash('sha512', $hashString));
+
+        $postData = [
+            'key'     => $key,
+            'command' => $command,
+            'var1'    => $mihpayid,        // PayU transaction ID
+            'var2'    => $tokenId,         // Unique refund token
+            'var3'    => $refundAmount,    // Refund amount
+            'hash'    => $hash,
+        ];
+
+        try {
+            $ch = curl_init($baseUrl);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postData));
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            $response = curl_exec($ch);
+            $curlError = curl_error($ch);
+            curl_close($ch);
+
+            \Illuminate\Support\Facades\Log::info("PayU Refund Request for Order #{$order->order_number}", $postData);
+            \Illuminate\Support\Facades\Log::info("PayU Refund Response for Order #{$order->order_number}: " . $response);
+
+            if ($curlError) {
+                \Illuminate\Support\Facades\Log::error("PayU Refund cURL Error: " . $curlError);
+                return ['status' => false, 'message' => 'cURL error: ' . $curlError];
+            }
+
+            $result = json_decode($response, true);
+
+            // PayU returns status 1 for queued/success
+            if (isset($result['status']) && $result['status'] == 1) {
+                $payment->update([
+                    'status'        => 'Refunded',
+                    'refund_id'     => $result['request_id'] ?? $tokenId,
+                    'refund_status' => 'Initiated',
+                    'refund_amount' => $payment->amount,
+                ]);
+                return ['status' => true, 'refund_id' => $result['request_id'] ?? $tokenId, 'raw' => $result];
+            }
+
+            // Refund queued or needs manual review
+            $payment->update([
+                'refund_status' => 'Failed',
+                'refund_id'     => $tokenId,
+            ]);
+
+            return ['status' => false, 'message' => $result['msg'] ?? 'Refund failed.', 'raw' => $result];
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("PayU Refund Exception: " . $e->getMessage());
+            return ['status' => false, 'message' => $e->getMessage()];
+        }
     }
 }

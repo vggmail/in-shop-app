@@ -100,6 +100,7 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('orders/{id}/invoice', [OrderController::class, 'printInvoice'])->name('orders.invoice');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('orders/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancelOrder');
     
     Route::get('payments', [OrderController::class, 'payments'])->name('payments.index');
     Route::get('payments/{id}', [OrderController::class, 'paymentShow'])->name('payments.show');
