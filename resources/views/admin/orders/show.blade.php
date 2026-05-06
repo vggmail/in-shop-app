@@ -23,7 +23,13 @@
 
     <div class="card p-4 shadow border-0">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="mb-0"><i class="fas fa-receipt text-muted me-2"></i> Order: {{ $order->order_number }}</h2>
+            <h2 class="mb-0">
+                <i class="fas fa-receipt text-muted me-2"></i>
+                @if($order->token_number)
+                    <span class="badge bg-warning text-dark me-2">Token #{{ $order->token_number }}</span>
+                @endif
+                Order: {{ $order->order_number }}
+            </h2>
             <div class="d-flex gap-2">
                 @if($tenant->whatsapp_number && $order->customer)
                     @php

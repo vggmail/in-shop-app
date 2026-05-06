@@ -48,8 +48,22 @@ class OrderRepository extends BaseRepository
             }
 
             $isOnline = in_array($data["payment_method"], ["PayU", "UPI", "Online"]);
+            
+            // Reusable Token Logic
+            $startToken = (app()->bound('tenant') ? app('tenant')->starting_token : 100) ?: 100;
+            $activeTokens = Order::whereNotIn('status', ['Completed', 'Cancelled'])
+                ->whereNotNull('token_number')
+                ->pluck('token_number')
+                ->toArray();
+            
+            $tokenNumber = $startToken;
+            while (in_array($tokenNumber, $activeTokens)) {
+                $tokenNumber++;
+            }
+
             $order = Order::create([
                 "order_number" => $orderNum,
+                "token_number" => $tokenNumber,
                 "customer_id" => $customerId,
                 "coupon_id" => $data["coupon_id"] ?? null,
                 "order_type" => $data["order_type"],

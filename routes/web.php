@@ -15,6 +15,7 @@ use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PayUController;
 use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\KdsController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -94,6 +95,11 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     
     Route::get('pos', [OrderController::class, 'create'])->name('pos.index');
     Route::post('pos/store', [OrderController::class, 'store'])->name('pos.store');
+
+    // Kitchen Display System (KDS)
+    Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
+    Route::get('kds/poll', [KdsController::class, 'poll'])->name('kds.poll');
+    Route::post('kds/{id}/status', [KdsController::class, 'updateStatus'])->name('kds.updateStatus');
     
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/check-pending', [OrderController::class, 'checkPending'])->name('orders.check-pending');

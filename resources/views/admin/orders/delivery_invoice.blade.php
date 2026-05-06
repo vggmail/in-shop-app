@@ -59,6 +59,11 @@
         <div class="text-end">
             <h4 class="fw-bold mb-0 text-muted" style="letter-spacing: 2px;">INVOICE</h4>
             <p class="mb-0 small" style="font-size: 11px;"><b>#{{ $order->order_number }}</b></p>
+            @if($order->token_number)
+                <div class="mt-1">
+                    <span class="badge bg-warning text-dark px-3 py-2 fw-bold" style="font-size: 14px; border: 1px solid #000;">TOKEN: {{ $order->token_number }}</span>
+                </div>
+            @endif
             <p class="small text-muted mb-0" style="font-size: 10px;">{{ $order->created_at->format('d M Y, h:i A') }}</p>
         </div>
     </div>

@@ -85,6 +85,7 @@
         .notification-bell:hover { background: #f1f5f9; }
         .bell-badge { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; border: 2px solid #fff; background: #ef4444; display: none; }
         .avatar-circle { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
     @yield("styles")
 </head>
@@ -105,6 +106,11 @@
                 
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>
                 <a href="{{ route('pos.index') }}" class="text-warning"><i class="fas fa-cash-register"></i> <span>POS Screen</span></a>
+                <a href="{{ route('kds.index') }}" class="{{ request()->routeIs('kds.*') ? 'active' : '' }}" style="{{ request()->routeIs('kds.*') ? '' : 'color:#4ade80;' }}" target="_blank">
+                    <i class="fas fa-fire-alt"></i>
+                    <span>Kitchen Display</span>
+                    <span class="ms-auto" style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; animation: blink 1.5s infinite;"></span>
+                </a>
                 <a href="{{ route('items.index') }}" class="{{ request()->routeIs('items.*') ? 'active' : '' }}"><i class="fas fa-box"></i> <span>Menu Items</span></a>
                 <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"><i class="fas fa-layer-group"></i> <span>Categories</span></a>
                 <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'active' : '' }} d-flex justify-content-between">

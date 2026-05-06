@@ -44,7 +44,8 @@ class TenantSettingsController extends Controller
             'takeaway_enabled' => 'nullable|boolean',
             'home_delivery_enabled' => 'nullable|boolean',
             'cash_enabled' => 'nullable|boolean',
-            'online_enabled' => 'nullable|boolean'
+            'online_enabled' => 'nullable|boolean',
+            'starting_token' => 'nullable|integer|min:1'
         ]);
 
         $tenantModel = Tenant::find($tenant->id);
@@ -68,6 +69,7 @@ class TenantSettingsController extends Controller
         $tenantModel->home_delivery_enabled = $request->has('home_delivery_enabled');
         $tenantModel->cash_enabled = $request->has('cash_enabled');
         $tenantModel->online_enabled = $request->has('online_enabled');
+        $tenantModel->starting_token = $request->starting_token ?? 100;
         $tenantModel->save();
 
         return redirect()->back()->with('success', 'Store settings updated successfully!');

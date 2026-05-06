@@ -33,6 +33,9 @@
                     @foreach($orders as $o)
                         <tr>
                             <td>
+                                @if($o->token_number)
+                                    <span class="badge bg-warning text-dark mb-1" style="font-size: 11px;">Token #{{ $o->token_number }}</span>
+                                @endif
                                 <div class="fw-bold text-primary" style="font-size: 14px;">{{ $o->order_number }}</div>
                                 @if($o->customer)
                                     <div class="small fw-bold text-dark mt-1">{{ Str::limit($o->customer->name, 15) }}</div>
