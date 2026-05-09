@@ -29,7 +29,15 @@ class Item extends Model {
 
     public function category() { return $this->belongsTo(Category::class); }
     public function variants() { return $this->hasMany(ItemVariant::class); }
-    public function extras() { return $this->hasMany(ItemExtra::class); }
+    public function extras()
+    {
+        return $this->hasMany(ItemExtra::class);
+    }
+
+    public function ingredients()
+    {
+        return $this->hasMany(ItemIngredient::class);
+    }
 
     public function images() { return $this->hasMany(ItemImage::class)->orderBy('is_feature', 'desc')->orderBy('sort_order', 'asc'); }
     

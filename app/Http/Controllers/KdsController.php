@@ -17,7 +17,7 @@ class KdsController extends Controller
     {
         $orders = Order::with(['items.item', 'items.variant', 'items.extras.extra', 'customer'])
             ->whereIn('status', self::KDS_STATUSES)
-            ->whereNotIn('payment_status', ['Pending'])
+            ->where('status', '!=', 'Pending Payment')
             ->orderBy('created_at', 'asc')
             ->get();
 
@@ -47,7 +47,7 @@ class KdsController extends Controller
     {
         $orders = Order::with(['items.item', 'items.variant', 'items.extras.extra', 'customer'])
             ->whereIn('status', self::KDS_STATUSES)
-            ->whereNotIn('payment_status', ['Pending'])
+            ->where('status', '!=', 'Pending Payment')
             ->orderBy('created_at', 'asc')
             ->get();
 

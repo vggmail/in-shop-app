@@ -238,6 +238,7 @@ class OrderController extends Controller
             // Only send status updates for Home Delivery
             if ($order->order_type == 'Home Delivery') {
                 $this->repo->sendOrderStatusEmail($order);
+                $this->repo->sendOrderWhatsAppNotification($order);
             }
         }
         if ($request->has('payment_status')) {
@@ -246,6 +247,7 @@ class OrderController extends Controller
             // If admin marks as Paid, send the email
             if ($order->payment_status == 'Paid') {
                 $this->repo->sendInvoiceEmail($order);
+                $this->repo->sendOrderWhatsAppNotification($order);
             }
         }
         $order->save();

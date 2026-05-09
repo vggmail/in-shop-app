@@ -16,6 +16,8 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PayUController;
 use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\KdsController;
+use App\Http\Controllers\CdsController;
+use App\Http\Controllers\ExpressPosController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -93,13 +95,35 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::resource('coupons', CouponController::class)->except(['create', 'show', 'edit']);
     Route::post('coupons/check', [CouponController::class, 'check'])->name('coupons.check');
     
-    Route::get('pos', [OrderController::class, 'create'])->name('pos.index');
-    Route::post('pos/store', [OrderController::class, 'store'])->name('pos.store');
+    Route::middleware(['check.shift'])->group(function () {
+        Route::get('pos', [OrderController::class, 'create'])->name('pos.index');
+        Route::get('pos/express', [ExpressPosController::class, 'index'])->name('pos.express');
+        Route::post('pos/store', [OrderController::class, 'store'])->name('pos.store');
+    });
 
     // Kitchen Display System (KDS)
     Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
     Route::get('kds/poll', [KdsController::class, 'poll'])->name('kds.poll');
     Route::post('kds/{id}/status', [KdsController::class, 'updateStatus'])->name('kds.updateStatus');
+
+    // Counter Display System (CDS)
+    Route::get('/cds', [App\Http\Controllers\CdsController::class, 'index'])->name('cds.index');
+    Route::get('/cds/poll', [App\Http\Controllers\CdsController::class, 'poll'])->name('cds.poll');
+    Route::post('/cds/handover/{id}', [App\Http\Controllers\CdsController::class, 'handover'])->name('cds.handover');
+    Route::post('/cds/pay/{id}', [App\Http\Controllers\CdsController::class, 'markPaid'])->name('cds.pay');
+
+    // Inventory
+    Route::resource('inventory/ingredients', App\Http\Controllers\IngredientController::class)->names('ingredients');
+    Route::get('inventory/recipes', [App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
+    Route::get('inventory/recipes/{item}/edit', [App\Http\Controllers\RecipeController::class, 'edit'])->name('recipes.edit');
+    Route::put('inventory/recipes/{item}', [App\Http\Controllers\RecipeController::class, 'update'])->name('recipes.update');
+
+    // Shift Management
+    Route::get('shifts', [App\Http\Controllers\ShiftController::class, 'index'])->name('shifts.index');
+    Route::post('shifts/open', [App\Http\Controllers\ShiftController::class, 'open'])->name('shifts.open');
+    Route::get('shifts/close', [App\Http\Controllers\ShiftController::class, 'showCloseForm'])->name('shifts.close.form');
+    Route::post('shifts/close', [App\Http\Controllers\ShiftController::class, 'close'])->name('shifts.close');
+    Route::post('shifts/petty-cash', [App\Http\Controllers\ShiftController::class, 'storePettyCash'])->name('shifts.petty_cash');
     
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/check-pending', [OrderController::class, 'checkPending'])->name('orders.check-pending');

@@ -37,4 +37,11 @@ return [
         'base_url' => env('PAYU_BASE_URL', 'https://test.payu.in/_payment'),
     ],
 
+    'whatsapp' => [
+        'token' => env('WHATSAPP_TOKEN'),
+        'phone_number_id' => env('WHATSAPP_PHONE_NUMBER_ID'),
+        'version' => env('WHATSAPP_VERSION', 'v19.0'),
+        'order_paid_template' => env('WHATSAPP_ORDER_PAID_TEMPLATE', 'order_paid_status'),
+    ],
+
 ];

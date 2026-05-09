@@ -86,6 +86,30 @@
         .bell-badge { position: absolute; top: 6px; right: 6px; width: 7px; height: 7px; border-radius: 50%; border: 2px solid #fff; background: #ef4444; display: none; }
         .avatar-circle { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        .sidebar a .submenu-arrow { transition: transform 0.3s; font-size: 0.7rem; }
+        .sidebar a[aria-expanded="true"] .submenu-arrow { transform: rotate(180deg); }
+        .sidebar .collapse a { 
+            margin: 2px 15px !important; 
+            padding: 8px 18px 8px 45px !important;
+            font-size: 0.8rem;
+            background: transparent !important;
+            box-shadow: none !important;
+            color: #94a3b8 !important;
+        }
+        .sidebar .collapse a:hover {
+            color: #fff !important;
+            background: rgba(255,255,255,0.05) !important;
+        }
+        .sidebar .collapse a.active { 
+            color: #fff !important; 
+            font-weight: 600;
+            background: rgba(255,255,255,0.1) !important;
+        }
+        .sidebar.collapsed .submenu-arrow { display: none !important; }
+        .sidebar .sidebar-dropdown > a[aria-expanded="true"] {
+            color: #fff;
+            background: rgba(255,255,255,0.05);
+        }
     </style>
     @yield("styles")
 </head>
@@ -106,31 +130,113 @@
                 
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>
                 <a href="{{ route('pos.index') }}" class="text-warning"><i class="fas fa-cash-register"></i> <span>POS Screen</span></a>
+                <a href="{{ route('pos.express') }}" class="{{ request()->routeIs('pos.express') ? 'active' : '' }}" target="_blank" style="color: #fbbf24; font-weight: bold;">
+                    <i class="fas fa-bolt"></i> <span>Express POS</span>
+                </a>
                 <a href="{{ route('kds.index') }}" class="{{ request()->routeIs('kds.*') ? 'active' : '' }}" style="{{ request()->routeIs('kds.*') ? '' : 'color:#4ade80;' }}" target="_blank">
                     <i class="fas fa-fire-alt"></i>
                     <span>Kitchen Display</span>
                     <span class="ms-auto" style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; animation: blink 1.5s infinite;"></span>
                 </a>
-                <a href="{{ route('items.index') }}" class="{{ request()->routeIs('items.*') ? 'active' : '' }}"><i class="fas fa-box"></i> <span>Menu Items</span></a>
-                <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}"><i class="fas fa-layer-group"></i> <span>Categories</span></a>
+                <a href="{{ route('cds.index') }}" class="{{ request()->routeIs('cds.*') ? 'active' : '' }}" style="{{ request()->routeIs('cds.*') ? '' : 'color:#60a5fa;' }}" target="_blank">
+                    <i class="fas fa-desktop"></i>
+                    <span>Counter Display</span>
+                    <span class="ms-auto" style="display:inline-block; width:8px; height:8px; background:#3b82f6; border-radius:50%; animation: blink 1.5s infinite;"></span>
+                </a>
+                <div class="sidebar-dropdown">
+                    <a href="#catalogSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('items.*') || request()->routeIs('categories.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('items.*') || request()->routeIs('categories.*') ? 'true' : 'false' }}">
+                        <div><i class="fas fa-list"></i> <span class="ms-1">Catalog</span></div>
+                        <i class="fas fa-chevron-down small submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('items.*') || request()->routeIs('categories.*') ? 'show' : '' }}" id="catalogSubmenu">
+                        <a href="{{ route('items.index') }}" class="{{ request()->routeIs('items.*') ? 'active' : '' }}">
+                             <span>Menu Items</span>
+                        </a>
+                        <a href="{{ route('categories.index') }}" class="{{ request()->routeIs('categories.*') ? 'active' : '' }}">
+                             <span>Categories</span>
+                        </a>
+                    </div>
+                </div>
                 <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'active' : '' }} d-flex justify-content-between">
                     <div><i class="fas fa-shopping-cart"></i> <span>Orders</span></div>
                     <span class="badge bg-danger rounded-pill" id="sidebar-pending-count">{{ $pending_orders_count > 0 ? $pending_orders_count : '' }}</span>
                 </a>
-                <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'active' : '' }}"><i class="fas fa-user-friends"></i> <span>Customers</span></a>
-                <a href="{{ route('coupons.index') }}" class="{{ request()->routeIs('coupons.*') ? 'active' : '' }}"><i class="fas fa-tag"></i> <span>Coupons</span></a>
-                <a href="{{ route('expenses.index') }}" class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}"><i class="fas fa-wallet"></i> <span>Expenses</span></a>
-                <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}"><i class="fas fa-credit-card"></i> <span>Payments</span></a>
-                <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}"><i class="fas fa-chart-pie"></i> <span>Reports</span></a>
+                <div class="sidebar-dropdown">
+                    <a href="#crmSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('customers.*') || request()->routeIs('coupons.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('customers.*') || request()->routeIs('coupons.*') ? 'true' : 'false' }}">
+                        <div><i class="fas fa-user-friends"></i> <span class="ms-1">Relationships</span></div>
+                        <i class="fas fa-chevron-down small submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('customers.*') || request()->routeIs('coupons.*') ? 'show' : '' }}" id="crmSubmenu">
+                        <a href="{{ route('customers.index') }}" class="{{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                             <span>Customers</span>
+                        </a>
+                        <a href="{{ route('coupons.index') }}" class="{{ request()->routeIs('coupons.*') ? 'active' : '' }}">
+                             <span>Coupons</span>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="sidebar-dropdown">
+                    <a href="#inventorySubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->is('cp/inventory*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->is('cp/inventory*') ? 'true' : 'false' }}">
+                        <div><i class="fas fa-boxes"></i> <span class="ms-1">Inventory</span></div>
+                        <i class="fas fa-chevron-down small submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->is('cp/inventory*') ? 'show' : '' }}" id="inventorySubmenu">
+                        <a href="{{ route('ingredients.index') }}" class="{{ request()->is('cp/inventory/ingredients*') ? 'active' : '' }}">
+                             <span>Ingredient Master</span>
+                        </a>
+                        <a href="{{ route('recipes.index') }}" class="{{ request()->is('cp/inventory/recipes*') ? 'active' : '' }}">
+                             <span>Recipes Builder</span>
+                        </a>
+                    </div>
+                </div>
+
+                <a href="{{ route('shifts.index') }}" class="{{ request()->is('cp/shifts*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Shift History</span></a>
+                
+                <div class="sidebar-dropdown">
+                    <a href="#accountSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('payments.*') || request()->routeIs('reports.*') || request()->routeIs('expenses.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('payments.*') || request()->routeIs('reports.*') || request()->routeIs('expenses.*') ? 'true' : 'false' }}">
+                        <div><i class="fas fa-file-invoice-dollar"></i> <span class="ms-1">Financials</span></div>
+                        <i class="fas fa-chevron-down small submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('payments.*') || request()->routeIs('reports.*') || request()->routeIs('expenses.*') ? 'show' : '' }}" id="accountSubmenu">
+                        <a href="{{ route('expenses.index') }}" class="{{ request()->routeIs('expenses.*') ? 'active' : '' }}">
+                             <span>Expenses</span>
+                        </a>
+                        <a href="{{ route('payments.index') }}" class="{{ request()->routeIs('payments.*') ? 'active' : '' }}">
+                             <span>Payments</span>
+                        </a>
+                        <a href="{{ route('reports.index') }}" class="{{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                             <span>Reports</span>
+                        </a>
+                    </div>
+                </div>
                 
                 @if(auth()->user()->isAdmin())
-                <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}"><i class="fas fa-store"></i> <span>Store Settings</span></a>
-                <a href="{{ route('settings.payments') }}" class="{{ request()->routeIs('settings.payments') ? 'active' : '' }}"><i class="fas fa-credit-card"></i> <span>Payment Settings</span></a>
-                <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}"><i class="fas fa-user-shield"></i> <span>Staff Management</span></a>
-                <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Activity Logs</span></a>
-                @if(auth()->user()->isSuperAdmin())
-                <a href="{{ route('super-admin.tenants.index') }}" class="{{ request()->routeIs('super-admin.tenants.*') ? 'active' : '' }}"><i class="fas fa-users-cog"></i> <span>Tenants</span></a>
-                @endif
+                <div class="sidebar-dropdown">
+                    <a href="#settingsSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('logs.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('logs.*') ? 'true' : 'false' }}">
+                        <div><i class="fas fa-cog"></i> <span class="ms-1">System Settings</span></div>
+                        <i class="fas fa-chevron-down small submenu-arrow"></i>
+                    </a>
+                    <div class="collapse {{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('logs.*') ? 'show' : '' }}" id="settingsSubmenu">
+                        <a href="{{ route('settings.index') }}" class="{{ request()->routeIs('settings.index') ? 'active' : '' }}">
+                             <span>Store Settings</span>
+                        </a>
+                        <a href="{{ route('settings.payments') }}" class="{{ request()->routeIs('settings.payments') ? 'active' : '' }}">
+                             <span>Payment Settings</span>
+                        </a>
+                        <a href="{{ route('users.index') }}" class="{{ request()->routeIs('users.*') ? 'active' : '' }}">
+                             <span>Staff Management</span>
+                        </a>
+                        <a href="{{ route('logs.index') }}" class="{{ request()->routeIs('logs.*') ? 'active' : '' }}">
+                             <span>Activity Logs</span>
+                        </a>
+                        @if(auth()->user()->isSuperAdmin())
+                        <a href="{{ route('super-admin.tenants.index') }}" class="{{ request()->routeIs('super-admin.tenants.*') ? 'active' : '' }}">
+                             <span>Tenants</span>
+                        </a>
+                        @endif
+                    </div>
+                </div>
                 @endif
                 
                 <div class="mt-auto p-3">

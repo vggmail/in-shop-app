@@ -209,6 +209,7 @@ class PayUController extends Controller
             
             // Send Invoice Email
             $this->orderRepo->sendInvoiceEmail($order);
+            $this->orderRepo->sendOrderWhatsAppNotification($order);
             
             // Log Attempt as Success
             PaymentAttempt::where('txnid', $txnid)->update([
@@ -301,6 +302,7 @@ class PayUController extends Controller
                 
                 // Send Invoice Email
                 $this->orderRepo->sendInvoiceEmail($order);
+                $this->orderRepo->sendOrderWhatsAppNotification($order);
             }
             return response('OK', 200);
         }

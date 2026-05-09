@@ -103,7 +103,8 @@
                                     </div>
                                     <h6 class="mb-1 fw-bold text-dark"
                                         style="font-size: 0.85rem; height: 2.2em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">
-                                        {{ $i->name }}</h6>
+                                        {{ $i->name }}
+                                    </h6>
                                     <div class="text-danger fw-bold" style="font-size: 0.8rem;">
                                         &#8377;{{ number_format($i->price, 0) }}</div>
                                     <div class="progress mt-2" style="height: 3px;">
@@ -285,28 +286,22 @@
                     </div>
                 </div>
 
-                <div class="p-3 order-top bg-white">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span class="text-muted">Subtotal</span>
-                        <span class="fw-bold h6 mb-0">&#8377;<span id="subTotal">0.00</span></span>
+                <div class="p-4 bg-white border-top">
+                    <div class="d-flex justify-content-between mb-1 small text-muted">
+                        <span>Subtotal</span>
+                        <span id="sub-total">₹0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-3 text-success">
+                    <div class="d-flex justify-content-between mb-3 text-success small">
                         <span>Discount</span>
-                        <span class="fw-bold">-&#8377;<span id="discount">0.00</span></span>
+                        <span>-₹0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-4 pt-3 border-top">
-                        <span class="h5 fw-bold text-dark">Total Payable</span>
-                        <span class="h4 fw-bold text-primary mb-0">&#8377;<span id="grandTotal">0.00</span></span>
+                    <div class="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
+                        <span class="h5 fw-bold mb-0">Total Payable</span>
+                        <span class="h3 fw-bold text-primary mb-0" id="cart-total">₹0.00</span>
                     </div>
 
                     <div class="row g-2">
                         <div class="col-6">
-                            <select id="payment_method" class="form-select border border-primary-subtle fw-bold shadow-sm"
-                                style="height: 40px; border-radius: 50px; font-size: 0.95rem; padding-left: 20px;">
-                                <option value="Cash">💵 CASH</option>
-                                <option value="Card">💳 CARD</option>
-                                <option value="UPI">📱 UPI</option>
-                            </select>
                         </div>
                         <div class="col-6">
                             <button class="btn w-100 fw-bold shadow-sm text-white"
@@ -419,14 +414,14 @@
             if (variants && variants.length > 0) {
                 let defLabel = defaultSize || 'Regular';
                 let varHtml = `<div class="form-check p-0 mb-2">
-                    <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_def" value="" data-price="${price}" data-name="${defLabel}" checked onchange="calcModalPrice()">
-                    <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_def">${defLabel} <span class="float-end">&#8377;${price}</span></label>
-                </div>`;
+                        <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_def" value="" data-price="${price}" data-name="${defLabel}" checked onchange="calcModalPrice()">
+                        <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_def">${defLabel} <span class="float-end">&#8377;${price}</span></label>
+                    </div>`;
                 variants.forEach(v => {
                     varHtml += `<div class="form-check p-0 mb-2">
-                        <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}" onchange="calcModalPrice()">
-                        <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_${v.id}">${v.name} <span class="float-end">&#8377;${v.price}</span></label>
-                    </div>`;
+                            <input type="radio" class="btn-check m_variant_sel" name="v_sel" id="v_${v.id}" value="${v.id}" data-price="${v.price}" data-name="${v.name}" onchange="calcModalPrice()">
+                            <label class="btn btn-outline-secondary w-100 text-start px-3 py-2 fw-medium" for="v_${v.id}">${v.name} <span class="float-end">&#8377;${v.price}</span></label>
+                        </div>`;
                 });
                 $("#m_variants_list").html(varHtml);
                 $("#variantsBox").removeClass("d-none");
@@ -439,9 +434,9 @@
                 let extHtml = "";
                 extras.forEach(e => {
                     extHtml += `<div class="col-6">
-                        <input type="checkbox" class="btn-check m_extra_cb" id="ext_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}" onchange="calcModalPrice()">
-                        <label class="btn btn-outline-success btn-sm w-100 text-start p-2 fw-medium" for="ext_${e.id}">${e.name} <br>+&#8377;${e.price}</label>
-                    </div>`;
+                            <input type="checkbox" class="btn-check m_extra_cb" id="ext_${e.id}" value="${e.id}" data-price="${e.price}" data-name="${e.name}" onchange="calcModalPrice()">
+                            <label class="btn btn-outline-success btn-sm w-100 text-start p-2 fw-medium" for="ext_${e.id}">${e.name} <br>+&#8377;${e.price}</label>
+                        </div>`;
                 });
                 $("#m_extras_list").html(extHtml);
                 $("#extrasBox").removeClass("d-none");
@@ -545,9 +540,7 @@
             });
         }
 
-        let pos_coupon_id = null;
-
-        // Customer search logic
+        let pos_coupon_id;
         $("#customer_phone").on("input", function () {
             let q = $(this).val();
             if (q.length < 1) { $("#customer_dropdown").addClass("d-none"); return; }
@@ -555,7 +548,9 @@
                 let html = "";
                 if (data && Array.isArray(data)) {
                     data.forEach(c => {
-                        html += `<div class="p-2 border-bottom pointer cust-item" data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}" data-addresses="${JSON.stringify(c.addresses || []).replace(/"/g, '&quot;')}">
+                        html += `<div class="p-2 border-bottom pointer cust-item" 
+                            data-id="${c.id}" data-name="${c.name}" data-phone="${c.phone}" 
+                            data-addresses='${JSON.stringify(c.addresses || [])}'>
                             <div class="fw-bold" style="font-size: 0.8rem;">${c.name}</div>
                             <div class="small text-muted" style="font-size: 0.7rem;">${c.phone}</div>
                         </div>`;
@@ -564,22 +559,40 @@
                 if (html) $("#customer_dropdown").html(html).removeClass("d-none");
                 else $("#customer_dropdown").addClass("d-none");
             });
+        }).on("keydown", function(e) {
+            if (e.which === 13) {
+                e.preventDefault();
+                const firstItem = $(".cust-item").first();
+                if (firstItem.length) {
+                    selectPosCustomer(firstItem.data('id'), firstItem.data('phone'), firstItem.data('addresses'));
+                }
+            }
         });
 
-        $(document).on("click", ".cust-item", function () {
+        $(document).on("mousedown", ".cust-item", function (e) {
+            e.preventDefault();
             let id = $(this).data("id");
             let phone = $(this).data("phone");
             let addresses = $(this).data("addresses");
+            selectPosCustomer(id, phone, addresses);
+        });
+
+        window.selectPosCustomer = function(id, phone, addresses) {
             $("#selected_customer_id").val(id);
             $("#customer_phone").val(phone).prop("readonly", true);
             $("#clear_cust").removeClass("d-none");
-            $("#customer_dropdown").addClass("d-none");
+            $("#customer_dropdown").addClass("d-none").empty().hide();
+            
+            setTimeout(() => {
+                $("#customer_dropdown").addClass("d-none").empty().hide();
+            }, 50);
 
             // Handle POS Addresses
             let addrOpt = '<option value="">+ Add New Address</option>';
-            let defaultAddr = addresses.find(a => a.is_default);
-            if (addresses.length > 0) {
-                addresses.forEach(a => {
+            let addrList = Array.isArray(addresses) ? addresses : [];
+            let defaultAddr = addrList.find(a => a.is_default);
+            if (addrList.length > 0) {
+                addrList.forEach(a => {
                     addrOpt += `<option value="${a.street_address}" data-city="${a.city}" data-state="${a.state}" data-pin="${a.pincode}">${a.label}: ${a.street_address}</option>`;
                 });
                 $("#pos-saved-addresses").removeClass("d-none");
@@ -593,7 +606,7 @@
                 $("#pos-save-addr-check, #pos-new-address-fields").removeClass("d-none");
             }
             $("#pos_saved_address_list").html(addrOpt);
-        });
+        };
 
         $("#pos_saved_address_list").on("change", function () {
             let opt = $(this).find('option:selected');
@@ -660,22 +673,22 @@
             cart.forEach((item, idx) => {
                 sub += item.total;
                 html += `<div class="list-group-item cart-item bg-transparent px-0 py-2 border-0">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="pe-3">
-                            <div class="fw-bold text-dark">${item.name}</div>
-                            <div class="small text-muted mb-1">${item.variant_name ? item.variant_name : ''} ${item.extras_text ? '· ' + item.extras_text : ''}</div>
-                            <div class="text-primary fw-bold small">&#8377;${item.price.toFixed(2)}</div>
-                        </div>
-                        <div class="text-end">
-                            <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm mb-1 px-1">
-                                <button class="btn btn-sm btn-qty text-danger p-0" onclick="updateCartQty(${idx}, -1)"><i class="fas fa-minus-circle"></i></button>
-                                <span class="px-2 fw-bold" style="min-width: 30px;">${item.qty}</span>
-                                <button class="btn btn-sm btn-qty text-success p-0" onclick="updateCartQty(${idx}, 1)"><i class="fas fa-plus-circle"></i></button>
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="pe-3">
+                                <div class="fw-bold text-dark">${item.name}</div>
+                                <div class="small text-muted mb-1">${item.variant_name ? item.variant_name : ''} ${item.extras_text ? '· ' + item.extras_text : ''}</div>
+                                <div class="text-primary fw-bold small">&#8377;${item.price.toFixed(2)}</div>
                             </div>
-                            <div class="fw-bold text-dark">&#8377;${item.total.toFixed(2)}</div>
+                            <div class="text-end">
+                                <div class="d-flex align-items-center bg-white border rounded-pill shadow-sm mb-1 px-1">
+                                    <button class="btn btn-sm btn-qty text-danger p-0" onclick="updateCartQty(${idx}, -1)"><i class="fas fa-minus-circle"></i></button>
+                                    <span class="px-2 fw-bold" style="min-width: 30px;">${item.qty}</span>
+                                    <button class="btn btn-sm btn-qty text-success p-0" onclick="updateCartQty(${idx}, 1)"><i class="fas fa-plus-circle"></i></button>
+                                </div>
+                                <div class="fw-bold text-dark">&#8377;${item.total.toFixed(2)}</div>
+                            </div>
                         </div>
-                    </div>
-                </div>`;
+                    </div>`;
             });
             html += '</div>';
             $("#cartBody").html(html);

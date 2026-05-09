@@ -5,6 +5,7 @@ use App\Models\OrderItem;
 use App\Models\OrderItemExtra;
 use App\Models\Payment;
 use App\Models\Customer;
+use App\Services\WhatsAppService;
 use DB;
 
 class OrderRepository extends BaseRepository
@@ -76,7 +77,7 @@ class OrderRepository extends BaseRepository
                 "grand_total" => $data["grand_total"],
                 "payment_method" => $data["payment_method"],
                 "payment_status" => $data["payment_status"] ?? ($data["grand_total"] > 0 && $data["payment_method"] != "Pending" && !$isOnline ? "Paid" : "Pending"),
-                "status" => $isOnline ? "Pending Payment" : "Preparing",
+                "status" => ($isOnline && ($data["source"] ?? "Online") !== "POS") ? "Pending Payment" : "Preparing",
             ]);
             \Illuminate\Support\Facades\Log::info("OrderRepo: Order record created ID: " . $order->id . " Num: " . $orderNum);
 
@@ -99,6 +100,19 @@ class OrderRepository extends BaseRepository
 
                     // Reduce Stock
                     $itemModel->decrement("stock_quantity", $item["quantity"]);
+
+                    // Deduct Ingredients (Recipe)
+                    $ingredients = \App\Models\ItemIngredient::where('item_id', $item["item_id"])
+                        ->where(function($q) use ($item) {
+                            $q->whereNull('variant_id')
+                              ->orWhere('variant_id', $item["variant_id"] ?? null);
+                        })->get();
+
+                    foreach ($ingredients as $recipe) {
+                        $totalDeduct = $recipe->quantity * $item["quantity"];
+                        \App\Models\Ingredient::where('id', $recipe->ingredient_id)
+                            ->decrement('stock_quantity', $totalDeduct);
+                    }
 
                     if (!empty($item["extras"])) {
                         foreach ($item["extras"] as $extra) {
@@ -156,6 +170,7 @@ class OrderRepository extends BaseRepository
             // Send Invoice ONLY if Payment is already Paid (CASH/POS)
             if ($order->payment_status == 'Paid') {
                 $this->sendInvoiceEmail($order);
+                $this->sendOrderWhatsAppNotification($order);
             }
 
             return $order;
@@ -204,6 +219,35 @@ class OrderRepository extends BaseRepository
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("OrderRepo Status Mail Error: " . $e->getMessage());
+        }
+        return false;
+    }
+
+    public function sendOrderWhatsAppNotification($order)
+    {
+        try {
+            if (!$order->relationLoaded('customer')) {
+                $order->load(['customer' => fn($q) => $q->withTrashed()]);
+            }
+
+            if ($order->customer && !empty($order->customer->phone)) {
+                $whatsapp = app(WhatsAppService::class);
+                $template = config('services.whatsapp.order_paid_template');
+                
+                // Example Parameters: [Customer Name, Order Number, Status, Amount]
+                $params = [
+                    $order->customer->name ?? 'Customer',
+                    $order->order_number,
+                    $order->status,
+                    number_format($order->grand_total, 2)
+                ];
+
+                $whatsapp->sendTemplateMessage($order->customer->phone, $template, $params);
+                \Illuminate\Support\Facades\Log::info("OrderRepo: WhatsApp notification sent to " . $order->customer->phone . " for Order #" . $order->order_number);
+                return true;
+            }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("OrderRepo WhatsApp Error: " . $e->getMessage());
         }
         return false;
     }
