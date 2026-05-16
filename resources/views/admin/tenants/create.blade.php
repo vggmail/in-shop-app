@@ -91,6 +91,7 @@
                             <label class="small fw-bold text-muted mb-2">FLOOR PLANS</label>
                             <div id="floorPlansContainer">
                                 <div class="row g-2 mb-2 floor-plan-row">
+                                    <input type="hidden" name="floor_plans[0][is_deleted]" class="is-deleted-flag" value="0">
                                     <div class="col-md-5">
                                         <input type="text" name="floor_plans[0][name]" class="form-control" placeholder="Section Name (e.g. Main Hall)" value="Main Hall (A/C)">
                                     </div>
@@ -101,10 +102,11 @@
                                         <input type="number" name="floor_plans[0][end]" class="form-control" placeholder="End Table" value="15">
                                     </div>
                                     <div class="col-md-1">
-                                        <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="removeFloorPlan(this)"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </div>
                                 <div class="row g-2 mb-2 floor-plan-row">
+                                    <input type="hidden" name="floor_plans[1][is_deleted]" class="is-deleted-flag" value="0">
                                     <div class="col-md-5">
                                         <input type="text" name="floor_plans[1][name]" class="form-control" placeholder="Section Name (e.g. Outdoor)" value="Outdoor (Non A/C)">
                                     </div>
@@ -115,7 +117,22 @@
                                         <input type="number" name="floor_plans[1][end]" class="form-control" placeholder="End Table" value="25">
                                     </div>
                                     <div class="col-md-1">
-                                        <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="removeFloorPlan(this)"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2 floor-plan-row">
+                                    <input type="hidden" name="floor_plans[2][is_deleted]" class="is-deleted-flag" value="0">
+                                    <div class="col-md-5">
+                                        <input type="text" name="floor_plans[2][name]" class="form-control" placeholder="Section Name (e.g. Bar)" value="Bar">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[2][start]" class="form-control" placeholder="Start Table" value="26">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[2][end]" class="form-control" placeholder="End Table" value="30">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="removeFloorPlan(this)"><i class="fas fa-trash"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -162,12 +179,13 @@
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Provisioning Store... Please wait';
     });
 
-    let fpIndex = 2;
+    let fpIndex = 3;
     function addFloorPlan() {
         const container = document.getElementById('floorPlansContainer');
         const row = document.createElement('div');
         row.className = 'row g-2 mb-2 floor-plan-row';
         row.innerHTML = `
+            <input type="hidden" name="floor_plans[${fpIndex}][is_deleted]" class="is-deleted-flag" value="0">
             <div class="col-md-5">
                 <input type="text" name="floor_plans[${fpIndex}][name]" class="form-control" placeholder="Section Name (e.g. Balcony)">
             </div>
@@ -178,11 +196,28 @@
                 <input type="number" name="floor_plans[${fpIndex}][end]" class="form-control" placeholder="End Table">
             </div>
             <div class="col-md-1">
-                <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                <button type="button" class="btn btn-outline-danger w-100" onclick="removeFloorPlan(this)"><i class="fas fa-trash"></i></button>
             </div>
         `;
         container.appendChild(row);
         fpIndex++;
+    }
+
+    function removeFloorPlan(btn) {
+        const container = document.getElementById('floorPlansContainer');
+        let visibleRows = 0;
+        container.querySelectorAll('.floor-plan-row').forEach(row => {
+            if (row.style.display !== 'none') visibleRows++;
+        });
+
+        if (visibleRows <= 1) {
+            showToast('warning', 'Action Denied', 'You must have at least one active floor plan section.');
+            return;
+        }
+
+        let flag = btn.closest('.floor-plan-row').querySelector('.is-deleted-flag');
+        if(flag) flag.value = '1';
+        btn.closest('.floor-plan-row').style.display = 'none';
     }
 </script>
 @endsection

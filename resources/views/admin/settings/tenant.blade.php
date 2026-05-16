@@ -238,6 +238,9 @@
                                         $plans = is_array($tenant->floor_plans) ? $tenant->floor_plans : (json_decode($tenant->floor_plans, true) ?: $defaultPlans);
                                     @endphp
                                     @foreach($plans as $i => $plan)
+                                        @if(isset($plan['is_deleted']) && $plan['is_deleted'])
+                                            @continue
+                                        @endif
                                         <div class="row g-2 mb-3 floor-plan-row align-items-center">
                                             <div class="col-md-6">
                                                 <label class="small text-muted fw-bold mb-1">Section Name</label>

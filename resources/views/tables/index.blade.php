@@ -144,7 +144,9 @@
             <select class="floor-plan-select" id="floorPlanSelect">
                 <option value="all">All Layouts</option>
                 @foreach($floorPlans as $index => $plan)
-                    <option value="floor-{{ $index }}">{{ $plan['name'] }}</option>
+                    @if(!isset($plan['is_deleted']) || !$plan['is_deleted'])
+                        <option value="floor-{{ $index }}">{{ $plan['name'] }}</option>
+                    @endif
                 @endforeach
             </select>
         </div>
@@ -169,7 +171,10 @@
 
     <!-- Table Sections -->
     @foreach($floorPlans as $index => $plan)
-    <div class="table-section floor-section border-top" id="floor-{{ $index }}">
+        @if(isset($plan['is_deleted']) && $plan['is_deleted'])
+            @continue
+        @endif
+        <div class="table-section floor-section border-top" id="floor-{{ $index }}">
         <div class="section-title">{{ $plan['name'] }}</div>
         <div class="table-grid">
             @for($i = $plan['start']; $i <= $plan['end']; $i++)
