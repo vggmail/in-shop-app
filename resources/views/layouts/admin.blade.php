@@ -116,7 +116,7 @@
 <body>
     <div class="sidebar-overlay" id="sidebar-overlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 1040; display: none;"></div>
     <div class="row g-0 flex-nowrap min-vh-100">
-        <div class="col-auto sidebar" id="admin-sidebar">
+        <div class="col-auto sidebar {{ request()->has('fullscreen') ? 'd-none' : '' }}" id="admin-sidebar">
                 <div class="px-3 py-3 d-flex align-items-center">
                     @if(isset($tenant_info) && $tenant_info->logo)
                         <img src="{{ asset($tenant_info->logo) }}" class="rounded-circle me-2 shadow-sm" style="width: 32px; height: 32px; object-fit: cover;">
@@ -133,7 +133,7 @@
                 <a href="{{ route('pos.express') }}" class="{{ request()->routeIs('pos.express') ? 'active' : '' }}" target="_blank" style="color: #fbbf24; font-weight: bold;">
                     <i class="fas fa-bolt"></i> <span>Express POS</span>
                 </a>
-                <a href="{{ route('tables.index') }}" class="{{ request()->routeIs('tables.index') ? 'active' : '' }}">
+                <a href="javascript:void(0)" onclick="window.open('{{ route('tables.index') }}?fullscreen=1', 'TableView', 'width='+screen.width+',height='+screen.height+',top=0,left=0,resizable=yes,scrollbars=yes,menubar=no,toolbar=no,location=no,status=no');" class="{{ request()->routeIs('tables.index') ? 'active' : '' }}">
                     <i class="fas fa-th-large"></i> <span>Table View</span>
                 </a>
                 <a href="{{ route('kds.index') }}" class="{{ request()->routeIs('kds.*') ? 'active' : '' }}" style="{{ request()->routeIs('kds.*') ? '' : 'color:#4ade80;' }}" target="_blank">
@@ -251,7 +251,7 @@
             </div>
             
             <div class="col main-content">
-                <nav class="top-navbar d-flex justify-content-between align-items-center shadow-sm">
+                <nav class="top-navbar {{ request()->has('fullscreen') ? 'd-none' : '' }} d-flex justify-content-between align-items-center shadow-sm">
                     <div class="d-flex align-items-center">
                         <button class="btn btn-link link-dark d-lg-none p-0 me-3 shadow-none" id="sidebar-toggler"><i class="fas fa-bars fs-4"></i></button>
                         <button class="btn btn-link link-dark d-none d-lg-block p-0 me-3 shadow-none" id="sidebar-toggler-desktop"><i class="fas fa-indent fs-4"></i></button>
@@ -302,7 +302,7 @@
                     </div>
                 </nav>
                 
-                <div class="content-area">
+                <div class="content-area {{ request()->has('fullscreen') ? 'p-0' : '' }}">
                     @if(isset($tenant_info) && $tenant_info->expires_at)
                     @php
                         $daysLeft = now()->diffInDays($tenant_info->expires_at, false);

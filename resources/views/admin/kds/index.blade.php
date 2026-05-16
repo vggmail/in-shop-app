@@ -47,7 +47,7 @@
         <div class="kds-card-header">
             <div>
                 <div class="order-number">
-                    <span class="text-warning">Token #{{ $order->token_number ?? 'N/A' }}</span>
+                    <span class="token-badge {{ !$order->token_number ? 'token-na' : '' }}">Token #{{ $order->token_number ?? 'N/A' }}</span>
                     <div style="font-size:0.7rem; color:#94a3b8; font-weight:500; margin-top:2px;">
                         ORD #{{ $order->order_number }}
                         @if($order->table_number)
@@ -341,7 +341,7 @@
             <div class="kds-card-header">
                 <div>
                     <div class="order-number">
-                        <span class="text-warning">Token #${o.token_number || 'N/A'}</span>
+                        <span class="token-badge ${!o.token_number ? 'token-na' : ''}">Token #${o.token_number || 'N/A'}</span>
                         <div style="font-size:0.7rem; color:#94a3b8; font-weight:500; margin-top:2px;">
                             ORD #${o.order_number}
                             ${o.table_number ? ' · Table ' + o.table_number : ''}

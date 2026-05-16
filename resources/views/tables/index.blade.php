@@ -17,6 +17,20 @@
     .delivery-btns .btn { border-radius: 6px; font-weight: 600; font-size: 0.85rem; padding: 6px 20px; border: none; margin-left: 10px; color: white; background: var(--accent-color); transition: 0.2s; }
     .delivery-btns .btn:hover { background: #e03d4b; transform: translateY(-1px); }
     
+    /* Counter Clock */
+    .counter-clock {
+        color: #1e293b;
+        padding: 5px 15px;
+        font-family: 'Inter', sans-serif;
+        font-weight: 800;
+        font-size: 1.4rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        line-height: 1;
+    }
+    .clock-time { letter-spacing: 1px; }
+    
     /* Filters Bar */
     .table-filters {
         padding: 15px 20px;
@@ -112,8 +126,14 @@
     <!-- Sub Header -->
     <div class="table-subheader">
         <div class="table-view-title"><i class="fas fa-th-large text-danger me-2"></i>Table Management</div>
+        
+        <div class="counter-clock mx-auto d-none d-md-flex">
+            <div class="clock-time" id="digitalClock">00:00:00</div>
+        </div>
+
         <div class="delivery-btns d-flex align-items-center">
-            <a href="javascript:void(0)" onclick="location.reload()" class="text-muted me-3 text-decoration-none transition"><i class="fas fa-sync-alt fa-lg"></i></a>
+            <a href="javascript:void(0)" onclick="location.reload()" class="text-muted me-3 text-decoration-none transition" title="Refresh"><i class="fas fa-sync-alt"></i></a>
+            <a href="javascript:void(0)" onclick="toggleFullScreen()" class="text-muted me-3 text-decoration-none transition" id="fullscreenBtn" title="Fullscreen"><i class="fas fa-expand fa-lg"></i></a>
             <a href="{{ route('pos.index') }}?type=Delivery" class="btn"><i class="fas fa-motorcycle me-1"></i> Delivery</a>
             <a href="{{ route('pos.index') }}?type=Takeaway" class="btn"><i class="fas fa-walking me-1"></i> Take Away</a>
         </div>
@@ -223,5 +243,42 @@
             }
         });
     });
+
+    function toggleFullScreen() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                showToast('error', 'Error', `Error attempting to enable full-screen mode: ${err.message} (${err.name})`);
+            });
+            document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-compress fa-lg"></i>';
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand fa-lg"></i>';
+            }
+        }
+    }
+
+    // Listen for fullscreen change events to update icon
+    document.addEventListener('fullscreenchange', () => {
+        if (!document.fullscreenElement) {
+            document.getElementById('fullscreenBtn').innerHTML = '<i class="fas fa-expand fa-lg"></i>';
+        }
+    });
+
+    function updateClock() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        
+        const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        const dayName = days[now.getDay()];
+        document.getElementById('digitalClock').textContent = `${hours}:${minutes}:${seconds}`;
+    }
+    
+    setInterval(updateClock, 1000);
+    updateClock();
 </script>
 @endsection
