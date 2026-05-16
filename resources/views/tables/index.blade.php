@@ -1,4 +1,6 @@
 @extends("layouts.admin")
+@section('page_title', 'Counter Display')
+@section('header_title', 'Counter Display')
 
 @section("styles")
 <style>
@@ -117,6 +119,19 @@
         font-weight: 800;
         margin-top: 2px;
     }
+    .table-token {
+        font-size: 0.65rem;
+        font-weight: 700;
+        margin-top: 4px;
+        padding: 2px 6px;
+        border-radius: 4px;
+        background: #f1f5f9;
+        color: #475569;
+    }
+    .token-na {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
 </style>
 @endsection
 
@@ -125,7 +140,7 @@
 <div class="table-view-container mb-4">
     <!-- Sub Header -->
     <div class="table-subheader">
-        <div class="table-view-title"><i class="fas fa-th-large text-danger me-2"></i>Table Management</div>
+        <div class="table-view-title"><i class="fas fa-th-large text-danger me-2"></i>Counter Display</div>
         
         <div class="counter-clock mx-auto d-none d-md-flex">
             <div class="clock-time" id="digitalClock">00:00:00</div>
@@ -203,6 +218,7 @@
                 <a href="{{ route('pos.index') }}?table={{ $i }}" class="table-box {{ $state['class'] }}">
                     Table {{ $i }}
                     @if($state['order'])
+                        <div class="table-token {{ !$state['order']->token_number ? 'token-na' : '' }}">T #{{ $state['order']->token_number ?? 'N/A' }}</div>
                         <div class="table-time">{{ \Carbon\Carbon::parse($state['order']->created_at)->diffForHumans() }}</div>
                         <div class="table-amount">₹{{ number_format($state['order']->grand_total, 0) }}</div>
                         <div class="table-actions table-actions-always" onclick="event.preventDefault(); window.open('{{ route('orders.invoice', $state['order']->id) }}', '_blank')">

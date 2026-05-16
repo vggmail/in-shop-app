@@ -1,16 +1,21 @@
 @extends('layouts.kds')
+@section('page_title', 'Counter Display')
+@section('brand_text', 'Counter Display')
 
 @section('styles')
 <style>
-    .cds-topbar { background: #1e1b4b; border-bottom: 1px solid #312e81; }
-    .badge-ready { background: #14532d; color: #4ade80; animation: pulse-green 1.5s infinite; }
-    @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4); } 70% { box-shadow: 0 0 0 10px rgba(74, 222, 128, 0); } 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0); } }
-    .card-ready { border-color: #22c55e !important; background: #064e3b !important; }
-    .btn-pay { background: #f59e0b; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; flex: 1; }
-    .btn-complete { background: #22c55e; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; flex: 1; }
+    .cds-topbar { background: #fff; border-bottom: 1px solid #e2e8f0; }
+    .badge-ready { background: #dcfce7; color: #15803d; animation: pulse-green 1.5s infinite; }
+    @keyframes pulse-green { 0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.2); } 70% { box-shadow: 0 0 0 10px rgba(34, 197, 94, 0); } 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); } }
+    .card-ready { border-color: #22c55e !important; background: #f0fdf4 !important; }
+    .btn-pay { background: #f59e0b; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; flex: 1; transition: 0.2s; }
+    .btn-pay:hover { background: #d97706; transform: translateY(-1px); }
+    .btn-complete { background: #22c55e; color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: bold; flex: 1; transition: 0.2s; }
+    .btn-complete:hover { background: #16a34a; transform: translateY(-1px); }
     .payment-badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: bold; margin-left: 5px; }
-    .payment-paid { background: #065f46; color: #34d399; }
-    .payment-pending { background: #7f1d1d; color: #f87171; }
+    .payment-paid { background: #dcfce7; color: #166534; }
+    .payment-pending { background: #fee2e2; color: #991b1b; }
+    .text-white { color: #1e293b !important; }
 </style>
 @endsection
 
@@ -34,8 +39,8 @@
             
             <div class="kds-card-header">
                 <div>
-                    <div class="order-number" style="font-size: 1.5rem;">
-                        Token #{{ $order->token_number }}
+                    <div class="order-number">
+                        <span class="token-badge {{ !$order->token_number ? 'token-na' : '' }}">Token #{{ $order->token_number ?? 'N/A' }}</span>
                     </div>
                     <div class="small text-muted">ORD #{{ $order->order_number }}</div>
                 </div>

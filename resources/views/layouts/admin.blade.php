@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ (app()->bound('tenant') ? app('tenant')->name : null) ?? 'Restaurant POS' }} - Admin Panel</title>
+    <title>@yield('page_title', 'Admin Panel') - {{ (app()->bound('tenant') ? app('tenant')->name : null) ?? 'Restaurant POS' }}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -255,7 +255,7 @@
                     <div class="d-flex align-items-center">
                         <button class="btn btn-link link-dark d-lg-none p-0 me-3 shadow-none" id="sidebar-toggler"><i class="fas fa-bars fs-4"></i></button>
                         <button class="btn btn-link link-dark d-none d-lg-block p-0 me-3 shadow-none" id="sidebar-toggler-desktop"><i class="fas fa-indent fs-4"></i></button>
-                        <h5 class="mb-0 fw-bold text-dark opacity-75">Control Center</h5>
+                        <h5 class="mb-0 fw-bold text-dark opacity-75">@yield('header_title', 'Control Center')</h5>
                     </div>
                     <div class="d-flex align-items-center">
                         <div class="notification-bell me-3" id="notif-trigger" data-bs-toggle="dropdown">
