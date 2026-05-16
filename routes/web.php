@@ -18,6 +18,7 @@ use App\Http\Controllers\CustomerAuthController;
 use App\Http\Controllers\KdsController;
 use App\Http\Controllers\CdsController;
 use App\Http\Controllers\ExpressPosController;
+use App\Http\Controllers\TableBookingController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -138,6 +139,9 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('reports', [OrderController::class, 'reports'])->name('reports.index');
     Route::get('logs', [AdminController::class, 'logs'])->name('logs.index');
     Route::resource('users', UserAdminController::class)->except(['create', 'show', 'edit']);
+    
+    // Table Booking
+    Route::get('tables', [TableBookingController::class, 'index'])->name('tables.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

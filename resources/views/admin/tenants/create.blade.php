@@ -87,6 +87,42 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-2">FLOOR PLANS</label>
+                            <div id="floorPlansContainer">
+                                <div class="row g-2 mb-2 floor-plan-row">
+                                    <div class="col-md-5">
+                                        <input type="text" name="floor_plans[0][name]" class="form-control" placeholder="Section Name (e.g. Main Hall)" value="Main Hall (A/C)">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[0][start]" class="form-control" placeholder="Start Table" value="1">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[0][end]" class="form-control" placeholder="End Table" value="15">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                                <div class="row g-2 mb-2 floor-plan-row">
+                                    <div class="col-md-5">
+                                        <input type="text" name="floor_plans[1][name]" class="form-control" placeholder="Section Name (e.g. Outdoor)" value="Outdoor (Non A/C)">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[1][start]" class="form-control" placeholder="Start Table" value="16">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="number" name="floor_plans[1][end]" class="form-control" placeholder="End Table" value="25">
+                                    </div>
+                                    <div class="col-md-1">
+                                        <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addFloorPlan()"><i class="fas fa-plus"></i> Add Floor Plan Section</button>
+                            <div class="small text-muted mt-2">Define physical sections and the table number range for each.</div>
+                        </div>
+
                         @if($errors->has('general'))
                         <div class="alert alert-danger rounded-3 fw-bold small">
                             <i class="fas fa-exclamation-triangle me-2"></i> {{ $errors->first('general') }}
@@ -125,5 +161,28 @@
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Provisioning Store... Please wait';
     });
+
+    let fpIndex = 2;
+    function addFloorPlan() {
+        const container = document.getElementById('floorPlansContainer');
+        const row = document.createElement('div');
+        row.className = 'row g-2 mb-2 floor-plan-row';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" name="floor_plans[${fpIndex}][name]" class="form-control" placeholder="Section Name (e.g. Balcony)">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="floor_plans[${fpIndex}][start]" class="form-control" placeholder="Start Table">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="floor_plans[${fpIndex}][end]" class="form-control" placeholder="End Table">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        container.appendChild(row);
+        fpIndex++;
+    }
 </script>
 @endsection

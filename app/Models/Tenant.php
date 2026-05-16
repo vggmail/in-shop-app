@@ -11,7 +11,7 @@ class Tenant extends Model
 {
     use HasFactory, SoftDeletes;
     protected $connection = 'mysql';
-    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active', 'expires_at', 'logo', 'tagline', 'address', 'city', 'state', 'pincode', 'phone', 'whatsapp_number', 'gst_number', 'dine_in_enabled', 'takeaway_enabled', 'home_delivery_enabled', 'cash_enabled', 'online_enabled', 'disable_home_page', 'starting_token'];
+    protected $fillable = ['subdomain', 'name', 'upi_id', 'is_active', 'expires_at', 'logo', 'tagline', 'address', 'city', 'state', 'pincode', 'phone', 'whatsapp_number', 'gst_number', 'dine_in_enabled', 'takeaway_enabled', 'home_delivery_enabled', 'cash_enabled', 'online_enabled', 'disable_home_page', 'starting_token', 'floor_plans'];
 
     protected $casts = [
         'dine_in_enabled' => 'boolean',
@@ -22,5 +22,6 @@ class Tenant extends Model
         'expires_at' => 'datetime',
         'is_active' => 'boolean',
         'disable_home_page' => 'boolean',
+        'floor_plans' => 'array',
     ];
 }

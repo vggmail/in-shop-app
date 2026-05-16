@@ -67,6 +67,48 @@
                             </div>
                         </div>
 
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-2">FLOOR PLANS</label>
+                            <div id="floorPlansContainer">
+                                @php
+                                    $plans = is_array($tenant->floor_plans) ? $tenant->floor_plans : (json_decode($tenant->floor_plans, true) ?? []);
+                                @endphp
+                                @forelse($plans as $i => $plan)
+                                    <div class="row g-2 mb-2 floor-plan-row">
+                                        <div class="col-md-5">
+                                            <input type="text" name="floor_plans[{{$i}}][name]" class="form-control" placeholder="Section Name (e.g. Main Hall)" value="{{ $plan['name'] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="floor_plans[{{$i}}][start]" class="form-control" placeholder="Start Table" value="{{ $plan['start'] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="floor_plans[{{$i}}][end]" class="form-control" placeholder="End Table" value="{{ $plan['end'] ?? '' }}">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                @empty
+                                    <div class="row g-2 mb-2 floor-plan-row">
+                                        <div class="col-md-5">
+                                            <input type="text" name="floor_plans[0][name]" class="form-control" placeholder="Section Name (e.g. Main Hall)">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="floor_plans[0][start]" class="form-control" placeholder="Start Table">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <input type="number" name="floor_plans[0][end]" class="form-control" placeholder="End Table">
+                                        </div>
+                                        <div class="col-md-1">
+                                            <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+                                        </div>
+                                    </div>
+                                @endforelse
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" onclick="addFloorPlan()"><i class="fas fa-plus"></i> Add Floor Plan Section</button>
+                            <div class="small text-muted mt-2">Define physical sections and the table number range for each.</div>
+                        </div>
+
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary py-3 fw-bold shadow-lg">
                                 <i class="fas fa-save me-2"></i> Update Tenant Information
@@ -79,4 +121,29 @@
         </div>
     </div>
 </div>
+
+<script>
+    let fpIndex = {{ isset($plans) ? max(1, count($plans)) : 1 }};
+    function addFloorPlan() {
+        const container = document.getElementById('floorPlansContainer');
+        const row = document.createElement('div');
+        row.className = 'row g-2 mb-2 floor-plan-row';
+        row.innerHTML = `
+            <div class="col-md-5">
+                <input type="text" name="floor_plans[${fpIndex}][name]" class="form-control" placeholder="Section Name (e.g. Balcony)">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="floor_plans[${fpIndex}][start]" class="form-control" placeholder="Start Table">
+            </div>
+            <div class="col-md-3">
+                <input type="number" name="floor_plans[${fpIndex}][end]" class="form-control" placeholder="End Table">
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-outline-danger w-100" onclick="this.closest('.floor-plan-row').remove()"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        container.appendChild(row);
+        fpIndex++;
+    }
+</script>
 @endsection

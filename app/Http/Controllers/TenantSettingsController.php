@@ -45,7 +45,8 @@ class TenantSettingsController extends Controller
             'home_delivery_enabled' => 'nullable|boolean',
             'cash_enabled' => 'nullable|boolean',
             'online_enabled' => 'nullable|boolean',
-            'starting_token' => 'nullable|integer|min:1'
+            'starting_token' => 'nullable|integer|min:1',
+            'floor_plans' => 'nullable|array'
         ]);
 
         $tenantModel = Tenant::find($tenant->id);
@@ -70,6 +71,22 @@ class TenantSettingsController extends Controller
         $tenantModel->cash_enabled = $request->has('cash_enabled');
         $tenantModel->online_enabled = $request->has('online_enabled');
         $tenantModel->starting_token = $request->starting_token ?? 100;
+        
+        if ($request->has('floor_plans')) {
+            $val = $request->floor_plans;
+            $parsed = is_string($val) ? json_decode($val, true) : $val;
+            if (is_array($parsed)) {
+                $filtered = array_values(array_filter($parsed, function($item) {
+                    return !empty($item['name']);
+                }));
+                $tenantModel->floor_plans = empty($filtered) ? null : $filtered;
+            } else {
+                $tenantModel->floor_plans = null;
+            }
+        } else {
+            $tenantModel->floor_plans = null;
+        }
+        
         $tenantModel->save();
 
         return redirect()->back()->with('success', 'Store settings updated successfully!');

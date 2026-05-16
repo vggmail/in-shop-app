@@ -380,6 +380,18 @@
                 cart = JSON.parse(saved);
                 renderCart();
             }
+            
+            // Pre-fill table number from URL if provided
+            let urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('table')) {
+                $("#table_number").val(urlParams.get('table'));
+                $("#type-dinein").prop("checked", true).trigger("change");
+            }
+            if (urlParams.has('type')) {
+                let type = urlParams.get('type');
+                if (type === 'Delivery') $("#type-delivery").prop("checked", true).trigger("change");
+                if (type === 'Takeaway') $("#type-takeaway").prop("checked", true).trigger("change");
+            }
         });
 
         let pos_discount_val = 0;

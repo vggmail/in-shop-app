@@ -221,6 +221,44 @@
                         </div>
                     </div>
 
+                    <h5 class="fw-bold mb-4 text-primary border-bottom pb-2 mt-5"><i class="fas fa-th-large me-2"></i>
+                        Floor Plans Configuration</h5>
+                    <p class="text-muted small mb-4">Define physical table sections and the range of table numbers for each layout.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="p-4 border rounded-3 bg-light shadow-sm">
+                                <div id="floorPlansContainer">
+                                    @php
+                                        $defaultPlans = [
+                                            ['name' => 'Main Hall (A/C)', 'start' => 1, 'end' => 15],
+                                            ['name' => 'Outdoor (Non A/C)', 'start' => 16, 'end' => 25],
+                                            ['name' => 'Bar', 'start' => 26, 'end' => 30]
+                                        ];
+                                        $plans = is_array($tenant->floor_plans) ? $tenant->floor_plans : (json_decode($tenant->floor_plans, true) ?: $defaultPlans);
+                                    @endphp
+                                    @foreach($plans as $i => $plan)
+                                        <div class="row g-2 mb-3 floor-plan-row align-items-center">
+                                            <div class="col-md-6">
+                                                <label class="small text-muted fw-bold mb-1">Section Name</label>
+                                                <input type="text" name="floor_plans[{{$i}}][name]" class="form-control bg-light fw-bold text-muted" placeholder="e.g. Main Hall" value="{{ $plan['name'] ?? '' }}" readonly required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="small text-muted fw-bold mb-1">Start Table No.</label>
+                                                <input type="number" name="floor_plans[{{$i}}][start]" class="form-control bg-white" placeholder="Start" value="{{ $plan['start'] ?? '' }}" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="small text-muted fw-bold mb-1">End Table No.</label>
+                                                <input type="number" name="floor_plans[{{$i}}][end]" class="form-control bg-white" placeholder="End" value="{{ $plan['end'] ?? '' }}" required>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="small text-danger mt-2"><i class="fas fa-info-circle me-1"></i> Note: Section names are configured by the Super Admin. You can only adjust the table ranges.</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-5 text-end border-top pt-4">
                         <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm px-5 fw-bold">
                             <i class="fas fa-save me-2"></i> Save Settings
@@ -250,5 +288,6 @@
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
+
     </script>
 @endsection

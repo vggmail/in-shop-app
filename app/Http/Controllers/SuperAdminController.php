@@ -52,6 +52,18 @@ class SuperAdminController extends Controller
         $prefix = config('database.tenant_prefix', '');
         $dbName = $prefix . $subdomain;
 
+        $floorPlans = null;
+        if ($request->has('floor_plans')) {
+            $val = $request->floor_plans;
+            $parsed = is_string($val) ? json_decode($val, true) : $val;
+            if (is_array($parsed)) {
+                $floorPlans = array_values(array_filter($parsed, function($item) {
+                    return !empty($item['name']);
+                }));
+                if (empty($floorPlans)) $floorPlans = null;
+            }
+        }
+
         // 1. Create entry in central DB
         $tenant = Tenant::on('mysql')->create([
             'name' => $request->name,
@@ -59,6 +71,7 @@ class SuperAdminController extends Controller
             'is_active' => true,
             'disable_home_page' => $request->has('disable_home_page'),
             'expires_at' => $request->expires_at,
+            'floor_plans' => $floorPlans,
         ]);
 
         // 2. Create physical database
@@ -152,6 +165,20 @@ class SuperAdminController extends Controller
         $data = $request->only('name', 'subdomain', 'expires_at');
         $data['is_active'] = $request->has('is_active');
         $data['disable_home_page'] = $request->has('disable_home_page');
+        if ($request->has('floor_plans')) {
+            $val = $request->floor_plans;
+            $parsed = is_string($val) ? json_decode($val, true) : $val;
+            if (is_array($parsed)) {
+                $filtered = array_values(array_filter($parsed, function($item) {
+                    return !empty($item['name']);
+                }));
+                $data['floor_plans'] = empty($filtered) ? null : $filtered;
+            } else {
+                $data['floor_plans'] = null;
+            }
+        } else {
+            $data['floor_plans'] = null;
+        }
         
         $tenant->update($data);
 

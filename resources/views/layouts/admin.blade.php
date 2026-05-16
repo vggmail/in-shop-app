@@ -133,6 +133,9 @@
                 <a href="{{ route('pos.express') }}" class="{{ request()->routeIs('pos.express') ? 'active' : '' }}" target="_blank" style="color: #fbbf24; font-weight: bold;">
                     <i class="fas fa-bolt"></i> <span>Express POS</span>
                 </a>
+                <a href="{{ route('tables.index') }}" class="{{ request()->routeIs('tables.index') ? 'active' : '' }}">
+                    <i class="fas fa-th-large"></i> <span>Table View</span>
+                </a>
                 <a href="{{ route('kds.index') }}" class="{{ request()->routeIs('kds.*') ? 'active' : '' }}" style="{{ request()->routeIs('kds.*') ? '' : 'color:#4ade80;' }}" target="_blank">
                     <i class="fas fa-fire-alt"></i>
                     <span>Kitchen Display</span>
