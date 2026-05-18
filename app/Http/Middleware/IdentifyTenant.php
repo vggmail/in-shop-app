@@ -45,7 +45,16 @@ class IdentifyTenant
         }
 
         // Query the central Tenant model (on 'mysql' connection)
-        $tenant = \App\Models\Tenant::on('mysql')->where('subdomain', $subdomain)->where('is_active', true)->first();
+        try {
+            $tenant = \App\Models\Tenant::on('mysql')->where('subdomain', $subdomain)->where('is_active', true)->first();
+        } catch (\Exception $e) {
+            // If query fails (e.g., missing columns/tables before migrations), allow utility paths to proceed
+            if ($request->is('run-migrate') || $request->is('fix-storage') || $request->is('optimize') || $request->is('clear-cache')) {
+                $this->shareFallbackTenant();
+                return $next($request);
+            }
+            throw $e;
+        }
 
         if (!$tenant) {
             abort(404, "Shop '$subdomain' not found or inactive.");
