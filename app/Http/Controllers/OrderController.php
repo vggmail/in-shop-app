@@ -50,7 +50,11 @@ class OrderController extends Controller
             $topItems = $items->where('stock_quantity', '>', 0)->sortByDesc('id')->take(16)->values();
         }
 
-        return view("admin.pos.index", compact("items", "customers", "topItems"));
+        $activeHappyHour = \App\Models\HappyHour::where('is_active', true)->get()->first(function($hh) {
+            return $hh->isActiveNow();
+        });
+
+        return view("admin.pos.index", compact("items", "customers", "topItems", "activeHappyHour"));
     }
 
     public function store(StoreOrderRequest $request)

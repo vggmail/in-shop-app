@@ -22,8 +22,10 @@ class ExpressPosController extends Controller
 
         $customers = Customer::orderBy('name', 'asc')->get();
         
-        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+        $activeHappyHour = \App\Models\HappyHour::where('is_active', true)->get()->first(function($hh) {
+            return $hh->isActiveNow();
+        });
 
-        return view('admin.pos.express', compact('categories', 'customers', 'tenant', 'items', 'topItems'));
+        return view('admin.pos.express', compact('categories', 'customers', 'tenant', 'items', 'topItems', 'activeHappyHour'));
     }
 }

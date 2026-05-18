@@ -159,12 +159,28 @@
             background: rgba(255,255,255,0.98); z-index: 2000;
             display: none; flex-direction: column; align-items: center; justify-content: center;
         }
+        
+        .pulse-dot {
+            animation: pulseAnim 1.8s infinite;
+        }
+        @keyframes pulseAnim {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 8px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
     </style>
 @endsection
 
 @section("content")
 <div class="express-topbar">
-    <div class="express-brand"><i class="fas fa-bolt text-warning me-2"></i>Express POS</div>
+    <div class="express-brand d-flex align-items-center gap-3">
+        <span><i class="fas fa-bolt text-warning me-2"></i>Express POS</span>
+        @if(isset($activeHappyHour))
+            <span class="badge bg-danger px-3 py-2 rounded-pill pulse-dot" style="font-size: 0.75rem;">
+                <i class="fas fa-glass-martini-alt me-1"></i> Happy Hour Live: {{ floatval($activeHappyHour->discount_percent) }}% OFF!
+            </span>
+        @endif
+    </div>
     <div class="express-clock" id="express-clock">00:00:00 PM</div>
     <a href="{{ route('dashboard') }}" class="btn-exit-express"><i class="fas fa-arrow-left me-1"></i> Back to Dashboard</a>
 </div>

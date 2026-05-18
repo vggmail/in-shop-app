@@ -119,6 +119,14 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('inventory/recipes/{item}/edit', [App\Http\Controllers\RecipeController::class, 'edit'])->name('recipes.edit');
     Route::put('inventory/recipes/{item}', [App\Http\Controllers\RecipeController::class, 'update'])->name('recipes.update');
 
+    // Bar Management
+    Route::get('bar/wastage', [App\Http\Controllers\BarController::class, 'wastageIndex'])->name('bar.wastage.index');
+    Route::post('bar/wastage', [App\Http\Controllers\BarController::class, 'storeWastage'])->name('bar.wastage.store');
+    Route::post('bar/happy-hours', [App\Http\Controllers\BarController::class, 'storeHappyHour'])->name('bar.happy_hours.store');
+    Route::post('bar/happy-hours/{id}/toggle', [App\Http\Controllers\BarController::class, 'toggleHappyHour'])->name('bar.happy_hours.toggle');
+    Route::delete('bar/happy-hours/{id}', [App\Http\Controllers\BarController::class, 'destroyHappyHour'])->name('bar.happy_hours.destroy');
+    Route::get('bar/excise', [App\Http\Controllers\BarController::class, 'exciseReport'])->name('bar.excise');
+
     // Shift Management
     Route::get('shifts', [App\Http\Controllers\ShiftController::class, 'index'])->name('shifts.index');
     Route::post('shifts/open', [App\Http\Controllers\ShiftController::class, 'open'])->name('shifts.open');

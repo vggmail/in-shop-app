@@ -27,7 +27,12 @@
                     @foreach($ingredients as $ing)
                     <tr>
                         <td>
-                            <div class="fw-bold text-dark">{{ $ing->name }}</div>
+                            <div class="fw-bold text-dark d-flex align-items-center gap-2">
+                                {{ $ing->name }}
+                                @if($ing->is_alcohol)
+                                    <span class="badge bg-warning text-dark"><i class="fas fa-wine-bottle me-1"></i>Alcohol ({{ $ing->bottle_size_ml }} ml)</span>
+                                @endif
+                            </div>
                         </td>
                         <td><span class="badge bg-secondary">{{ strtoupper($ing->unit) }}</span></td>
                         <td>
@@ -104,6 +109,23 @@
                         <input type="number" step="0.001" name="min_stock_level" class="form-control" required value="1">
                     </div>
                 </div>
+                <div class="border rounded p-3 bg-light mb-3">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="is_alcohol" id="add_is_alcohol" value="1" onchange="toggleAddBottleSize()">
+                        <label class="form-check-label fw-bold" for="add_is_alcohol">🍾 Is Alcoholic Liquor / Bar Item</label>
+                    </div>
+                    <div class="mb-0 d-none" id="add_bottle_size_group">
+                        <label class="form-label">Bottle Size (ml)</label>
+                        <select name="bottle_size_ml" class="form-select">
+                            <option value="750">750 ml (Standard)</option>
+                            <option value="1000">1000 ml (1 Liter)</option>
+                            <option value="375">375 ml (Half)</option>
+                            <option value="180">180 ml (Quarter)</option>
+                            <option value="500">500 ml</option>
+                        </select>
+                        <span class="text-muted small">Will allow standard peg auto-deductions (30ml, 60ml, 90ml) in recipes.</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
@@ -154,6 +176,23 @@
                         <input type="number" step="0.001" name="min_stock_level" id="edit_min" class="form-control" required>
                     </div>
                 </div>
+                <div class="border rounded p-3 bg-light mb-3">
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="is_alcohol" id="edit_is_alcohol" value="1" onchange="toggleEditBottleSize()">
+                        <label class="form-check-label fw-bold" for="edit_is_alcohol">🍾 Is Alcoholic Liquor / Bar Item</label>
+                    </div>
+                    <div class="mb-0 d-none" id="edit_bottle_size_group">
+                        <label class="form-label">Bottle Size (ml)</label>
+                        <select name="bottle_size_ml" id="edit_bottle_size_ml" class="form-select">
+                            <option value="750">750 ml (Standard)</option>
+                            <option value="1000">1000 ml (1 Liter)</option>
+                            <option value="375">375 ml (Half)</option>
+                            <option value="180">180 ml (Quarter)</option>
+                            <option value="500">500 ml</option>
+                        </select>
+                        <span class="text-muted small">Will allow standard peg auto-deductions (30ml, 60ml, 90ml) in recipes.</span>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
@@ -166,6 +205,22 @@
 
 @section('scripts')
 <script>
+    function toggleAddBottleSize() {
+        if ($('#add_is_alcohol').is(':checked')) {
+            $('#add_bottle_size_group').removeClass('d-none');
+        } else {
+            $('#add_bottle_size_group').addClass('d-none');
+        }
+    }
+
+    function toggleEditBottleSize() {
+        if ($('#edit_is_alcohol').is(':checked')) {
+            $('#edit_bottle_size_group').removeClass('d-none');
+        } else {
+            $('#edit_bottle_size_group').addClass('d-none');
+        }
+    }
+
     function editIng(ing) {
         $('#editForm').attr('action', `/cp/inventory/ingredients/${ing.id}`);
         $('#edit_name').val(ing.name);
@@ -173,6 +228,17 @@
         $('#edit_cost').val(ing.cost_per_unit);
         $('#edit_stock').val(ing.stock_quantity);
         $('#edit_min').val(ing.min_stock_level);
+        
+        const isAlcohol = ing.is_alcohol == 1 || ing.is_alcohol === true;
+        $('#edit_is_alcohol').prop('checked', isAlcohol);
+        if (isAlcohol) {
+            $('#edit_bottle_size_group').removeClass('d-none');
+            $('#edit_bottle_size_ml').val(parseFloat(ing.bottle_size_ml).toString());
+        } else {
+            $('#edit_bottle_size_group').addClass('d-none');
+            $('#edit_bottle_size_ml').val('750');
+        }
+        
         new bootstrap.Modal(document.getElementById('editModal')).show();
     }
 </script>

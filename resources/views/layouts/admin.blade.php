@@ -194,6 +194,8 @@
                     </div>
                 </div>
 
+                <a href="{{ route('bar.wastage.index') }}" class="{{ request()->is('cp/bar*') ? 'active' : '' }}"><i class="fas fa-glass-martini-alt text-info"></i> <span>Bar Console</span></a>
+
                 <a href="{{ route('shifts.index') }}" class="{{ request()->is('cp/shifts*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Shift History</span></a>
                 
                 <div class="sidebar-dropdown">

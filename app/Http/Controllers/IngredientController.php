@@ -21,7 +21,14 @@ class IngredientController extends Controller
             'stock_quantity' => 'required|numeric|min:0',
             'min_stock_level' => 'required|numeric|min:0',
             'cost_per_unit' => 'required|numeric|min:0',
+            'is_alcohol' => 'nullable|boolean',
+            'bottle_size_ml' => 'nullable|numeric|min:0',
         ]);
+
+        $validated['is_alcohol'] = $request->boolean('is_alcohol');
+        if (!$validated['is_alcohol']) {
+            $validated['bottle_size_ml'] = null;
+        }
 
         Ingredient::create($validated);
 
@@ -36,7 +43,14 @@ class IngredientController extends Controller
             'stock_quantity' => 'required|numeric|min:0',
             'min_stock_level' => 'required|numeric|min:0',
             'cost_per_unit' => 'required|numeric|min:0',
+            'is_alcohol' => 'nullable|boolean',
+            'bottle_size_ml' => 'nullable|numeric|min:0',
         ]);
+
+        $validated['is_alcohol'] = $request->boolean('is_alcohol');
+        if (!$validated['is_alcohol']) {
+            $validated['bottle_size_ml'] = null;
+        }
 
         $ingredient->update($validated);
 

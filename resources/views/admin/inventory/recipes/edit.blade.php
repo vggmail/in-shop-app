@@ -35,8 +35,8 @@
                                 <select name="ingredients[{{ $index }}][ingredient_id]" class="form-select ing-select" required onchange="updateUnit(this)">
                                     <option value="">Select Ingredient</option>
                                     @foreach($ingredients as $ing)
-                                        <option value="{{ $ing->id }}" data-unit="{{ $ing->unit }}" {{ $recipe->ingredient_id == $ing->id ? 'selected' : '' }}>
-                                            {{ $ing->name }}
+                                        <option value="{{ $ing->id }}" data-unit="{{ $ing->unit }}" data-is-alcohol="{{ $ing->is_alcohol ? '1' : '0' }}" data-bottle-size="{{ $ing->bottle_size_ml ?? '750' }}" {{ $recipe->ingredient_id == $ing->id ? 'selected' : '' }}>
+                                            {{ $ing->name }} {{ $ing->is_alcohol ? '(🍾)' : '' }}
                                         </option>
                                     @endforeach
                                 </select>
@@ -52,7 +52,16 @@
                                 </select>
                             </td>
                             <td>
-                                <input type="number" step="0.001" name="ingredients[{{ $index }}][quantity]" class="form-control" value="{{ $recipe->quantity }}" required>
+                                <div class="input-group">
+                                    <input type="number" step="0.0001" name="ingredients[{{ $index }}][quantity]" class="form-control qty-input" value="{{ $recipe->quantity }}" required>
+                                    <select class="form-select peg-helper {{ $recipe->ingredient->is_alcohol ? '' : 'd-none' }}" style="max-width: 140px;" onchange="applyPegHelper(this)">
+                                        <option value="">Peg Helper</option>
+                                        <option value="30">30 ml Peg</option>
+                                        <option value="60">60 ml Peg</option>
+                                        <option value="90">90 ml Peg</option>
+                                        <option value="750">Full Bottle</option>
+                                    </select>
+                                </div>
                             </td>
                             <td class="unit-text text-muted small fw-bold text-uppercase">
                                 {{ strtoupper($recipe->ingredient->unit) }}
@@ -95,7 +104,7 @@
                     <select name="ingredients[${rowIndex}][ingredient_id]" class="form-select ing-select" required onchange="updateUnit(this)">
                         <option value="">Select Ingredient</option>
                         @foreach($ingredients as $ing)
-                            <option value="{{ $ing->id }}" data-unit="{{ $ing->unit }}">{{ $ing->name }}</option>
+                            <option value="{{ $ing->id }}" data-unit="{{ $ing->unit }}" data-is-alcohol="{{ $ing->is_alcohol ? '1' : '0' }}" data-bottle-size="{{ $ing->bottle_size_ml ?? '750' }}">{{ $ing->name }} {{ $ing->is_alcohol ? '(🍾)' : '' }}</option>
                         @endforeach
                     </select>
                 </td>
@@ -108,7 +117,16 @@
                     </select>
                 </td>
                 <td>
-                    <input type="number" step="0.001" name="ingredients[${rowIndex}][quantity]" class="form-control" required placeholder="0.000">
+                    <div class="input-group">
+                        <input type="number" step="0.0001" name="ingredients[${rowIndex}][quantity]" class="form-control qty-input" required placeholder="0.0000">
+                        <select class="form-select peg-helper d-none" style="max-width: 140px;" onchange="applyPegHelper(this)">
+                            <option value="">Peg Helper</option>
+                            <option value="30">30 ml Peg</option>
+                            <option value="60">60 ml Peg</option>
+                            <option value="90">90 ml Peg</option>
+                            <option value="750">Full Bottle</option>
+                        </select>
+                    </div>
                 </td>
                 <td class="unit-text text-muted small fw-bold text-uppercase">-</td>
                 <td class="text-end">
@@ -127,8 +145,43 @@
     }
 
     function updateUnit(select) {
-        const unit = select.options[select.selectedIndex].dataset.unit;
-        select.closest('tr').querySelector('.unit-text').innerText = unit ? unit.toUpperCase() : '-';
+        const row = select.closest('tr');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        if (!selectedOption || select.value === '') {
+            row.querySelector('.unit-text').innerText = '-';
+            row.querySelector('.peg-helper').classList.add('d-none');
+            return;
+        }
+
+        const unit = selectedOption.dataset.unit;
+        row.querySelector('.unit-text').innerText = unit ? unit.toUpperCase() : '-';
+
+        const isAlcohol = selectedOption.dataset.isAlcohol === '1';
+        const pegHelper = row.querySelector('.peg-helper');
+        if (isAlcohol) {
+            pegHelper.classList.remove('d-none');
+        } else {
+            pegHelper.classList.add('d-none');
+            pegHelper.value = '';
+        }
+    }
+
+    function applyPegHelper(helperSelect) {
+        const row = helperSelect.closest('tr');
+        const ingSelect = row.querySelector('.ing-select');
+        const selectedOption = ingSelect.options[ingSelect.selectedIndex];
+        
+        if (!selectedOption) return;
+
+        const bottleSize = parseFloat(selectedOption.dataset.bottleSize) || 750;
+        const pegVol = parseFloat(helperSelect.value);
+        
+        if (!isNaN(pegVol)) {
+            const qty = pegVol / bottleSize;
+            // set to 3 decimal places
+            row.querySelector('.qty-input').value = qty.toFixed(3);
+        }
     }
 </script>
 @endsection
