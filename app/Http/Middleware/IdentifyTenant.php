@@ -67,6 +67,14 @@ class IdentifyTenant
 
         // Configure the 'tenant' connection dynamically: prefix + subdomain
         $prefix = config('database.tenant_prefix', '');
+        if (empty($prefix)) {
+            // Auto-detect prefix from database username for cPanel environments
+            $dbUsername = config('database.connections.mysql.username', '');
+            if (str_contains($dbUsername, '_')) {
+                $parts = explode('_', $dbUsername);
+                $prefix = $parts[0] . '_';
+            }
+        }
         $dbName = $prefix . $subdomain;
 
         \Illuminate\Support\Facades\Config::set('database.connections.tenant.database', $dbName);
