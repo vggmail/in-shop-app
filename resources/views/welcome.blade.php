@@ -754,7 +754,7 @@
             let p_addr = $("#pincode").val() || '';
             let full_addr = s_addr ? (s_addr + ', ' + c_addr + ', ' + st_addr + ' - ' + p_addr) : '';
 
-            $.post("{{ route('home.store') }}", { 
+            $.post("{{ route('home.store', [], false) }}", { 
                 _token: "{{ csrf_token() }}", 
                 honey_pot_field: $("#hp_checkout").val(),
                 customer_name: $("#cust_name").val(), 
@@ -796,7 +796,7 @@
         }
         function checkPhoneExists() {
             let p = $("#login-phone").val().trim(); if(!/^[6-9]\d{9}$/.test(p)) return showLoginError("Please enter a valid 10-digit mobile number.");
-            $.post("{{ route('customer.checkPhone') }}", { _token: "{{ csrf_token() }}", phone: p, honey_pot_field: $("#hp_login").val() }, function(res) {
+            $.post("{{ route('customer.checkPhone', [], false) }}", { _token: "{{ csrf_token() }}", phone: p, honey_pot_field: $("#hp_login").val() }, function(res) {
                 if(res.status) { 
                     $("#login-phone-section").addClass("d-none"); 
                     $("#login-pin-section").removeClass("d-none"); 
@@ -832,8 +832,8 @@
                 if(pin !== pinConfirm) return showLoginError("PINs do not match!");
             }
 
-            $.post("{{ route('customer.login') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: name, honey_pot_field: $("#hp_login").val() }, function(res) {
-                if(res.status) { if(res.device_token) localStorage.setItem('customer_device_token', res.device_token); location.reload(); } else showLoginError(res.message || "Invalid PIN");
+            $.post("{{ route('customer.login', [], false) }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, name: name, honey_pot_field: $("#hp_login").val() }, function(res) {
+                if(res.status) { if(res.device_token) localStorage.setItem('customer_device_token', res.device_token); sessionStorage.setItem('just_logged_in', '1'); location.reload(); } else showLoginError(res.message || "Invalid PIN");
             }).fail(function(xhr) {
                 let msg = "Invalid PIN!";
                 if(xhr.responseJSON && xhr.responseJSON.message) msg = xhr.responseJSON.message;
@@ -946,7 +946,7 @@
         function sendForgotPinOtp() {
             let p = $("#login-phone").val().trim();
             $("#otp-phone-display").text(p);
-            $.post("{{ route('customer.forgot-pin.send-otp') }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
+            $.post("{{ route('customer.forgot-pin.send-otp', [], false) }}", { _token: "{{ csrf_token() }}", phone: p }, function(res) {
                 if(res.status) {
                     $("#login-pin-section").addClass("d-none");
                     $("#forgot-otp-section").removeClass("d-none");
@@ -959,7 +959,7 @@
             let p = $("#login-phone").val().trim();
             let otp = $("#forgot-otp").val().trim();
             if(otp.length !== 4) return showLoginError("Please enter 4-digit OTP");
-            $.post("{{ route('customer.forgot-pin.verify-otp') }}", { _token: "{{ csrf_token() }}", phone: p, otp: otp }, function(res) {
+            $.post("{{ route('customer.forgot-pin.verify-otp', [], false) }}", { _token: "{{ csrf_token() }}", phone: p, otp: otp }, function(res) {
                 if(res.status) {
                     $("#forgot-otp-section").addClass("d-none");
                     $("#forgot-reset-section").removeClass("d-none");
@@ -976,7 +976,7 @@
             if(pin !== pinConfirm) return showLoginError("PINs do not match!");
             if(pin.length !== 4) return showLoginError("PIN must be 4 digits!");
             
-            $.post("{{ route('customer.forgot-pin.reset') }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, pin_confirmation: pinConfirm, otp: otp }, function(res) {
+            $.post("{{ route('customer.forgot-pin.reset', [], false) }}", { _token: "{{ csrf_token() }}", phone: p, pin: pin, pin_confirmation: pinConfirm, otp: otp }, function(res) {
                 if(res.status) {
                     alert('PIN reset successfully!');
                     processPinLogin(); // Auto login
@@ -1037,8 +1037,14 @@
                     @endif
                 }
 
-                let t = localStorage.getItem('customer_device_token'); 
-            @if(!isset($customer)) if(t) $.post("{{ route('customer.autoLogin') }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res){ if(res.status) location.reload(); else localStorage.removeItem('customer_device_token'); }); @endif
+                let t = localStorage.getItem('customer_device_token');
+                let justLoggedIn = sessionStorage.getItem('just_logged_in');
+                if(justLoggedIn) {
+                    // Clear the flag and skip autoLogin to prevent infinite reload loop
+                    sessionStorage.removeItem('just_logged_in');
+                } else {
+                    @if(!isset($customer)) if(t) $.post("{{ route('customer.autoLogin', [], false) }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res){ if(res.status) { sessionStorage.setItem('just_logged_in', '1'); location.reload(); } else localStorage.removeItem('customer_device_token'); }); @endif
+                }
 
             // Device Detection for UPI Intent
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
@@ -1051,10 +1057,10 @@
         function startPolling(orderNumber) {
             if(pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(() => {
-                $.get(`{{ url('/order') }}/${orderNumber}/check-status`, function(res) {
+                $.get(`/order/${orderNumber}/check-status`, function(res) {
                     if(res.status && res.payment_status === 'Paid') {
                         clearInterval(pollInterval);
-                        window.location.href = `{{ url('/order') }}/${orderNumber}/success`;
+                        window.location.href = `/order/${orderNumber}/success`;
                     }
                 });
             }, 3000);

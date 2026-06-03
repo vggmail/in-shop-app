@@ -25,6 +25,11 @@ class IdentifyTenant
             return $next($request);
         }
 
+        // Strip www. prefix if present
+        if (count($parts) > 0 && $parts[0] === 'www') {
+            array_shift($parts);
+        }
+
         if (count($parts) >= 1) {
             // Handle single-word hosts (e.g., http://retail/) where count is 1
             if (count($parts) === 1 && $parts[0] !== 'localhost' && $parts[0] !== '127') {
@@ -32,7 +37,7 @@ class IdentifyTenant
             } 
             // Handle multi-part hosts (e.g., retail.domain.com or retail.localhost)
             else if (count($parts) >= 2) {
-                if ($parts[0] !== 'www') {
+                if ($parts[0] !== 'localhost' && $parts[0] !== '127') {
                     $subdomain = $parts[0];
                 }
             }
@@ -76,6 +81,9 @@ class IdentifyTenant
             }
         }
         $dbName = $prefix . $subdomain;
+        if ($dbName === 'localhost') {
+            $dbName = config('database.connections.mysql.database');
+        }
 
         \Illuminate\Support\Facades\Config::set('database.connections.tenant.database', $dbName);
         \Illuminate\Support\Facades\DB::purge('tenant');
@@ -97,10 +105,32 @@ class IdentifyTenant
     private function shareFallbackTenant(): void
     {
         try {
-            $tenant = \App\Models\Tenant::first();
+            $tenant = \App\Models\Tenant::on('mysql')->first();
             if ($tenant) {
                 app()->instance('tenant', $tenant);
                 view()->share('tenant_info', $tenant);
+
+                // Configure the 'tenant' connection dynamically: prefix + subdomain
+                $prefix = config('database.tenant_prefix', '');
+                if (empty($prefix)) {
+                    // Auto-detect prefix from database username for cPanel environments
+                    $dbUsername = config('database.connections.mysql.username', '');
+                    if (str_contains($dbUsername, '_')) {
+                        $parts = explode('_', $dbUsername);
+                        $prefix = $parts[0] . '_';
+                    }
+                }
+                $dbName = $prefix . $tenant->subdomain;
+                if ($dbName === 'localhost') {
+                    $dbName = config('database.connections.mysql.database');
+                }
+
+                \Illuminate\Support\Facades\Config::set('database.connections.tenant.database', $dbName);
+                \Illuminate\Support\Facades\DB::purge('tenant');
+                \Illuminate\Support\Facades\DB::reconnect('tenant');
+
+                // Force all subsequent database calls to use the tenant connection by default
+                \Illuminate\Support\Facades\DB::setDefaultConnection('tenant');
             }
         } catch (\Exception $e) {
             // Silently fail if tenants table doesn't exist

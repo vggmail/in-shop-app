@@ -38,7 +38,7 @@
                     <i class="fas fa-key me-1"></i> Change PIN
                 </button>
                 <br>
-                <form action="{{ route('customer.logout') }}" method="POST" class="d-inline">
+                <form action="{{ route('customer.logout') }}" method="POST" class="d-inline" onsubmit="localStorage.removeItem('customer_device_token'); sessionStorage.removeItem('just_logged_in');">
                     @csrf
                     <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-4 fw-bold">
                         <i class="fas fa-sign-out-alt me-1"></i> Logout
@@ -271,7 +271,7 @@
         const btn = $('#saveAddrBtn');
         btn.prop('disabled', true).text('SAVING...');
         
-        $.post("{{ route('customer.address.save') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
+        $.post("{{ route('customer.address.save', [], false) }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
             if(res.status) {
                 location.reload();
             } else {
@@ -282,7 +282,7 @@
     });
 
     function makeDefault(id) {
-        $.post("{{ url('/customer/address') }}/" + id + "/default", { _token: "{{ csrf_token() }}" }, function(res) {
+        $.post("/customer/address/" + id + "/default", { _token: "{{ csrf_token() }}" }, function(res) {
             if(res.status) location.reload();
         });
     }
@@ -290,7 +290,7 @@
     function deleteAddress(id) {
         if(confirm('Are you sure you want to delete this address?')) {
             $.ajax({
-                url: "{{ url('/customer/address') }}/" + id,
+                url: "/customer/address/" + id,
                 type: 'DELETE',
                 data: { _token: "{{ csrf_token() }}" },
                 success: function(res) {
@@ -308,7 +308,7 @@
         btn.prop('disabled', true).text('SAVING...');
         err.addClass('d-none');
 
-        $.post("{{ route('customer.update-profile') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
+        $.post("{{ route('customer.update-profile', [], false) }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
             if(res.status) {
                 location.reload();
             } else {
@@ -336,7 +336,7 @@
         btn.prop('disabled', true).text('UPDATING...');
         err.addClass('d-none');
 
-        $.post("{{ route('customer.update-pin') }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
+        $.post("{{ route('customer.update-pin', [], false) }}", $(this).serialize() + "&_token={{ csrf_token() }}", function(res) {
             if(res.status) {
                 alert('PIN updated successfully!');
                 location.reload();
