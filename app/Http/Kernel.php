@@ -39,6 +39,8 @@ class Kernel extends HttpKernel
             \App\Http\Middleware\IdentifyTenant::class,
             \App\Http\Middleware\BlockBots::class,
             \App\Http\Middleware\HoneyPotMiddleware::class,
+            /* \App\Http\Middleware\PreventBrowserCache::class, */ 
+            // ← prevents stale cached HTML
         ],
 
         'api' => [

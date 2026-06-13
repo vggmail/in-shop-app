@@ -1038,12 +1038,32 @@
                 }
 
                 let t = localStorage.getItem('customer_device_token');
-                let justLoggedIn = sessionStorage.getItem('just_logged_in');
-                if(justLoggedIn) {
-                    // Clear the flag and skip autoLogin to prevent infinite reload loop
+
+                // PHP tells JS definitively whether the server session has a logged-in customer.
+                // This is the authoritative source — NOT sessionStorage (which is wiped on mobile refresh).
+                const serverKnowsCustomer = {{ isset($customer) ? 'true' : 'false' }};
+
+                if (serverKnowsCustomer) {
+                    // Server already has the session — no need for autoLogin or any reload.
+                    // Just ensure the device_token is stored for future visits.
                     sessionStorage.removeItem('just_logged_in');
-                } else {
-                    @if(!isset($customer)) if(t) $.post("{{ route('customer.autoLogin', [], false) }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res){ if(res.status) { sessionStorage.setItem('just_logged_in', '1'); location.reload(); } else localStorage.removeItem('customer_device_token'); }); @endif
+                } else if (t) {
+                    // Server does NOT know this customer, but we have a device_token.
+                    // Only attempt autoLogin if we haven't just done a login-triggered reload.
+                    let justLoggedIn = sessionStorage.getItem('just_logged_in');
+                    if (justLoggedIn) {
+                        // We just reloaded after login — clear flag, don't loop.
+                        sessionStorage.removeItem('just_logged_in');
+                    } else {
+                        $.post("{{ route('customer.autoLogin', [], false) }}", { _token: "{{ csrf_token() }}", device_token: t }, function(res) {
+                            if (res.status) {
+                                sessionStorage.setItem('just_logged_in', '1');
+                                location.reload();
+                            } else {
+                                localStorage.removeItem('customer_device_token');
+                            }
+                        });
+                    }
                 }
 
             // Device Detection for UPI Intent
