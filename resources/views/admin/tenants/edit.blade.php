@@ -100,6 +100,75 @@
                             <div class="small text-muted mt-2">Define physical sections and the table number range for each.</div>
                         </div>
 
+                        @php
+                            $allMenus = [
+                                'dashboard'     => ['label' => 'Dashboard',         'icon' => 'fa-home',               'desc' => 'Main dashboard & analytics'],
+                                'pos'           => ['label' => 'POS Screen',        'icon' => 'fa-cash-register',      'desc' => 'Point of sale terminal'],
+                                'express_pos'   => ['label' => 'Express POS',       'icon' => 'fa-bolt',               'desc' => 'Quick-order express POS'],
+                                'table_view'    => ['label' => 'Table View',        'icon' => 'fa-th-large',           'desc' => 'Floor & table layout'],
+                                'kds'           => ['label' => 'Kitchen Display',   'icon' => 'fa-fire-alt',           'desc' => 'Live kitchen order screen'],
+                                'cds'           => ['label' => 'Counter Display',   'icon' => 'fa-desktop',            'desc' => 'Customer counter screen'],
+                                'catalog'       => ['label' => 'Catalog',           'icon' => 'fa-list',               'desc' => 'Menu items & categories'],
+                                'orders'        => ['label' => 'Orders',            'icon' => 'fa-shopping-cart',      'desc' => 'View & manage orders'],
+                                'relationships' => ['label' => 'Relationships',     'icon' => 'fa-user-friends',       'desc' => 'Customers & coupons'],
+                                'inventory'     => ['label' => 'Inventory',         'icon' => 'fa-boxes',              'desc' => 'Ingredients & recipes'],
+                                'bar'           => ['label' => 'Bar Console',       'icon' => 'fa-glass-martini-alt',  'desc' => 'Bar wastage & excise'],
+                                'shifts'        => ['label' => 'Shift History',     'icon' => 'fa-history',            'desc' => 'Open/close shift records'],
+                                'financials'    => ['label' => 'Financials',        'icon' => 'fa-file-invoice-dollar','desc' => 'Expenses, payments, reports'],
+                            ];
+                            // null = all enabled; otherwise check per key
+                            $savedMenus = $tenant->enabled_menus; // null or array
+                        @endphp
+
+                        <div class="mb-4">
+                            <label class="small fw-bold text-muted mb-3 d-block">
+                                <i class="fas fa-sliders-h me-1 text-primary"></i> SIDEBAR MENU PERMISSIONS
+                            </label>
+                            <div class="bg-light border rounded-4 p-3">
+                                <div class="d-flex align-items-center justify-content-between mb-3 pb-2 border-bottom">
+                                    <div>
+                                        <div class="fw-bold text-dark small">Control which menu items this store admin can access</div>
+                                        <div class="text-muted" style="font-size: 11px;">System Settings is always visible. Uncheck to hide from the store's sidebar.</div>
+                                    </div>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-sm btn-outline-success rounded-pill px-3" onclick="toggleAllMenus(true)">
+                                            <i class="fas fa-check-double me-1"></i> All
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="toggleAllMenus(false)">
+                                            <i class="fas fa-times me-1"></i> None
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row g-2">
+                                    @foreach($allMenus as $key => $menu)
+                                    @php
+                                        $isChecked = is_null($savedMenus) || in_array($key, $savedMenus);
+                                    @endphp
+                                    <div class="col-md-6">
+                                        <label class="d-flex align-items-center gap-3 p-2 rounded-3 border bg-white menu-perm-item {{ $isChecked ? 'border-success border-opacity-50' : 'border-secondary border-opacity-25' }}" style="cursor:pointer; transition: all 0.2s;">
+                                            <input type="checkbox"
+                                                   name="enabled_menus[]"
+                                                   value="{{ $key }}"
+                                                   class="form-check-input menu-perm-cb flex-shrink-0"
+                                                   style="width:18px; height:18px;"
+                                                   {{ $isChecked ? 'checked' : '' }}>
+                                            <div class="d-flex align-items-center gap-2 flex-grow-1">
+                                                <div class="rounded-3 d-flex align-items-center justify-content-center flex-shrink-0"
+                                                     style="width:34px; height:34px; background: {{ $isChecked ? '#dcfce7' : '#f1f5f9' }}; transition: background 0.2s;">
+                                                    <i class="fas {{ $menu['icon'] }} small" style="color: {{ $isChecked ? '#16a34a' : '#94a3b8' }};"></i>
+                                                </div>
+                                                <div>
+                                                    <div class="fw-bold small text-dark">{{ $menu['label'] }}</div>
+                                                    <div class="text-muted" style="font-size: 10px;">{{ $menu['desc'] }}</div>
+                                                </div>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="d-grid gap-2">
                             <button type="submit" class="btn btn-primary py-3 fw-bold shadow-lg">
                                 <i class="fas fa-save me-2"></i> Update Tenant Information
@@ -197,5 +266,38 @@
             deleteModal.hide();
         }
     });
+
+    // Toggle all menu permission checkboxes
+    function toggleAllMenus(state) {
+        document.querySelectorAll('.menu-perm-cb').forEach(cb => {
+            cb.checked = state;
+            updateMenuItemStyle(cb);
+        });
+    }
+
+    // Live visual feedback when a menu checkbox is toggled
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('menu-perm-cb')) {
+            updateMenuItemStyle(e.target);
+        }
+    });
+
+    function updateMenuItemStyle(cb) {
+        const label   = cb.closest('.menu-perm-item');
+        const iconBox = label.querySelector('[style*="width:34px"]');
+        const icon    = iconBox.querySelector('i');
+        if (cb.checked) {
+            label.classList.remove('border-secondary');
+            label.classList.add('border-success');
+            iconBox.style.background = '#dcfce7';
+            icon.style.color = '#16a34a';
+        } else {
+            label.classList.remove('border-success');
+            label.classList.add('border-secondary');
+            iconBox.style.background = '#f1f5f9';
+            icon.style.color = '#94a3b8';
+        }
+    }
+
 </script>
 @endsection

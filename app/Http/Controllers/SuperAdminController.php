@@ -165,6 +165,11 @@ class SuperAdminController extends Controller
         $data = $request->only('name', 'subdomain', 'expires_at');
         $data['is_active'] = $request->has('is_active');
         $data['disable_home_page'] = $request->has('disable_home_page');
+
+        // Save menu permissions — null means all menus on (backward-compatible)
+        $submitted = $request->input('enabled_menus', []);
+        $data['enabled_menus'] = empty($submitted) ? null : array_values($submitted);
+
         if ($request->has('floor_plans')) {
             $val = $request->floor_plans;
             $parsed = is_string($val) ? json_decode($val, true) : $val;

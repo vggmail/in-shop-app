@@ -128,24 +128,50 @@
                     <h5 class="text-white fw-bold mb-0 text-truncate">{{ $tenant_info->name ?? 'Fast Food' }}</h5>
                 </div>
                 
+                @php
+                    // Super Admin always sees all menus; regular admins are controlled per tenant
+                    $isSuperAdmin = auth()->user()->isSuperAdmin();
+                    $menuInfo     = isset($tenant_info) ? $tenant_info : null;
+                    $canSeeMenu   = fn(string $key) => $isSuperAdmin || !$menuInfo || $menuInfo->isMenuEnabled($key);
+                @endphp
+
+                @if($canSeeMenu('dashboard'))
                 <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-home"></i> <span>Dashboard</span></a>
+                @endif
+
+                @if($canSeeMenu('pos'))
                 <a href="{{ route('pos.index') }}" class="text-warning"><i class="fas fa-cash-register"></i> <span>POS Screen</span></a>
+                @endif
+
+                @if($canSeeMenu('express_pos'))
                 <a href="{{ route('pos.express') }}" class="{{ request()->routeIs('pos.express') ? 'active' : '' }}" target="_blank" style="color: #fbbf24; font-weight: bold;">
                     <i class="fas fa-bolt"></i> <span>Express POS</span>
                 </a>
+                @endif
+
+                @if($canSeeMenu('table_view'))
                 <a href="javascript:void(0)" onclick="window.open('{{ route('tables.index') }}?fullscreen=1', 'TableView', 'width='+screen.width+',height='+screen.height+',top=0,left=0,resizable=yes,scrollbars=yes,menubar=no,toolbar=no,location=no,status=no');" class="{{ request()->routeIs('tables.index') ? 'active' : '' }}">
                     <i class="fas fa-th-large"></i> <span>Table View</span>
                 </a>
+                @endif
+
+                @if($canSeeMenu('kds'))
                 <a href="{{ route('kds.index') }}" class="{{ request()->routeIs('kds.*') ? 'active' : '' }}" style="{{ request()->routeIs('kds.*') ? '' : 'color:#4ade80;' }}" target="_blank">
                     <i class="fas fa-fire-alt"></i>
                     <span>Kitchen Display</span>
                     <span class="ms-auto" style="display:inline-block; width:8px; height:8px; background:#22c55e; border-radius:50%; animation: blink 1.5s infinite;"></span>
                 </a>
+                @endif
+
+                @if($canSeeMenu('cds'))
                 <a href="{{ route('cds.index') }}" class="{{ request()->routeIs('cds.*') ? 'active' : '' }}" style="{{ request()->routeIs('cds.*') ? '' : 'color:#60a5fa;' }}" target="_blank">
                     <i class="fas fa-desktop"></i>
                     <span>Counter Display</span>
                     <span class="ms-auto" style="display:inline-block; width:8px; height:8px; background:#3b82f6; border-radius:50%; animation: blink 1.5s infinite;"></span>
                 </a>
+                @endif
+
+                @if($canSeeMenu('catalog'))
                 <div class="sidebar-dropdown">
                     <a href="#catalogSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('items.*') || request()->routeIs('categories.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('items.*') || request()->routeIs('categories.*') ? 'true' : 'false' }}">
                         <div><i class="fas fa-list"></i> <span class="ms-1">Catalog</span></div>
@@ -160,10 +186,16 @@
                         </a>
                     </div>
                 </div>
+                @endif
+
+                @if($canSeeMenu('orders'))
                 <a href="{{ route('orders.index') }}" class="{{ request()->routeIs('orders.*') ? 'active' : '' }} d-flex justify-content-between">
                     <div><i class="fas fa-shopping-cart"></i> <span>Orders</span></div>
                     <span class="badge bg-danger rounded-pill" id="sidebar-pending-count">{{ $pending_orders_count > 0 ? $pending_orders_count : '' }}</span>
                 </a>
+                @endif
+
+                @if($canSeeMenu('relationships'))
                 <div class="sidebar-dropdown">
                     <a href="#crmSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('customers.*') || request()->routeIs('coupons.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('customers.*') || request()->routeIs('coupons.*') ? 'true' : 'false' }}">
                         <div><i class="fas fa-user-friends"></i> <span class="ms-1">Relationships</span></div>
@@ -178,7 +210,9 @@
                         </a>
                     </div>
                 </div>
-                
+                @endif
+
+                @if($canSeeMenu('inventory'))
                 <div class="sidebar-dropdown">
                     <a href="#inventorySubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->is('cp/inventory*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->is('cp/inventory*') ? 'true' : 'false' }}">
                         <div><i class="fas fa-boxes"></i> <span class="ms-1">Inventory</span></div>
@@ -193,11 +227,17 @@
                         </a>
                     </div>
                 </div>
+                @endif
 
+                @if($canSeeMenu('bar'))
                 <a href="{{ route('bar.wastage.index') }}" class="{{ request()->is('cp/bar*') ? 'active' : '' }}"><i class="fas fa-glass-martini-alt text-info"></i> <span>Bar Console</span></a>
+                @endif
 
+                @if($canSeeMenu('shifts'))
                 <a href="{{ route('shifts.index') }}" class="{{ request()->is('cp/shifts*') ? 'active' : '' }}"><i class="fas fa-history"></i> <span>Shift History</span></a>
-                
+                @endif
+
+                @if($canSeeMenu('financials'))
                 <div class="sidebar-dropdown">
                     <a href="#accountSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('payments.*') || request()->routeIs('reports.*') || request()->routeIs('expenses.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('payments.*') || request()->routeIs('reports.*') || request()->routeIs('expenses.*') ? 'true' : 'false' }}">
                         <div><i class="fas fa-file-invoice-dollar"></i> <span class="ms-1">Financials</span></div>
@@ -215,7 +255,9 @@
                         </a>
                     </div>
                 </div>
-                
+                @endif
+
+                {{-- System Settings: always visible to admins, not controllable by super admin --}}
                 @if(auth()->user()->isAdmin())
                 <div class="sidebar-dropdown">
                     <a href="#settingsSubmenu" data-bs-toggle="collapse" class="d-flex align-items-center justify-content-between {{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('logs.*') ? '' : 'collapsed' }}" aria-expanded="{{ request()->routeIs('settings.*') || request()->routeIs('users.*') || request()->routeIs('logs.*') ? 'true' : 'false' }}">
@@ -243,6 +285,7 @@
                     </div>
                 </div>
                 @endif
+
                 
                 <div class="mt-auto p-3">
                     <form action="{{ route('logout') }}" method="POST">
