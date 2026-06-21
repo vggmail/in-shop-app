@@ -15,15 +15,19 @@ return new class extends Migration
 
     public function up(): void
     {
-        Schema::connection('mysql')->table('tenants', function (Blueprint $table) {
-            $table->json('enabled_menus')->nullable()->after('floor_plans');
-        });
+        if (!Schema::connection('mysql')->hasColumn('tenants', 'enabled_menus')) {
+            Schema::connection('mysql')->table('tenants', function (Blueprint $table) {
+                $table->json('enabled_menus')->nullable()->after('floor_plans');
+            });
+        }
     }
 
     public function down(): void
     {
-        Schema::connection('mysql')->table('tenants', function (Blueprint $table) {
-            $table->dropColumn('enabled_menus');
-        });
+        if (Schema::connection('mysql')->hasColumn('tenants', 'enabled_menus')) {
+            Schema::connection('mysql')->table('tenants', function (Blueprint $table) {
+                $table->dropColumn('enabled_menus');
+            });
+        }
     }
 };

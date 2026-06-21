@@ -1,4 +1,4 @@
-const CACHE_NAME = 'in-shop-v2'; // ← bumped to kill old cache
+const CACHE_NAME = 'in-shop-v3'; // ← bumped to kill old cache
 
 // Only cache truly static assets — NEVER HTML pages (they are dynamic/session-based)
 const STATIC_ASSETS = [
@@ -30,6 +30,11 @@ self.addEventListener('install', (event) => {
 }); */
 
 self.addEventListener('fetch', (event) => {
+  // Bypasses the service worker for all non-GET requests (POST, PUT, DELETE, etc.)
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
   // NETWORK-FIRST for ALL HTML navigation (Laravel pages, login, logout, etc.)
   // These are session-driven and must NEVER be served from cache
   if (
