@@ -28,14 +28,6 @@ class CategoryController extends Controller
 
         $data = $request->except('image_file');
         
-        $slug = Str::slug($request->name);
-        $original_slug = $slug;
-        $i = 1;
-        while(Category::where('slug', $slug)->exists()) {
-            $slug = $original_slug . '-' . $i++;
-        }
-        $data['slug'] = $slug;
-        
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image_file')) {
@@ -58,14 +50,6 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->except('image_file');
-        
-        $slug = Str::slug($request->name);
-        $original_slug = $slug;
-        $i = 1;
-        while(Category::where('slug', $slug)->where('id', '!=', $id)->exists()) {
-            $slug = $original_slug . '-' . $i++;
-        }
-        $data['slug'] = $slug;
         
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 

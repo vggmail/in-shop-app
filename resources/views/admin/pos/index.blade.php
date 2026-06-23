@@ -289,19 +289,25 @@
                 <div class="p-4 bg-white border-top">
                     <div class="d-flex justify-content-between mb-1 small text-muted">
                         <span>Subtotal</span>
-                        <span id="sub-total">₹0.00</span>
+                        <span>₹<span id="subTotal">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between mb-3 text-success small">
                         <span>Discount</span>
-                        <span>-₹0.00</span>
+                        <span>-₹<span id="discount">0.00</span></span>
                     </div>
                     <div class="d-flex justify-content-between align-items-center mb-4 pt-2 border-top">
                         <span class="h5 fw-bold mb-0">Total Payable</span>
-                        <span class="h3 fw-bold text-primary mb-0" id="cart-total">₹0.00</span>
+                        <span class="h3 fw-bold text-primary mb-0">₹<span id="grandTotal">0.00</span></span>
                     </div>
 
                     <div class="row g-2">
                         <div class="col-6">
+                            <select id="payment_method" class="form-select fw-bold shadow-sm"
+                                style="height: 40px; border-radius: 50px; font-size: 0.9rem; border-color: #e2e8f0; cursor: pointer; padding-left: 15px;">
+                                <option value="Cash">💵 CASH</option>
+                                <option value="UPI">📱 UPI / QR</option>
+                                <option value="Card">💳 CARD</option>
+                            </select>
                         </div>
                         <div class="col-6">
                             <button class="btn w-100 fw-bold shadow-sm text-white"

@@ -26,6 +26,8 @@ class ExpressPosController extends Controller
             return $hh->isActiveNow();
         });
 
+        $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
+
         return view('admin.pos.express', compact('categories', 'customers', 'tenant', 'items', 'topItems', 'activeHappyHour'));
     }
 }

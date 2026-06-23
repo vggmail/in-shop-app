@@ -11,15 +11,17 @@ class Item extends Model {
     protected static function boot() {
         parent::boot();
         static::saving(function($item) {
-            if (empty($item->slug)) {
-                $slug = \Illuminate\Support\Str::slug($item->name);
-                $originalSlug = $slug;
-                $count = 1;
-                while (static::where('slug', $slug)->where('id', '!=', $item->id)->exists()) {
-                    $slug = $originalSlug . '-' . $count++;
-                }
-                $item->slug = $slug;
+            if (empty($item->slug) || ($item->isDirty('name') && !$item->isDirty('slug'))) {
+                $item->slug = \Illuminate\Support\Str::slug($item->name);
             }
+            
+            $slug = $item->slug;
+            $originalSlug = $slug;
+            $count = 1;
+            while (static::withTrashed()->where('slug', $slug)->where('id', '!=', $item->id)->exists()) {
+                $slug = $originalSlug . '-' . $count++;
+            }
+            $item->slug = $slug;
         });
     }
 
