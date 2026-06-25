@@ -474,8 +474,8 @@
     <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
         <button type="button" class="btn-close modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
         <div class="modal-body p-4 text-center">
-        <div id="m-image-box" class="mb-4 modal-food-img overflow-hidden d-none">
-            <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
+        <div id="m-image-box" class="mb-4 modal-food-img overflow-hidden d-none skeleton-img-container skeleton">
+            <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover fade-in-on-load" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
         </div>
         <h3 class="m-title mb-2" id="m-food-name">Food Name</h3>
         <div class="m-desc-box mb-4 mx-2">
@@ -711,10 +711,11 @@
             $("#m-food-desc").text(description || 'Fresh ingredients & special sauces.');
             $("#m-variants-list, #m-extras-list").empty();
             if(image && image !== 'null' && image !== '') {
-                $("#m-image-box").removeClass("d-none");
-                $("#m-food-image").attr("src", "/storage/" + image);
+                $("#m-image-box").addClass("skeleton").removeClass("d-none");
+                $("#m-food-image").removeClass("loaded").attr("src", "/storage/" + image);
             } else {
                 $("#m-image-box").addClass("d-none");
+                $("#m-food-image").removeClass("loaded").attr("src", "");
             }
             if(variants.length) { 
                 $("#m-variants-box").removeClass("d-none"); 
