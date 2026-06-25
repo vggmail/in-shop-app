@@ -319,7 +319,7 @@
                 <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', '{{ addslashes($ri->description) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->feature_image }}', '{{ addslashes($ri->default_size) }}')">
                     <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm skeleton-img-container {{ ($ri->image || $ri->feature_image) ? 'skeleton' : '' }}" style="width: 50px; height: 50px;">
                         @if($ri->image || $ri->feature_image)
-                            <img src="{{ asset('storage/'.$ri->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ asset('storage/'.$ri->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load lazy-load">
                         @else
                             <i class="fas fa-history text-primary"></i>
                         @endif
@@ -358,7 +358,7 @@
                 <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->feature_image }}', '{{ addslashes($i->default_size) }}')">
                     <div class="food-img position-relative overflow-hidden skeleton-img-container {{ ($i->image || $i->feature_image) ? 'skeleton' : '' }}">
                         @if($i->image || $i->feature_image)
-                            <img src="{{ asset('storage/'.$i->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
+                            <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-src="{{ asset('storage/'.$i->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load lazy-load">
                         @else
                             <i class="fas fa-hamburger fa-2x"></i>
                         @endif
@@ -1231,6 +1231,41 @@
             bootstrap.Modal.getInstance(document.getElementById('paymentPendingModal')).hide();
             location.reload(); // Refresh to clear state
         }
+
+        // Lazy Load Images on Scroll
+        document.addEventListener("DOMContentLoaded", function() {
+            const lazyImages = document.querySelectorAll('img.lazy-load');
+            if ('IntersectionObserver' in window) {
+                const imageObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const image = entry.target;
+                            image.onload = () => {
+                                image.classList.add('loaded');
+                                image.parentElement.classList.remove('skeleton');
+                            };
+                            image.onerror = () => {
+                                image.parentElement.classList.remove('skeleton');
+                            };
+                            image.src = image.dataset.src;
+                            imageObserver.unobserve(image);
+                        }
+                    });
+                }, {
+                    rootMargin: "0px 0px 200px 0px"
+                });
+                lazyImages.forEach(image => imageObserver.observe(image));
+            } else {
+                // Fallback for browsers that don't support IntersectionObserver
+                lazyImages.forEach(image => {
+                    image.onload = () => {
+                        image.classList.add('loaded');
+                        image.parentElement.classList.remove('skeleton');
+                    };
+                    image.src = image.dataset.src;
+                });
+            }
+        });
     </script>
 </body>
 </html>
