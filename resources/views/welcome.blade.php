@@ -43,6 +43,22 @@
         .m-desc-box { background: #fdf2f2; border-left: 4px solid var(--primary); padding: 15px; border-radius: 15px; }
         .m-desc { color: #666; font-size: 13px; margin-bottom: 0; font-weight: 500; }
         .modal-section-label { font-size: 11px; font-weight: 800; text-transform: uppercase; color: #adb5bd; letter-spacing: 1px; margin-bottom: 12px; display: block; }
+        .modal-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+            background-color: rgba(255, 255, 255, 0.85);
+            border-radius: 50%;
+            padding: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transition: all 0.2s ease-in-out;
+        }
+        .modal-close-btn:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 1);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+        }
         
         .variant-btn, .extra-btn { transition: all 0.2s ease; border: 1.5px solid #eee !important; background: white !important; color: #444 !important; font-weight: 600 !important; font-size: 14px !important; }
         .btn-check:checked + .variant-btn { border-color: var(--dark) !important; background: var(--dark) !important; color: white !important; box-shadow: 0 5px 15px rgba(0,0,0,0.1) !important; transform: translateY(-2px); }
@@ -122,9 +138,118 @@
         body.banner-active {
             padding-top: 56px;
         }
+        
+        /* ─── SKELETON SHIMMER LOADER ─── */
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, #f1f2f6 25%, #e4e7eb 50%, #f1f2f6 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite linear;
+        }
+        #app-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: #f8f9fa;
+            z-index: 9999;
+            transition: opacity 0.3s ease-in-out;
+            overflow-y: auto;
+            padding-bottom: 90px;
+        }
+        .skeleton-hero {
+            height: 180px;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 20px;
+        }
+        .skeleton-pill {
+            flex-shrink: 0;
+        }
+        .skeleton-card-wrapper {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            height: 100%;
+        }
+        .skeleton-img {
+            height: 140px;
+        }
+        .skeleton-text {
+            border-radius: 4px;
+        }
+        
+        /* ─── NATIVE IMAGE FADE IN ─── */
+        .skeleton-img-container {
+            position: relative;
+            background: #e4e7eb;
+            overflow: hidden;
+        }
+        .fade-in-on-load {
+            opacity: 0;
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .fade-in-on-load.loaded {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
+    <!-- App Loader (Native Skeleton Shell) -->
+    <div id="app-loader">
+        <!-- Hero Skeleton -->
+        <div class="skeleton skeleton-hero mb-4"></div>
+
+        <div class="container">
+            <!-- Pills Skeleton -->
+            <div class="d-flex overflow-hidden gap-2 mb-4">
+                <div class="skeleton skeleton-pill" style="width: 80px; height: 35px; border-radius: 30px;"></div>
+                <div class="skeleton skeleton-pill" style="width: 100px; height: 35px; border-radius: 30px;"></div>
+                <div class="skeleton skeleton-pill" style="width: 90px; height: 35px; border-radius: 30px;"></div>
+                <div class="skeleton skeleton-pill" style="width: 110px; height: 35px; border-radius: 30px;"></div>
+                <div class="skeleton skeleton-pill" style="width: 80px; height: 35px; border-radius: 30px;"></div>
+            </div>
+
+            <!-- Card Grid Skeleton (4 cards) -->
+            <div class="row g-3">
+                @for ($k = 0; $k < 4; $k++)
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="skeleton-card-wrapper p-3">
+                        <div class="skeleton skeleton-img mb-3 rounded-4" style="height: 140px;"></div>
+                        <div class="skeleton skeleton-text mb-2" style="width: 70%; height: 16px;"></div>
+                        <div class="skeleton skeleton-text mb-2" style="width: 90%; height: 12px;"></div>
+                        <div class="d-flex justify-content-between mt-3">
+                            <div class="skeleton skeleton-text" style="width: 40%; height: 14px;"></div>
+                            <div class="skeleton skeleton-text" style="width: 20%; height: 14px;"></div>
+                        </div>
+                    </div>
+                </div>
+                @endfor
+            </div>
+        </div>
+
+        <!-- Bottom Nav Skeleton -->
+        <div class="bottom-nav-skeleton border-top bg-white d-flex align-items-center justify-content-around" style="position: fixed; bottom: 0; left: 0; right: 0; height: 75px; border-radius: 30px 30px 0 0; z-index: 10000; box-shadow: 0 -5px 25px rgba(0,0,0,0.05);">
+            <div class="skeleton rounded-circle" style="width: 32px; height: 32px;"></div>
+            <div class="skeleton rounded-circle" style="width: 32px; height: 32px;"></div>
+            <div class="skeleton rounded-circle" style="width: 32px; height: 32px;"></div>
+        </div>
+    </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            var loader = document.getElementById('app-loader');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(function() {
+                    loader.remove();
+                }, 350);
+            }
+        });
+    </script>
+
     <!-- Custom Top Install Banner -->
     <div id="installBanner" class="install-banner">
         <div class="banner-content">
@@ -192,9 +317,9 @@
             <div class="d-flex overflow-auto gap-3 pb-2 no-scrollbar">
                 @foreach($recentItems as $ri)
                 <div class="recent-card" onclick="openFoodModal({{ $ri->id }}, '{{ addslashes($ri->name) }}', '{{ addslashes($ri->description) }}', {{ $ri->price }}, {{ json_encode($ri->variants) }}, {{ json_encode($ri->extras) }}, '{{ $ri->feature_image }}', '{{ addslashes($ri->default_size) }}')">
-                    <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm" style="width: 50px; height: 50px;">
+                    <div class="bg-light rounded-4 mb-2 overflow-hidden mx-auto d-flex align-items-center justify-content-center shadow-sm skeleton-img-container {{ ($ri->image || $ri->feature_image) ? 'skeleton' : '' }}" style="width: 50px; height: 50px;">
                         @if($ri->image || $ri->feature_image)
-                            <img src="{{ asset('storage/'.$ri->feature_thumb) }}" class="w-100 h-100 object-fit-cover">
+                            <img src="{{ asset('storage/'.$ri->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
                         @else
                             <i class="fas fa-history text-primary"></i>
                         @endif
@@ -231,9 +356,9 @@
             @foreach($items as $i)
             <div class="col-6 col-md-4 col-lg-3 food-item-box" data-cat="{{ Str::slug($i->category->name) }}">
                 <div class="card food-card" onclick="openFoodModal({{ $i->id }}, '{{ addslashes($i->name) }}', '{{ addslashes($i->description) }}', {{ $i->price }}, {{ json_encode($i->variants) }}, {{ json_encode($i->extras) }}, '{{ $i->feature_image }}', '{{ addslashes($i->default_size) }}')">
-                    <div class="food-img position-relative overflow-hidden">
+                    <div class="food-img position-relative overflow-hidden skeleton-img-container {{ ($i->image || $i->feature_image) ? 'skeleton' : '' }}">
                         @if($i->image || $i->feature_image)
-                            <img src="{{ asset('storage/'.$i->feature_thumb) }}" class="w-100 h-100 object-fit-cover">
+                            <img src="{{ asset('storage/'.$i->feature_thumb) }}" class="w-100 h-100 object-fit-cover fade-in-on-load" onload="this.classList.add('loaded'); this.parentElement.classList.remove('skeleton');">
                         @else
                             <i class="fas fa-hamburger fa-2x"></i>
                         @endif
@@ -346,7 +471,9 @@
     </div></div></div></div>
 
     <!-- Food Modal -->
-    <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content"><div class="modal-body p-4 text-center">
+    <div class="modal fade" id="foodModal"><div class="modal-dialog modal-dialog-centered"><div class="modal-content">
+        <button type="button" class="btn-close modal-close-btn" data-bs-dismiss="modal" aria-label="Close"></button>
+        <div class="modal-body p-4 text-center">
         <div id="m-image-box" class="mb-4 modal-food-img overflow-hidden d-none">
             <img src="" id="m-food-image" class="w-100 h-100 object-fit-cover">
         </div>
