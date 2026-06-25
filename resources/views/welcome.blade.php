@@ -675,7 +675,16 @@
         const availableItemIds = {!! json_encode($items->pluck('id')->merge($recentItems->pluck('id'))->unique()->values()) !!};
         const itemStockMap = {!! json_encode($items->pluck('stock_quantity', 'id')->merge($recentItems->pluck('stock_quantity', 'id'))->all()) !!};
         
-        $(document).ready(function() { renderCart(); });
+        $(document).ready(function() {
+            renderCart();
+            
+            // Blur focused element inside modal when closing to prevent WAI-ARIA active-focus warnings
+            $('.modal').on('hide.bs.modal', function() {
+                if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                    document.activeElement.blur();
+                }
+            });
+        });
         function saveCart() { localStorage.setItem('cart', JSON.stringify(cart)); renderCart(); }
         function filterCat(slug) { $(".category-pill").removeClass("active"); $(event.target).addClass("active"); if(slug==='all') $(".food-item-box").show(); else { $(".food-item-box").hide(); $(`.food-item-box[data-cat="${slug}"]`).show(); } }
         function updateOrderTypeUI() {
