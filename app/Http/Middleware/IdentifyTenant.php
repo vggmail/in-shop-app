@@ -94,6 +94,7 @@ class IdentifyTenant
 
         // Inject the tenant model into the request and view sharing
         app()->instance('tenant', $tenant);
+        app()->instance('is_tenant_subdomain', true);
         view()->share('tenant_info', $tenant);
 
         return $next($request);

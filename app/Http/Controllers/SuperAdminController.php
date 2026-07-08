@@ -123,6 +123,9 @@ class SuperAdminController extends Controller
                 $appUrl = config('app.url'); // e.g. http://localhost
                 $parsedUrl = parse_url($appUrl);
                 $host = $parsedUrl['host'] ?? 'localhost';
+                if (strpos($host, 'retail.') === 0) {
+                    $host = substr($host, 7);
+                }
                 $scheme = $parsedUrl['scheme'] ?? 'http';
                 $port = isset($parsedUrl['port']) ? ':' . $parsedUrl['port'] : '';
                 
@@ -130,8 +133,10 @@ class SuperAdminController extends Controller
                 
                 try {
                     Mail::to($request->email)->send(new TenantWelcomeMail($tenant, $request->email, $request->password, $loginUrl));
+                    \App\Models\EmailLog::log($request->email, 'Welcome to ' . $tenant->name, 'sent');
                 } catch (\Exception $e) {
                     \Illuminate\Support\Facades\Log::error("Failed to send tenant email: " . $e->getMessage());
+                    \App\Models\EmailLog::log($request->email, 'Welcome to ' . $tenant->name, 'failed', $e->getMessage());
                     // Don't fail the whole process if only mail fails
                     return redirect()->route('super-admin.tenants.index')->with('success', "Tenant '$subdomain' created successfully, but welcome email failed to send.");
                 }

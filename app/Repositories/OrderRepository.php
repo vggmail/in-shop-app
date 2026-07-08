@@ -194,12 +194,16 @@ class OrderRepository extends BaseRepository
                 $fullOrder = $this->find($order->id);
                 \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderInvoiceMail($fullOrder));
                 \Illuminate\Support\Facades\Log::info("OrderRepo: Invoice email sent to " . $order->customer->email . " for Order #" . $order->order_number);
+                \App\Models\EmailLog::log($order->customer->email, 'Order Invoice #' . $order->order_number, 'sent');
                 return true;
             } else {
                 \Illuminate\Support\Facades\Log::info("OrderRepo: No email address found for customer in Order #" . $order->order_number . ". Skipping email.");
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("OrderRepo Mail Error for Order #" . $order->order_number . ": " . $e->getMessage());
+            if ($order->customer && !empty($order->customer->email)) {
+                \App\Models\EmailLog::log($order->customer->email, 'Order Invoice #' . $order->order_number, 'failed', $e->getMessage());
+            }
         }
         return false;
     }
@@ -215,10 +219,14 @@ class OrderRepository extends BaseRepository
                 $order->load('items.item');
                 \Illuminate\Support\Facades\Mail::to($order->customer->email)->send(new \App\Mail\OrderStatusMail($order));
                 \Illuminate\Support\Facades\Log::info("OrderRepo: Status email sent to " . $order->customer->email . " for Order #" . $order->order_number);
+                \App\Models\EmailLog::log($order->customer->email, 'Order Status #' . $order->order_number, 'sent');
                 return true;
             }
         } catch (\Exception $e) {
             \Illuminate\Support\Facades\Log::error("OrderRepo Status Mail Error: " . $e->getMessage());
+            if ($order->customer && !empty($order->customer->email)) {
+                \App\Models\EmailLog::log($order->customer->email, 'Order Status #' . $order->order_number, 'failed', $e->getMessage());
+            }
         }
         return false;
     }

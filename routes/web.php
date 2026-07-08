@@ -176,4 +176,25 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     });
 });
 
+// Central SaaS Registration
+Route::get('/signup', [App\Http\Controllers\CentralRegistrationController::class, 'showSignupForm'])->name('central.signup');
+Route::get('/auth/signup', [App\Http\Controllers\CentralRegistrationController::class, 'showSignupForm']);
+Route::post('/auth/signup/send-otp', [App\Http\Controllers\CentralRegistrationController::class, 'sendOtp'])->name('central.signup.send-otp');
+Route::post('/auth/signup/verify-otp', [App\Http\Controllers\CentralRegistrationController::class, 'verifyOtp'])->name('central.signup.verify-otp');
+Route::post('/auth/signup/register', [App\Http\Controllers\CentralRegistrationController::class, 'register'])->name('central.signup.register');
+
+// Cross-Subdomain Auto-Login
+Route::get('/autologin/{user_id}', [App\Http\Controllers\AutologinController::class, 'autologin'])->name('central.autologin')->middleware('signed');
+
+// Helper route to view logs in browser for production troubleshooting
+Route::get('/view-logs', function () {
+    $logPath = storage_path('logs/laravel.log');
+    if (!file_exists($logPath)) {
+        return 'No log file found.';
+    }
+    $lines = file($logPath);
+    $lastLines = array_slice($lines, -100);
+    return '<h3>Last 100 lines of laravel.log</h3><pre>' . implode('', array_map('htmlspecialchars', $lastLines)) . '</pre>';
+});
+
 require __DIR__.'/auth.php';
