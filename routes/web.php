@@ -15,6 +15,10 @@ use App\Http\Controllers\UserAdminController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\PayUController;
 use App\Http\Controllers\CustomerAuthController;
+use App\Http\Controllers\KdsController;
+use App\Http\Controllers\CdsController;
+use App\Http\Controllers\ExpressPosController;
+use App\Http\Controllers\TableBookingController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/place-order', [HomeController::class, 'placeOrder'])->name('home.store');
@@ -69,10 +73,11 @@ Route::post('/customer/address/save', [CustomerAuthController::class, 'saveAddre
 Route::delete('/customer/address/{id}', [CustomerAuthController::class, 'deleteAddress'])->name('customer.address.delete');
 Route::post('/customer/address/{id}/default', [CustomerAuthController::class, 'setDefaultAddress'])->name('customer.address.default');
 Route::post('/customer/update-pin', [CustomerAuthController::class, 'updatePin'])->name('customer.update-pin');
+Route::post('/customer/update-profile', [CustomerAuthController::class, 'updateProfile'])->name('customer.update-profile');
 Route::post('/customer/forgot-pin/send-otp', [CustomerAuthController::class, 'sendForgotPinOtp'])->name('customer.forgot-pin.send-otp');
 Route::post('/customer/forgot-pin/verify-otp', [CustomerAuthController::class, 'verifyForgotOtp'])->name('customer.forgot-pin.verify-otp');
 Route::post('/customer/forgot-pin/reset', [CustomerAuthController::class, 'resetForgotPin'])->name('customer.forgot-pin.reset');
-Route::get('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
+Route::post('/customer/logout', [CustomerAuthController::class, 'logout'])->name('customer.logout');
 
 Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
@@ -81,22 +86,60 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('items/sample-csv', [ItemController::class, 'sampleCsv'])->name('items.sampleCsv');
     
     Route::get('customers/search', [CustomerController::class, 'search'])->name('customers.search');
+    Route::post('customers/{id}/reset-pin', [CustomerController::class, 'resetPin'])->name('customers.reset-pin');
     Route::resource('items', ItemController::class)->except(['create', 'show', 'edit']);
     Route::resource('categories', CategoryController::class)->except(['create', 'show', 'edit']);
     Route::resource('customers', CustomerController::class)->except(['create', 'show', 'edit']);
     Route::resource('expenses', ExpenseController::class)->except(['create', 'show', 'edit']);
+    Route::post('expenses/{id}/restore', [ExpenseController::class, 'restore'])->name('expenses.restore');
     
     Route::resource('coupons', CouponController::class)->except(['create', 'show', 'edit']);
     Route::post('coupons/check', [CouponController::class, 'check'])->name('coupons.check');
     
-    Route::get('pos', [OrderController::class, 'create'])->name('pos.index');
-    Route::post('pos/store', [OrderController::class, 'store'])->name('pos.store');
+    Route::middleware(['check.shift'])->group(function () {
+        Route::get('pos', [OrderController::class, 'create'])->name('pos.index');
+        Route::get('pos/express', [ExpressPosController::class, 'index'])->name('pos.express');
+        Route::post('pos/store', [OrderController::class, 'store'])->name('pos.store');
+    });
+
+    // Kitchen Display System (KDS)
+    Route::get('kds', [KdsController::class, 'index'])->name('kds.index');
+    Route::get('kds/poll', [KdsController::class, 'poll'])->name('kds.poll');
+    Route::post('kds/{id}/status', [KdsController::class, 'updateStatus'])->name('kds.updateStatus');
+
+    // Counter Display System (CDS)
+    Route::get('/cds', [App\Http\Controllers\CdsController::class, 'index'])->name('cds.index');
+    Route::get('/cds/poll', [App\Http\Controllers\CdsController::class, 'poll'])->name('cds.poll');
+    Route::post('/cds/handover/{id}', [App\Http\Controllers\CdsController::class, 'handover'])->name('cds.handover');
+    Route::post('/cds/pay/{id}', [App\Http\Controllers\CdsController::class, 'markPaid'])->name('cds.pay');
+
+    // Inventory
+    Route::resource('inventory/ingredients', App\Http\Controllers\IngredientController::class)->names('ingredients');
+    Route::get('inventory/recipes', [App\Http\Controllers\RecipeController::class, 'index'])->name('recipes.index');
+    Route::get('inventory/recipes/{item}/edit', [App\Http\Controllers\RecipeController::class, 'edit'])->name('recipes.edit');
+    Route::put('inventory/recipes/{item}', [App\Http\Controllers\RecipeController::class, 'update'])->name('recipes.update');
+
+    // Bar Management
+    Route::get('bar/wastage', [App\Http\Controllers\BarController::class, 'wastageIndex'])->name('bar.wastage.index');
+    Route::post('bar/wastage', [App\Http\Controllers\BarController::class, 'storeWastage'])->name('bar.wastage.store');
+    Route::post('bar/happy-hours', [App\Http\Controllers\BarController::class, 'storeHappyHour'])->name('bar.happy_hours.store');
+    Route::post('bar/happy-hours/{id}/toggle', [App\Http\Controllers\BarController::class, 'toggleHappyHour'])->name('bar.happy_hours.toggle');
+    Route::delete('bar/happy-hours/{id}', [App\Http\Controllers\BarController::class, 'destroyHappyHour'])->name('bar.happy_hours.destroy');
+    Route::get('bar/excise', [App\Http\Controllers\BarController::class, 'exciseReport'])->name('bar.excise');
+
+    // Shift Management
+    Route::get('shifts', [App\Http\Controllers\ShiftController::class, 'index'])->name('shifts.index');
+    Route::post('shifts/open', [App\Http\Controllers\ShiftController::class, 'open'])->name('shifts.open');
+    Route::get('shifts/close', [App\Http\Controllers\ShiftController::class, 'showCloseForm'])->name('shifts.close.form');
+    Route::post('shifts/close', [App\Http\Controllers\ShiftController::class, 'close'])->name('shifts.close');
+    Route::post('shifts/petty-cash', [App\Http\Controllers\ShiftController::class, 'storePettyCash'])->name('shifts.petty_cash');
     
     Route::get('orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('orders/check-pending', [OrderController::class, 'checkPending'])->name('orders.check-pending');
     Route::get('orders/{id}/invoice', [OrderController::class, 'printInvoice'])->name('orders.invoice');
     Route::get('orders/{id}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('orders/{id}/status', [OrderController::class, 'updateStatus'])->name('orders.updateStatus');
+    Route::post('orders/{id}/cancel', [OrderController::class, 'cancelOrder'])->name('orders.cancelOrder');
     
     Route::get('payments', [OrderController::class, 'payments'])->name('payments.index');
     Route::get('payments/{id}', [OrderController::class, 'paymentShow'])->name('payments.show');
@@ -104,6 +147,9 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::get('reports', [OrderController::class, 'reports'])->name('reports.index');
     Route::get('logs', [AdminController::class, 'logs'])->name('logs.index');
     Route::resource('users', UserAdminController::class)->except(['create', 'show', 'edit']);
+    
+    // Table Booking
+    Route::get('tables', [TableBookingController::class, 'index'])->name('tables.index');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -116,6 +162,39 @@ Route::middleware('auth')->prefix('cp')->group(function () {
     Route::post('/settings/payments', [\App\Http\Controllers\PaymentSettingsController::class, 'update'])->name('settings.payments.update');
     
     Route::get('/password', [\App\Http\Controllers\AdminProfileController::class, 'editPassword'])->name('admin.password');
+
+    // Super Admin - Tenant Management
+    Route::prefix('super-admin')->group(function() {
+        Route::get('/tenants', [\App\Http\Controllers\SuperAdminController::class, 'index'])->name('super-admin.tenants.index');
+        Route::get('/tenants/create', [\App\Http\Controllers\SuperAdminController::class, 'create'])->name('super-admin.tenants.create');
+        Route::post('/tenants', [\App\Http\Controllers\SuperAdminController::class, 'store'])->name('super-admin.tenants.store');
+        Route::get('/tenants/{id}/edit', [\App\Http\Controllers\SuperAdminController::class, 'edit'])->name('super-admin.tenants.edit');
+        Route::put('/tenants/{id}', [\App\Http\Controllers\SuperAdminController::class, 'update'])->name('super-admin.tenants.update');
+        Route::post('/tenants/{id}/toggle', [\App\Http\Controllers\SuperAdminController::class, 'toggleStatus'])->name('super-admin.tenants.toggle');
+        Route::delete('/tenants/{id}', [\App\Http\Controllers\SuperAdminController::class, 'destroy'])->name('super-admin.tenants.destroy');
+        Route::post('/tenants/{id}/restore', [\App\Http\Controllers\SuperAdminController::class, 'restore'])->name('super-admin.tenants.restore');
+    });
+});
+
+// Central SaaS Registration
+Route::get('/signup', [App\Http\Controllers\CentralRegistrationController::class, 'showSignupForm'])->name('central.signup');
+Route::get('/auth/signup', [App\Http\Controllers\CentralRegistrationController::class, 'showSignupForm']);
+Route::post('/auth/signup/send-otp', [App\Http\Controllers\CentralRegistrationController::class, 'sendOtp'])->name('central.signup.send-otp');
+Route::post('/auth/signup/verify-otp', [App\Http\Controllers\CentralRegistrationController::class, 'verifyOtp'])->name('central.signup.verify-otp');
+Route::post('/auth/signup/register', [App\Http\Controllers\CentralRegistrationController::class, 'register'])->name('central.signup.register');
+
+// Cross-Subdomain Auto-Login
+Route::get('/autologin/{user_id}', [App\Http\Controllers\AutologinController::class, 'autologin'])->name('central.autologin')->middleware('signed');
+
+// Helper route to view logs in browser for production troubleshooting
+Route::get('/view-logs', function () {
+    $logPath = storage_path('logs/laravel.log');
+    if (!file_exists($logPath)) {
+        return 'No log file found.';
+    }
+    $lines = file($logPath);
+    $lastLines = array_slice($lines, -100);
+    return '<h3>Last 100 lines of laravel.log</h3><pre>' . implode('', array_map('htmlspecialchars', $lastLines)) . '</pre>';
 });
 
 require __DIR__.'/auth.php';

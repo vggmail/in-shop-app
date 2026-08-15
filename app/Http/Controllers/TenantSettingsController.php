@@ -9,7 +9,7 @@ class TenantSettingsController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify store settings.");
         }
         $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
@@ -21,7 +21,7 @@ class TenantSettingsController extends Controller
 
     public function update(Request $request)
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify store settings.");
         }
         $tenant = app()->bound('tenant') ? app('tenant') : \App\Models\Tenant::first();
@@ -44,19 +44,16 @@ class TenantSettingsController extends Controller
             'takeaway_enabled' => 'nullable|boolean',
             'home_delivery_enabled' => 'nullable|boolean',
             'cash_enabled' => 'nullable|boolean',
-            'online_enabled' => 'nullable|boolean'
+            'online_enabled' => 'nullable|boolean',
+            'starting_token' => 'nullable|integer|min:1',
+            'floor_plans' => 'nullable|array'
         ]);
 
         $tenantModel = Tenant::find($tenant->id);
 
         if ($request->hasFile('logo')) {
-            $file = $request->file('logo');
-            $filename = time() . '_' . $file->getClientOriginalName();
-            if (!file_exists(public_path('uploads/logos'))) {
-                mkdir(public_path('uploads/logos'), 0777, true);
-            }
-            $file->move(public_path('uploads/logos'), $filename);
-            $tenantModel->logo = '/uploads/logos/' . $filename;
+            $path = $request->file('logo')->store('logos', 'public');
+            $tenantModel->logo = '/storage/' . $path;
         }
 
         $tenantModel->name = $request->name;
@@ -73,6 +70,23 @@ class TenantSettingsController extends Controller
         $tenantModel->home_delivery_enabled = $request->has('home_delivery_enabled');
         $tenantModel->cash_enabled = $request->has('cash_enabled');
         $tenantModel->online_enabled = $request->has('online_enabled');
+        $tenantModel->starting_token = $request->starting_token ?? 100;
+        
+        if ($request->has('floor_plans')) {
+            $val = $request->floor_plans;
+            $parsed = is_string($val) ? json_decode($val, true) : $val;
+            if (is_array($parsed)) {
+                $filtered = array_values(array_filter($parsed, function($item) {
+                    return !empty($item['name']);
+                }));
+                $tenantModel->floor_plans = empty($filtered) ? null : $filtered;
+            } else {
+                $tenantModel->floor_plans = null;
+            }
+        } else {
+            $tenantModel->floor_plans = null;
+        }
+        
         $tenantModel->save();
 
         return redirect()->back()->with('success', 'Store settings updated successfully!');

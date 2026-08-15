@@ -113,6 +113,13 @@
             </div>
         </div>
 
+        @if($order->token_number)
+        <div class="text-center" style="margin: 10px 0; border: 2px solid #000; padding: 5px;">
+            <div style="font-size: 14px; font-weight: bold;">TOKEN NUMBER</div>
+            <div style="font-size: 32px; font-weight: 900; line-height: 1;">{{ $order->token_number }}</div>
+        </div>
+        @endif
+
         <div style="margin: 5px 0; font-size: 11px;">
             <b>Order:</b> {{ $order->order_number }}<br>
             <b>Date:</b> {{ $order->created_at->format("d-M-Y H:i") }}<br>

@@ -49,7 +49,7 @@
 
                 <div class="d-flex gap-2">
                     <button class="btn btn-sm btn-outline-dark w-100 rounded-pill py-2 fw-bold" 
-                        onclick="editCategory({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->parent_id ?? 'null' }}, {{ $cat->is_active }})">
+                        onclick="editCategory({{ $cat->id }}, '{{ addslashes($cat->name) }}', {{ $cat->parent_id ?? 'null' }}, {{ $cat->is_active }}, '{{ $cat->image ? asset('storage/' . $cat->image) : '' }}')">
                         <i class="fas fa-edit small me-1"></i> Edit
                     </button>
                     <form action="{{ route('categories.destroy', $cat->id) }}" method="POST" class="w-100">
@@ -102,7 +102,15 @@
                         </div>
                         <div class="col-12">
                             <label class="small fw-bold text-muted text-uppercase mb-1">Upload Icon/Image</label>
-                            <input type="file" name="image_file" class="form-control bg-light border-0" accept="image/*">
+                            <input type="file" name="image_file" id="f_image_file" class="form-control bg-light border-0 mb-2" accept="image/*">
+                            
+                            <!-- Image Preview Container -->
+                            <div id="image_preview_container" style="display: none;">
+                                <div class="small text-muted mb-1"><i class="fas fa-image me-1"></i> Category Image Preview:</div>
+                                <div class="position-relative d-inline-block bg-white p-2 border rounded-3 shadow-sm">
+                                    <img id="category_image_preview" src="" style="max-height: 100px; max-width: 100%; object-fit: contain; border-radius: 8px;">
+                                </div>
+                            </div>
                         </div>
                         <div class="col-12 mt-4">
                             <div class="form-check form-switch p-0 d-flex align-items-center justify-content-between bg-light p-3 rounded-3">
@@ -133,10 +141,15 @@ function openAddCategory() {
     $("#categoryModalTitle").text("Add New Category");
     // Show all options in parent selection
     $("#f_parent_id option").show();
+    
+    // Reset image preview
+    $("#category_image_preview").attr("src", "");
+    $("#image_preview_container").hide();
+    
     new bootstrap.Modal(document.getElementById("categoryModal")).show();
 }
 
-function editCategory(id, name, parentId, isActive) {
+function editCategory(id, name, parentId, isActive, imageUrl) {
     $("#categoryForm").attr("action", "/cp/categories/" + id);
     $("#method_field").html('@method("PUT")');
     $("#categoryModalTitle").text("Edit Category Details");
@@ -148,8 +161,35 @@ function editCategory(id, name, parentId, isActive) {
     $("#f_parent_id option").show();
     if(id) $("#f_parent_id option[value='" + id + "']").hide();
 
+    // Reset file input
+    $("#f_image_file").val('');
+
+    // Handle image preview
+    if (imageUrl) {
+        $("#category_image_preview").attr("src", imageUrl);
+        $("#image_preview_container").show();
+    } else {
+        $("#category_image_preview").attr("src", "");
+        $("#image_preview_container").hide();
+    }
+
     new bootstrap.Modal(document.getElementById("categoryModal")).show();
 }
+
+// Live preview when a new file is chosen
+$(document).ready(function() {
+    $("#f_image_file").on("change", function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $("#category_image_preview").attr("src", e.target.result);
+                $("#image_preview_container").show();
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
 </script>
 
 <style>

@@ -1,0 +1,17 @@
+{
+  "name": "In-Shop: Restaurant POS & Ordering",
+  "short_name": "In-Shop",
+  "description": "Premium Online Ordering System & Restaurant POS",
+  "start_url": "in-shop-product-overview.html",
+  "display": "standalone",
+  "background_color": "#4F46E5",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "in_shop_app_icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

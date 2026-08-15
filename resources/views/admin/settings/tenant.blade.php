@@ -79,8 +79,13 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">STATE</label>
-                            <input type="text" name="state" class="form-control bg-light border-0 rounded-3"
-                                value="{{ old('state', $tenant->state) }}">
+                            <select name="state" class="form-select bg-light border-0 rounded-3">
+                                <option value="">Select State</option>
+                                @php $states = ["Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh","Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka","Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram","Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana","Tripura","Uttar Pradesh","Uttarakhand","West Bengal","Delhi"]; @endphp
+                                @foreach($states as $s)
+                                    <option value="{{ $s }}" {{ old('state', $tenant->state) == $s ? 'selected' : '' }}>{{ $s }}</option>
+                                @endforeach
+                            </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-bold text-muted">PINCODE / ZIP</label>
@@ -201,6 +206,62 @@
                         </div>
                     </div>
 
+                    <h5 class="fw-bold mb-4 text-primary border-bottom pb-2 mt-5"><i class="fas fa-ticket-alt me-2"></i>
+                        Token Management</h5>
+                    <p class="text-muted small mb-4">Configure how token numbers are assigned to new orders.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="p-3 border rounded-3 bg-light shadow-sm">
+                                <label class="form-label small fw-bold text-muted">STARTING TOKEN NUMBER</label>
+                                <input type="number" name="starting_token" class="form-control bg-white border rounded-3"
+                                    value="{{ old('starting_token', $tenant->starting_token) }}" min="1" placeholder="e.g. 100">
+                                <small class="text-muted d-block mt-2">New tokens will start from this number. Completed/Cancelled tokens are reused automatically.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="fw-bold mb-4 text-primary border-bottom pb-2 mt-5"><i class="fas fa-th-large me-2"></i>
+                        Floor Plans Configuration</h5>
+                    <p class="text-muted small mb-4">Define physical table sections and the range of table numbers for each layout.</p>
+
+                    <div class="row g-4">
+                        <div class="col-md-12">
+                            <div class="p-4 border rounded-3 bg-light shadow-sm">
+                                <div id="floorPlansContainer">
+                                    @php
+                                        $defaultPlans = [
+                                            ['name' => 'Main Hall (A/C)', 'start' => 1, 'end' => 15],
+                                            ['name' => 'Outdoor (Non A/C)', 'start' => 16, 'end' => 25],
+                                            ['name' => 'Bar', 'start' => 26, 'end' => 30]
+                                        ];
+                                        $plans = is_array($tenant->floor_plans) ? $tenant->floor_plans : (json_decode($tenant->floor_plans, true) ?: $defaultPlans);
+                                    @endphp
+                                    @foreach($plans as $i => $plan)
+                                        @if(isset($plan['is_deleted']) && $plan['is_deleted'])
+                                            @continue
+                                        @endif
+                                        <div class="row g-2 mb-3 floor-plan-row align-items-center">
+                                            <div class="col-md-6">
+                                                <label class="small text-muted fw-bold mb-1">Section Name</label>
+                                                <input type="text" name="floor_plans[{{$i}}][name]" class="form-control bg-light fw-bold text-muted" placeholder="e.g. Main Hall" value="{{ $plan['name'] ?? '' }}" readonly required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="small text-muted fw-bold mb-1">Start Table No.</label>
+                                                <input type="number" name="floor_plans[{{$i}}][start]" class="form-control bg-white" placeholder="Start" value="{{ $plan['start'] ?? '' }}" required>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <label class="small text-muted fw-bold mb-1">End Table No.</label>
+                                                <input type="number" name="floor_plans[{{$i}}][end]" class="form-control bg-white" placeholder="End" value="{{ $plan['end'] ?? '' }}" required>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                                <div class="small text-danger mt-2"><i class="fas fa-info-circle me-1"></i> Note: Section names are configured by the Super Admin. You can only adjust the table ranges.</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="mt-5 text-end border-top pt-4">
                         <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm px-5 fw-bold">
                             <i class="fas fa-save me-2"></i> Save Settings
@@ -230,5 +291,6 @@
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
+
     </script>
 @endsection

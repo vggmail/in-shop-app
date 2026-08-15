@@ -27,7 +27,7 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->except('image_file');
-        $data['slug'] = Str::slug($request->name);
+        
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image_file')) {
@@ -50,7 +50,7 @@ class CategoryController extends Controller
         ]);
 
         $data = $request->except('image_file');
-        $data['slug'] = Str::slug($request->name);
+        
         $data['is_active'] = $request->has('is_active') ? 1 : 0;
 
         if ($request->hasFile('image_file')) {

@@ -19,14 +19,22 @@
 @section("content")
 <div class="container-fluid py-4">
     <div class="row align-items-center mb-5">
-        <div class="col">
-            <h2 class="fw-800 text-dark mb-1">Command Center</h2>
-            <p class="text-muted mb-0">Analytics overview for your restaurant network</p>
+        <div class="col d-flex align-items-center">
+            <div>
+                <div class="d-flex align-items-center">
+                    <h2 class="mb-0 fw-800 text-dark me-3">Command Center</h2>
+                    <div class="btn-group shadow-sm rounded-pill overflow-hidden bg-white p-1">
+                        <a href="{{ route('dashboard', ['tab' => 'classic']) }}" class="btn rounded-pill px-4 {{ $tab === 'classic' ? 'btn-primary text-white pointer-events-none' : 'btn-light text-muted' }}">Standard View</a>
+                        <a href="{{ route('dashboard', ['tab' => 'analytics']) }}" class="btn rounded-pill px-4 {{ $tab === 'analytics' || !isset($tab) ? 'btn-primary text-white pointer-events-none' : 'btn-light text-muted' }}">Advanced Analytics ✨</a>
+                    </div>
+                </div>
+                <p class="text-muted mb-0 mt-2">Analytics overview for your restaurant network</p>
+            </div>
         </div>
         <div class="col-auto">
             <div class="btn-group shadow-sm rounded-pill overflow-hidden">
-                <a href="?range=30d" class="btn btn-white border px-4 py-2 small fw-600 {{ $range == '30d' ? 'active btn-primary text-white' : '' }}">Last 30 Days</a>
-                <a href="?range=6m" class="btn btn-white border px-4 py-2 small fw-600 {{ $range == '6m' ? 'active btn-primary text-white' : '' }}">Last 6 Months</a>
+                <a href="?tab=classic&range=30d" class="btn btn-light border px-4 py-2 small fw-600 {{ $range == '30d' ? 'active btn-primary text-white' : '' }}">Last 30 Days</a>
+                <a href="?tab=classic&range=6m" class="btn btn-light border px-4 py-2 small fw-600 {{ $range == '6m' ? 'active btn-primary text-white' : '' }}">Last 6 Months</a>
             </div>
         </div>
     </div>

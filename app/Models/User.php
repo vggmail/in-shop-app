@@ -13,6 +13,10 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
     public function role() { return $this->belongsTo(Role::class); }
+    public function isSuperAdmin() { return $this->role && $this->role->name === 'Super Admin'; }
+    public function isAdmin() { 
+        return $this->role && ($this->role->name === 'Admin' || $this->role->name === 'Super Admin'); 
+    }
 
     /**
      * The attributes that are mass assignable.

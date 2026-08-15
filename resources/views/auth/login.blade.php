@@ -4,6 +4,9 @@
 
     <form method="POST" action="{{ route('login') }}">
         @csrf
+        <div style="display:none !important;">
+            <input type="text" name="honey_pot_field" tabindex="-1" autocomplete="off">
+        </div>
 
         <!-- Email Address -->
         <div>

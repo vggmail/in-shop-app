@@ -17,6 +17,16 @@ class ItemRepository extends BaseRepository {
         return DB::transaction(function() use ($data) {
             $item = Item::create($data); 
 
+            if (!empty($data['image'])) {
+                \App\Models\ItemImage::create([
+                    'item_id' => $item->id,
+                    'image_path' => $data['image'],
+                    'thumbnail_path' => $data['thumbnail'] ?? null,
+                    'is_feature' => true,
+                    'sort_order' => 0
+                ]);
+            }
+
             if(!empty($data['variants'])) {
                 foreach($data['variants'] as $v) {
                     if(!empty($v['name'])) {
@@ -57,6 +67,19 @@ class ItemRepository extends BaseRepository {
             
             $i->update($data); 
         
+            if (isset($data['image'])) {
+                // For future scope: mark all others as non-feature
+                $i->images()->update(['is_feature' => false]);
+                
+                \App\Models\ItemImage::create([
+                    'item_id' => $id,
+                    'image_path' => $data['image'],
+                    'thumbnail_path' => $data['thumbnail'] ?? null,
+                    'is_feature' => true,
+                    'sort_order' => 0
+                ]);
+            }
+
             // Only update variants if they are present in the data to avoid accidental deletion
             if (isset($data['variants'])) {
                 $i->variants()->delete();

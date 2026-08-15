@@ -10,7 +10,7 @@ class PaymentSettingsController extends Controller
 {
     public function index()
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify payment settings.");
         }
 
@@ -33,7 +33,7 @@ class PaymentSettingsController extends Controller
 
     public function update(Request $request)
     {
-        if (auth()->user()->role_id != 1) {
+        if (!in_array(auth()->user()->role_id, [1, 2])) {
             abort(403, "Unauthorized access. Only Admins can modify payment settings.");
         }
 
